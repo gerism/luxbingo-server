@@ -10,7 +10,7 @@ const io = new Server(server, {
   pingInterval: 25000,
 });
 
-app.get('/', (_, res) => res.send('GeriBingo Server online ✅'));
+app.get('/', (_, res) => res.send('Lux Bingo Server online ✅'));
 app.get('/health', (_, res) => res.json({ status: 'ok', salas: Object.keys(salas).length }));
 
 // ─── Estado global ────────────────────────────────────────────────────────────
