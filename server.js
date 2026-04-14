@@ -13,11 +13,10 @@ const io = new Server(server, {
 app.get('/', (_, res) => res.send('Lux Bingo Server online ✅'));
 app.get('/health', (_, res) => res.json({ status: 'ok', salas: Object.keys(salas).length }));
 
-// ─── Estado global ────────────────────────────────────────────────────────────
-// salas[codigo] = { adm, jogadores, cartelas, numeros, sorteados, ativa, premio }
+// ─── Estado global ─────────────────────────────────────────────────────────
 const salas = {};
 
-// ─── Utilidades ───────────────────────────────────────────────────────────────
+// ─── Utilidades ────────────────────────────────────────────────────────────
 function gerarCodigo() {
   const letras = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const nums   = '23456789';
@@ -28,14 +27,7 @@ function gerarCodigo() {
 }
 
 function gerarCartela75() {
-  // Bingo 75 bolas — colunas B(1-15) I(16-30) N(31-45) G(46-60) O(61-75)
-  const faixas = [
-    [1,  15],  // B
-    [16, 30],  // I
-    [31, 45],  // N
-    [46, 60],  // G
-    [61, 75],  // O
-  ];
+  const faixas = [[1,15],[16,30],[31,45],[46,60],[61,75]];
   const cartela = [];
   for (let col = 0; col < 5; col++) {
     const [min, max] = faixas[col];
@@ -47,14 +39,13 @@ function gerarCartela75() {
     }
     cartela.push(escolhidos);
   }
-  // cartela[col][row] — transpor para [row][col] pra facilitar UI
   const grid = Array.from({ length: 5 }, (_, row) =>
     Array.from({ length: 5 }, (_, col) => (row === 2 && col === 2 ? 'FREE' : cartela[col][row]))
   );
   return grid;
 }
 
-function gerarBolão(sala, quantidade) {
+function gerarBolao(sala, quantidade) {
   const cartelas = [];
   for (let i = 0; i < quantidade; i++) {
     cartelas.push({
@@ -72,60 +63,54 @@ function gerarBolão(sala, quantidade) {
 function validarBingo(cartela, sorteados) {
   const grid = cartela.grid;
   const marcados = cartela.marcados;
-
-  // marca automaticamente tudo que foi sorteado
   for (let r = 0; r < 5; r++)
     for (let c = 0; c < 5; c++)
       if (sorteados.includes(grid[r][c]) || (r === 2 && c === 2)) marcados[r][c] = true;
-
-  // verifica linhas, colunas, diagonais
   for (let i = 0; i < 5; i++) {
-    if (marcados[i].every(Boolean)) return true;                            // linha
-    if (marcados.every(row => row[i])) return true;                         // coluna
+    if (marcados[i].every(Boolean)) return true;
+    if (marcados.every(row => row[i])) return true;
   }
-  if ([0,1,2,3,4].every(i => marcados[i][i])) return true;                 // diagonal \
-  if ([0,1,2,3,4].every(i => marcados[i][4 - i])) return true;             // diagonal /
+  if ([0,1,2,3,4].every(i => marcados[i][i])) return true;
+  if ([0,1,2,3,4].every(i => marcados[i][4 - i])) return true;
   return false;
 }
 
 function sorteiarNumero(sala) {
   const s = salas[sala];
   if (!s || !s.ativa) return null;
-
   const restantes = s.numeros.filter(n => !s.sorteados.includes(n));
   if (restantes.length === 0) return null;
-
   const num = restantes[Math.floor(Math.random() * restantes.length)];
   s.sorteados.push(num);
-
-  // coluna do número
   const letras = 'BINGO';
   const coluna = letras[Math.floor((num - 1) / 15)];
-
   return { numero: num, coluna, sorteados: s.sorteados };
 }
 
-// ─── Socket.io ────────────────────────────────────────────────────────────────
+// ─── Socket.io ─────────────────────────────────────────────────────────────
 io.on('connection', (socket) => {
   console.log(`[+] ${socket.id} conectado`);
 
-  // ── ADM: criar sala ──────────────────────────────────────────────────────
-  socket.on('criar_sala', ({ nomeAdm, premio, quantidadeCartelas }, cb) => {
+  // ── ADM: criar sala ────────────────────────────────────────────────────
+  // Agora recebe: nomeAdm, valorCartela, chavePix, quantidadeCartelas
+  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas }, cb) => {
     let codigo;
     do { codigo = gerarCodigo(); } while (salas[codigo]);
 
-    const cartelas = gerarBolão(codigo, quantidadeCartelas || 30);
+    const cartelas = gerarBolao(codigo, quantidadeCartelas || 100);
 
     salas[codigo] = {
       codigo,
       adm: { socketId: socket.id, nome: nomeAdm },
       jogadores: {},
-      cartelas,              // pool de cartelas disponíveis
-      cartelasVendidas: {},  // jogadorId → [cartela, ...]
+      cartelas,
+      cartelasVendidas: {},
+      solicitacoes: {},      // jogadorId → { dados, status: 'pendente'|'aprovado'|'rejeitado' }
       numeros: Array.from({ length: 75 }, (_, i) => i + 1),
       sorteados: [],
       ativa: false,
-      premio,
+      valorCartela: valorCartela || 0,
+      chavePix: chavePix || '',
       vencedor: null,
     };
 
@@ -133,7 +118,7 @@ io.on('connection', (socket) => {
     socket.data.sala  = codigo;
     socket.data.papel = 'adm';
 
-    console.log(`[SALA] ${codigo} criada por ${nomeAdm}`);
+    console.log(`[SALA] ${codigo} criada por ${nomeAdm} — Pix: ${chavePix} — R$${valorCartela}`);
     cb({ ok: true, codigo, cartelas: cartelas.length });
   });
 
@@ -150,7 +135,6 @@ io.on('connection', (socket) => {
     socket.data.sala  = codigo.toUpperCase();
     socket.data.papel = 'jogador';
 
-    // informa o ADM que alguém entrou
     io.to(s.adm.socketId).emit('jogador_entrou', {
       jogadorId,
       nome: nomeJogador,
@@ -158,42 +142,111 @@ io.on('connection', (socket) => {
     });
 
     console.log(`[SALA] ${nomeJogador} entrou em ${codigo}`);
-    cb({ ok: true, sorteados: s.sorteados, ativa: s.ativa, premio: s.premio });
+    cb({
+      ok: true,
+      sorteados: s.sorteados,
+      ativa: s.ativa,
+      valorCartela: s.valorCartela,
+      chavePix: s.chavePix,
+    });
   });
 
-  // ── ADM: distribuir cartela para jogador ─────────────────────────────────
-  socket.on('distribuir_cartela', ({ codigo, jogadorId, quantidade }, cb) => {
+  // ── Jogador: solicitar cartela (envia dados pessoais + pagamento) ────────
+  socket.on('solicitar_cartela', ({ codigo, dados }, cb) => {
+    // dados = { nome, cpf, celular, chavePix, email? }
+    const s = salas[codigo];
+    if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
+    if (s.ativa) return cb({ ok: false, erro: 'Jogo já em andamento' });
+
+    const jogadorId = socket.id;
+
+    // Verifica se já tem 3 cartelas aprovadas
+    const cartelasDoJogador = s.cartelasVendidas[jogadorId] || [];
+    if (cartelasDoJogador.length >= 3) {
+      return cb({ ok: false, erro: 'Você já tem o máximo de 3 cartelas!' });
+    }
+
+    // Verifica se já tem solicitação pendente
+    const solicitacaoAtual = s.solicitacoes[jogadorId];
+    if (solicitacaoAtual && solicitacaoAtual.status === 'pendente') {
+      return cb({ ok: false, erro: 'Você já tem uma solicitação pendente. Aguarde o sorteador aprovar.' });
+    }
+
+    // Registra solicitação
+    s.solicitacoes[jogadorId] = {
+      jogadorId,
+      nome: dados.nome || s.jogadores[jogadorId]?.nome || 'Jogador',
+      cpf: dados.cpf,
+      celular: dados.celular,
+      chavePix: dados.chavePix,
+      email: dados.email || '',
+      status: 'pendente',
+      timestamp: Date.now(),
+      cartelasJaTem: cartelasDoJogador.length,
+    };
+
+    // Avisa o ADM
+    io.to(s.adm.socketId).emit('nova_solicitacao', {
+      jogadorId,
+      nome: s.solicitacoes[jogadorId].nome,
+      cpf: dados.cpf,
+      celular: dados.celular,
+      chavePix: dados.chavePix,
+      email: dados.email || '',
+      cartelasJaTem: cartelasDoJogador.length,
+      timestamp: Date.now(),
+    });
+
+    console.log(`[SOLICITACAO] ${dados.nome} solicitou cartela em ${codigo}`);
+    cb({ ok: true, mensagem: 'Solicitação enviada! Aguarde o sorteador aprovar.' });
+  });
+
+  // ── ADM: aprovar solicitação ─────────────────────────────────────────────
+  socket.on('aprovar_cartela', ({ codigo, jogadorId }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
 
-    const disponíveis = s.cartelas.filter(c => !Object.values(s.cartelasVendidas).flat().find(v => v.id === c.id));
-    const qtd = Math.min(quantidade || 1, disponíveis.length);
-    if (qtd === 0) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
+    const solicitacao = s.solicitacoes[jogadorId];
+    if (!solicitacao) return cb({ ok: false, erro: 'Solicitação não encontrada' });
 
-    const lote = disponíveis.slice(0, qtd);
-    s.cartelasVendidas[jogadorId] = [...(s.cartelasVendidas[jogadorId] || []), ...lote];
-
-    // envia cartelas ao jogador
-    io.to(jogadorId).emit('receber_cartelas', { cartelas: lote, sorteados: s.sorteados });
-    cb({ ok: true, distribuídas: qtd });
-  });
-
-  // ── Jogador: pegar cartela própria (auto-serve quando sala permite) ───────
-  socket.on('pegar_cartela', ({ codigo }, cb) => {
-    const s = salas[codigo];
-    if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
-    if (s.ativa) return cb({ ok: false, erro: 'Jogo em andamento' });
-
-    const jogadorId = socket.id;
-    const disponíveis = s.cartelas.filter(c =>
+    // Verifica cartelas disponíveis
+    const disponiveis = s.cartelas.filter(c =>
       !Object.values(s.cartelasVendidas).flat().find(v => v.id === c.id)
     );
-    if (!disponíveis.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
+    if (!disponiveis.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
 
-    const cartela = disponíveis[0];
+    const cartela = disponiveis[0];
     s.cartelasVendidas[jogadorId] = [...(s.cartelasVendidas[jogadorId] || []), cartela];
+    s.solicitacoes[jogadorId].status = 'aprovado';
 
-    cb({ ok: true, cartela, sorteados: s.sorteados });
+    // Envia cartela ao jogador
+    io.to(jogadorId).emit('cartela_aprovada', {
+      cartela,
+      sorteados: s.sorteados,
+      mensagem: '✅ Pagamento confirmado! Sua cartela foi liberada.',
+    });
+
+    console.log(`[APROVADO] Cartela liberada para ${solicitacao.nome} em ${codigo}`);
+    cb({ ok: true });
+  });
+
+  // ── ADM: rejeitar solicitação ────────────────────────────────────────────
+  socket.on('rejeitar_cartela', ({ codigo, jogadorId, motivo }, cb) => {
+    const s = salas[codigo];
+    if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
+
+    const solicitacao = s.solicitacoes[jogadorId];
+    if (!solicitacao) return cb({ ok: false, erro: 'Solicitação não encontrada' });
+
+    s.solicitacoes[jogadorId].status = 'rejeitado';
+
+    // Avisa o jogador
+    io.to(jogadorId).emit('cartela_rejeitada', {
+      mensagem: motivo || '❌ Pagamento não confirmado. Tente novamente.',
+    });
+
+    console.log(`[REJEITADO] Solicitação de ${solicitacao.nome} rejeitada em ${codigo}`);
+    cb({ ok: true });
   });
 
   // ── ADM: iniciar jogo ────────────────────────────────────────────────────
@@ -201,7 +254,7 @@ io.on('connection', (socket) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false });
     s.ativa = true;
-    io.to(codigo).emit('jogo_iniciado', { premio: s.premio });
+    io.to(codigo).emit('jogo_iniciado', { valorCartela: s.valorCartela });
     console.log(`[JOGO] ${codigo} iniciado`);
     cb({ ok: true });
   });
@@ -210,10 +263,8 @@ io.on('connection', (socket) => {
   socket.on('sortear', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id || !s.ativa) return cb({ ok: false });
-
     const resultado = sorteiarNumero(codigo);
     if (!resultado) return cb({ ok: false, erro: 'Sem números restantes' });
-
     io.to(codigo).emit('numero_sorteado', resultado);
     cb({ ok: true, ...resultado });
   });
@@ -222,29 +273,23 @@ io.on('connection', (socket) => {
   socket.on('gritar_bingo', ({ codigo, cartelaId }, cb) => {
     const s = salas[codigo];
     if (!s || !s.ativa || s.vencedor) return cb({ ok: false });
-
     const jogadorId = socket.id;
     const cartelasJogador = s.cartelasVendidas[jogadorId] || [];
     const cartela = cartelasJogador.find(c => c.id === cartelaId);
     if (!cartela) return cb({ ok: false, erro: 'Cartela não encontrada' });
-
     const valido = validarBingo(cartela, s.sorteados);
     if (!valido) return cb({ ok: false, erro: 'Bingo inválido' });
-
     s.vencedor = { jogadorId, nome: s.jogadores[jogadorId]?.nome, cartelaId };
     s.ativa = false;
-
     io.to(codigo).emit('bingo_confirmado', {
       vencedor: s.vencedor,
       sorteados: s.sorteados,
-      premio: s.premio,
     });
-
     console.log(`[BINGO] ${s.vencedor.nome} venceu em ${codigo}`);
     cb({ ok: true });
   });
 
-  // ── Status da sala ───────────────────────────────────────────────────────
+  // ── Status da sala ────────────────────────────────────────────────────────
   socket.on('status_sala', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s) return cb({ ok: false });
@@ -254,19 +299,18 @@ io.on('connection', (socket) => {
       sorteados: s.sorteados,
       ativa: s.ativa,
       vencedor: s.vencedor,
+      solicitacoesPendentes: Object.values(s.solicitacoes).filter(sol => sol.status === 'pendente').length,
       cartelas_restantes: s.cartelas.filter(c =>
         !Object.values(s.cartelasVendidas).flat().find(v => v.id === c.id)
       ).length,
     });
   });
 
-  // ── Desconexão ───────────────────────────────────────────────────────────
+  // ── Desconexão ────────────────────────────────────────────────────────────
   socket.on('disconnect', () => {
     const { sala, papel } = socket.data || {};
     if (!sala || !salas[sala]) return;
-
     if (papel === 'adm') {
-      // ADM sumiu — avisa jogadores mas mantém estado
       io.to(sala).emit('adm_desconectado');
       console.log(`[WARN] ADM de ${sala} desconectou`);
     } else {
@@ -275,6 +319,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+// ─── Start ──────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`GeriBingo Server rodando na porta ${PORT} 🎱`));
+server.listen(PORT, () => console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`));
