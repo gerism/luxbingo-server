@@ -340,6 +340,18 @@ function sorteiarNumero(sala) {
 io.on('connection', (socket) => {
   console.log(`[+] ${socket.id} conectado`);
 
+  // Reconexão do ADM — atualiza socketId
+  socket.on('reconectar_adm', ({ codigo }, cb) => {
+    const s = salas[codigo];
+    if (!s) return cb({ ok: false });
+    s.adm.socketId = socket.id;
+    socket.join(codigo);
+    socket.data.sala  = codigo;
+    socket.data.papel = 'adm';
+    console.log(`[RECONEXAO] ADM de ${codigo} reconectado`);
+    cb({ ok: true });
+  });
+
   socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas }, cb) => {
     let codigo;
     do { codigo = gerarCodigo(); } while (salas[codigo]);
