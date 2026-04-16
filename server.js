@@ -126,6 +126,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a55a5
     <div class="cartela-wrap" id="cWrap" style="display:none">
       <div class="cartela-header">
         <div class="cartela-titulo">🎟️ SUA CARTELA — SALA ${codigo}</div>
+        <div id="cHorario" style="font-size:11px;color:rgba(255,255,255,.7);margin-top:3px"></div>
       </div>
       <div class="letras">
         <div class="letra">B</div><div class="letra">I</div><div class="letra">N</div><div class="letra">G</div><div class="letra">O</div>
@@ -190,8 +191,12 @@ document.getElementById('btnConectar').onclick=function(){
     });
   });
   sock.on('connect_error',function(){toast('❌ Erro de conexão!',true);});
-  sock.on('cartela_aprovada',function(d){
+ sock.on('cartela_aprovada',function(d){
     cart=d.cartela;cId=cart.id;nums=d.sorteados||[];marc=nums.slice();
+    if(d.horario){
+      var h=document.getElementById('cHorario');
+      if(h) h.textContent='🕐 '+d.horario;
+    }
     renderCart();renderGrid();tela(3);toast('🎉 Cartela liberada! Boa sorte!');
   });
   sock.on('cartela_rejeitada',function(d){
@@ -459,7 +464,9 @@ io.on('connection', (socket) => {
     s.cartelasVendidas[jogadorId] = [...(s.cartelasVendidas[jogadorId] || []), cartela];
     s.solicitacoes[jogadorId].status = 'aprovado';
     io.to(jogadorId).emit('cartela_aprovada', {
-      cartela, sorteados: s.sorteados, mensagem: '✅ Pagamento confirmado! Sua cartela foi liberada.',
+      cartela, sorteados: s.sorteados,
+      horario: s.horario || '',
+      mensagem: '✅ Pagamento confirmado! Sua cartela foi liberada.',
     });
     console.log(`[APROVADO] Cartela liberada para ${solicitacao.nome} em ${codigo}`);
     cb({ ok: true });
