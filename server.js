@@ -263,12 +263,22 @@ renderGrid();
 function falarNumero(num) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  var msg = new SpeechSynthesisUtterance('Número ' + num);
-  msg.lang = 'pt-BR';
-  msg.rate = 0.9;
-  msg.pitch = 1;
-  msg.volume = 1;
-  window.speechSynthesis.speak(msg);
+  var msg1 = new SpeechSynthesisUtterance('Número ' + num);
+  msg1.lang = 'pt-BR';
+  msg1.rate = 0.9;
+  msg1.pitch = 1;
+  msg1.volume = 1;
+  var msg2 = new SpeechSynthesisUtterance('Número ' + num);
+  msg2.lang = 'pt-BR';
+  msg2.rate = 0.9;
+  msg2.pitch = 1;
+  msg2.volume = 1;
+  window.speechSynthesis.speak(msg1);
+  msg1.onend = function() {
+    setTimeout(function() {
+      window.speechSynthesis.speak(msg2);
+    }, 800);
+  };
 }
 </script>
 </body>
