@@ -197,6 +197,7 @@ document.getElementById('btnConectar').onclick=function(){
     document.getElementById('nAtual').textContent=d.numero||d;
     if(marc.indexOf(d.numero)===-1) marc.push(d.numero);
     renderCart();renderGrid();verBingo();
+    falarNumero(d.numero);
   });
   sock.on('bingo_confirmado',function(d){
     var b=document.createElement('div');b.className='bingo-banner';
@@ -257,6 +258,18 @@ document.getElementById('btnBingo').onclick=function(){
 };
 
 renderGrid();
+
+// ── ÁUDIO via Web Speech API (fala o número em português) ──
+function falarNumero(num) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var msg = new SpeechSynthesisUtterance('Número ' + num);
+  msg.lang = 'pt-BR';
+  msg.rate = 0.9;
+  msg.pitch = 1;
+  msg.volume = 1;
+  window.speechSynthesis.speak(msg);
+}
 </script>
 </body>
 </html>`);
