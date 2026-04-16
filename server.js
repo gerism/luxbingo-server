@@ -105,9 +105,9 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);min-height:100vh;c
 /* TELAS */
 #t1,#t2,#t3,#t4{display:none}
 #t1.ok,#t2.ok,#t3.ok,#t4.ok{display:block}
-@media (orientation:landscape){
-  #t3.ok{display:flex !important}
-}
+#t3.ok{display:flex !important;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:100;background:var(--navy)}
+.land-esq{width:42%;background:rgba(0,0,0,.3);border-right:1px solid rgba(201,162,39,.2);display:flex;flex-direction:column;padding:10px;gap:8px;overflow-y:auto;height:100vh}
+.land-dir{flex:1;display:flex;flex-direction:column;padding:10px;gap:8px;overflow-y:auto;height:100vh}
 </style>
 </head>
 <body>
