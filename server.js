@@ -142,6 +142,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a55a5
       <div class="ng" id="nGrid"></div>
     </div>
     <button class="btn-b" id="btnBingo" style="display:none;font-size:18px;padding:16px">🎉 GRITAR BINGO!</button>
+    <button class="btn-b" id="btnAudio" style="margin-top:8px;background:linear-gradient(135deg,#6B2D5B,#4a1f40)">🔊 Áudio ON</button>
   </div>
 
   <div id="t4">
@@ -155,7 +156,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a55a5
 </div>
 
 <script>
-var COD='${codigo}',SERVER=window.location.origin,sock=null,cart=null,marc=[],nums=[],cId=null;
+var COD='${codigo}',SERVER=window.location.origin,sock=null,cart=null,marc=[],nums=[],cId=null,audioOn=true;
 
 document.getElementById('iCpf').oninput=function(){
   var v=this.value.replace(/\\D/g,'');
@@ -180,6 +181,7 @@ document.getElementById('btnConectar').onclick=function(){
   if(!nome||!cpf||!cel||!pix){toast('❌ Preencha todos os campos obrigatórios!',true);return;}
   sock=io(SERVER,{transports:['websocket']});
   sock.on('connect',function(){
+    localStorage.setItem('luxbingo_nome_'+COD, nome);
     sock.emit('entrar_sala',{codigo:COD,nomeJogador:nome},function(r){
       if(!r.ok){toast('❌ '+r.erro,true);sock.disconnect();return;}
     document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
@@ -278,11 +280,20 @@ document.getElementById('btnBingo').onclick=function(){
   });
 };
 
+// ── BOTÃO ÁUDIO ──
+document.getElementById('btnAudio').onclick=function(){
+  audioOn=!audioOn;
+  this.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';
+  this.style.background=audioOn?'linear-gradient(135deg,#6B2D5B,#4a1f40)':'linear-gradient(135deg,#e74c3c,#c0392b)';
+};
+
 renderGrid();
+
+// ── ÁUDIO via Web Speech API
 
 // ── ÁUDIO via Web Speech API (fala o número em português) ──
 function falarNumero(num) {
-  if (!window.speechSynthesis) return;
+  if (!audioOn || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   var msg1 = new SpeechSynthesisUtterance('Número ' + num);
   msg1.lang = 'pt-BR';
@@ -324,10 +335,22 @@ function restaurarLocal(){
 }
 
 window.onload = function(){
-  if(restaurarLocal()){
+  var restaurou = restaurarLocal();
+  if(restaurou){
     sock = io(SERVER, {transports:['websocket']});
     sock.on('connect', function(){
-      sock.emit('entrar_sala',{codigo:COD,nomeJogador:'Reconectando...'},function(){});
+      var nSalvo = localStorage.getItem('luxbingo_nome_'+COD) || 'Jogador';
+      sock.emit('entrar_sala',{codigo:COD,nomeJogador:nSalvo},function(r){
+        if(r && r.ok){
+          // Atualiza números já sorteados
+          nums = r.sorteados || nums;
+          r.sorteados.forEach(function(n){
+            if(marc.indexOf(n)===-1) marc.push(n);
+          });
+          salvarLocal();
+          renderCart();renderGrid();verBingo();
+        }
+      });
     });
     sock.on('numero_sorteado',function(d){
       nums=d.sorteados||nums;
@@ -336,6 +359,13 @@ window.onload = function(){
       salvarLocal();
       renderCart();renderGrid();verBingo();
       falarNumero(d.numero);
+    });
+    sock.on('alerta_jogador',function(d){
+      var box=document.getElementById('alertaBox');
+      box.textContent=d.texto;
+      box.className=d.tipo==='bingo'?'alerta-bingo':'alerta-quase';
+      box.style.display='block';
+      if(d.tipo!=='bingo') setTimeout(function(){box.style.display='none';},5000);
     });
     sock.on('bingo_confirmado',function(d){
       var b=document.createElement('div');b.className='bingo-banner';
