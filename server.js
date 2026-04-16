@@ -70,6 +70,9 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a55a5
 .toast.err{background:#e74c3c}
 #t1,#t2,#t3,#t4{display:none}
 #t1.ok,#t2.ok,#t3.ok,#t4.ok{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.alerta-quase{background:rgba(255,215,0,.2);border:2px solid #FFD700;color:#FFD700}
+.alerta-bingo{background:rgba(46,204,113,.2);border:2px solid #2ecc71;color:#2ecc71}
 </style>
 </head>
 <body>
@@ -119,6 +122,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a55a5
   </div>
 
   <div id="t3">
+    <div id="alertaBox" style="display:none;margin-bottom:12px;border-radius:14px;padding:14px;text-align:center;font-weight:900;font-size:14px;animation:fadeIn .3s ease"></div>
     <div class="num-atual">
       <div class="na-label">Número Atual</div>
       <div class="na-num" id="nAtual">--</div>
@@ -215,6 +219,13 @@ document.getElementById('btnConectar').onclick=function(){
     document.querySelector('.wrap').insertBefore(b,document.getElementById('t3'));
   });
   sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou. Jogo continua!');});
+  sock.on('alerta_jogador',function(d){
+    var box=document.getElementById('alertaBox');
+    box.textContent=d.texto;
+    box.className=d.tipo==='bingo'?'alerta-bingo':'alerta-quase';
+    box.style.display='block';
+    if(d.tipo!=='bingo') setTimeout(function(){box.style.display='none';},5000);
+  });
 };
 
 document.getElementById('btnVoltar').onclick=function(){tela(1);};
@@ -543,7 +554,35 @@ io.on('connection', (socket) => {
     if (!s.ativa) s.ativa = true;
     const resultado = sorteiarNumero(codigo);
     if (!resultado) return cb({ ok: false, erro: 'Sem números restantes' });
-    io.to(codigo).emit('numero_sorteado', resultado);
+   io.to(codigo).emit('numero_sorteado', resultado);
+
+    // Verifica progresso de cada jogador
+    Object.entries(s.cartelasVendidas).forEach(([jogadorId, cartelas]) => {
+      cartelas.forEach(cartela => {
+        let marcados = 0, total = 0;
+        for(let r=0;r<5;r++) for(let c=0;c<5;c++){
+          const v = cartela.grid[r][c];
+          if(v==='FREE'){marcados++;total++;}
+          else{total++;if(s.sorteados.includes(v))marcados++;}
+        }
+        const nomeJog = s.jogadores[jogadorId]?.nome || 'Jogador';
+        if(marcados === total - 1){
+          // Falta 1!
+          io.to(codigo).emit('alerta_jogador', {
+            nome: nomeJog, tipo: 'quase',
+            texto: '🔥 '+nomeJog+' está quase ganhando!'
+          });
+        }
+        if(marcados === total){
+          // Completou!
+          io.to(codigo).emit('alerta_jogador', {
+            nome: nomeJog, tipo: 'bingo',
+            texto: '🎉 '+nomeJog+' completou a cartela!'
+          });
+        }
+      });
+    });
+
     cb({ ok: true, ...resultado });
   });
 
