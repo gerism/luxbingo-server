@@ -112,6 +112,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a55a5
         <div style="font-size:36px;font-weight:900;color:#2060b0" id="pValor">R$ --</div>
         <div style="font-size:13px;color:#4a6080;margin:10px 0 4px">Chave Pix do sorteador:</div>
         <div style="font-size:16px;font-weight:900;color:#1a2a4a;padding:10px;background:#f4f6f9;border-radius:10px;word-break:break-all" id="pChave">--</div>
+        <div id="pHorario" style="display:none;font-size:14px;font-weight:700;color:#2060b0;margin-top:10px;padding:8px;background:#f4f6f9;border-radius:8px"></div>
         <div style="font-size:11px;color:#8099b0;margin-top:8px">Após pagar aguarde a confirmação</div>
       </div>
     </div>
@@ -176,8 +177,12 @@ document.getElementById('btnConectar').onclick=function(){
   sock.on('connect',function(){
     sock.emit('entrar_sala',{codigo:COD,nomeJogador:nome},function(r){
       if(!r.ok){toast('❌ '+r.erro,true);sock.disconnect();return;}
-      document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
+    document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
       document.getElementById('pChave').textContent=r.chavePix||'--';
+      if(r.horario){
+        document.getElementById('pHorario').textContent='🕐 '+r.horario;
+        document.getElementById('pHorario').style.display='block';
+      }
       sock.emit('solicitar_cartela',{codigo:COD,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
         if(!r2.ok){toast('❌ '+r2.erro,true);return;}
         tela(2);toast('✅ Solicitação enviada!');
@@ -375,7 +380,7 @@ io.on('connection', (socket) => {
     cb({ ok: true });
   });
 
-  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas }, cb) => {
+  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario }, cb) => {
     let codigo;
     do { codigo = gerarCodigo(); } while (salas[codigo]);
     const cartelas = gerarBolao(codigo, quantidadeCartelas || 100);
@@ -389,8 +394,9 @@ io.on('connection', (socket) => {
       numeros: Array.from({ length: 75 }, (_, i) => i + 1),
       sorteados: [],
       ativa: false,
-      valorCartela: valorCartela || 0,
+     valorCartela: valorCartela || 0,
       chavePix: chavePix || '',
+      horario: horario || '',
       vencedor: null,
     };
     socket.join(codigo);
@@ -413,7 +419,7 @@ io.on('connection', (socket) => {
       jogadorId, nome: nomeJogador, total: Object.keys(s.jogadores).length,
     });
     console.log(`[SALA] ${nomeJogador} entrou em ${codigo}`);
-    cb({ ok: true, sorteados: s.sorteados, ativa: s.ativa, valorCartela: s.valorCartela, chavePix: s.chavePix });
+    cb({ ok: true, sorteados: s.sorteados, ativa: s.ativa, valorCartela: s.valorCartela, chavePix: s.chavePix, horario: s.horario });
   });
 
   socket.on('solicitar_cartela', ({ codigo, dados }, cb) => {
