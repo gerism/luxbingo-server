@@ -505,7 +505,18 @@ io.on('connection', (socket) => {
       io.to(sala).emit('adm_desconectado');
       console.log(`[WARN] ADM de ${sala} desconectou`);
     } else {
-      delete salas[sala]?.jogadores[socket.id];
+      const jogador = salas[sala]?.jogadores[socket.id];
+      if (jogador) {
+        const nomeJogador = jogador.nome;
+        delete salas[sala].jogadores[socket.id];
+        const s = salas[sala];
+        if (s) {
+          io.to(s.adm.socketId).emit('jogador_saiu', {
+            nome: nomeJogador,
+            total: Object.keys(s.jogadores).length,
+          });
+        }
+      }
     }
   });
 });
