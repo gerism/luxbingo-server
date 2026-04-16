@@ -290,6 +290,49 @@ function falarNumero(num) {
     }, 800);
   };
 }
+
+// ── SALVAR E RESTAURAR CARTELA ──
+function salvarLocal(){
+  if(!cart) return;
+  localStorage.setItem('luxbingo_'+COD, JSON.stringify({
+    cart:cart, cId:cId, marc:marc, nums:nums
+  }));
+}
+
+function restaurarLocal(){
+  try{
+    var saved = localStorage.getItem('luxbingo_'+COD);
+    if(!saved) return false;
+    var d = JSON.parse(saved);
+    cart=d.cart; cId=d.cId; marc=d.marc; nums=d.nums;
+    renderCart(); renderGrid(); verBingo();
+    tela(3);
+    toast('✅ Cartela restaurada!');
+    return true;
+  } catch(e){ return false; }
+}
+
+window.onload = function(){
+  if(restaurarLocal()){
+    sock = io(SERVER, {transports:['websocket']});
+    sock.on('connect', function(){
+      sock.emit('entrar_sala',{codigo:COD,nomeJogador:'Reconectando...'},function(){});
+    });
+    sock.on('numero_sorteado',function(d){
+      nums=d.sorteados||nums;
+      document.getElementById('nAtual').textContent=d.numero||d;
+      if(marc.indexOf(d.numero)===-1) marc.push(d.numero);
+      salvarLocal();
+      renderCart();renderGrid();verBingo();
+      falarNumero(d.numero);
+    });
+    sock.on('bingo_confirmado',function(d){
+      var b=document.createElement('div');b.className='bingo-banner';
+      b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>';
+      document.querySelector('.wrap').insertBefore(b,document.getElementById('t3'));
+    });
+  }
+};
 </script>
 </body>
 </html>`);
