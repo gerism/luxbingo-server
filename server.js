@@ -27,72 +27,101 @@ app.get('/jogo/:codigo', (req, res) => {
 <title>Lux Bingo 🎰</title>
 <link rel="icon" type="image/png" href="/icon.png">
 <link rel="apple-touch-icon" href="/icon.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"><\/script>
 <style>
 :root{--navy:#0d1b2e;--navy2:#1a2d4e;--gold:#c9a227;--gold2:#f0c040;--gold3:#ffd966;--card:#0f2240;--text:#e8d5a3;--textl:rgba(232,213,163,.6)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--navy),var(--navy2));min-height:100vh;color:var(--text)}
-.wrap{max-width:420px;margin:0 auto;padding:20px 16px 40px}
-.logo-area{text-align:center;padding:20px 0 10px}
-.logo-img{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 0 25px rgba(201,162,39,.4)}
-.logo-title{font-size:26px;font-weight:900;color:var(--gold2);letter-spacing:4px;margin:6px 0 2px}
-.logo-sub{font-size:11px;color:var(--textl);letter-spacing:2px}
-.card{background:var(--card);border:1px solid rgba(201,162,39,.2);border-radius:16px;padding:18px;margin-bottom:14px}
-.ct{font-size:11px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px}
-.lbl{font-size:10px;color:var(--textl);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;display:block}
-.inp{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.3);border-radius:11px;padding:13px;color:var(--gold2);font-size:15px;outline:none;margin-bottom:12px;font-family:inherit}
-.inp:focus{border-color:var(--gold2);background:rgba(255,255,255,.08)}
+body{font-family:'Segoe UI',sans-serif;background:var(--navy);min-height:100vh;color:var(--text);overflow-x:hidden}
+/* PORTRAIT */
+.port-wrap{max-width:420px;margin:0 auto;padding:16px 14px 40px}
+/* LANDSCAPE - tela do jogo */
+.land-wrap{display:none}
+@media (orientation:landscape){
+  .port-wrap{display:none}
+  .land-wrap{display:flex;height:100vh;width:100vw;overflow:hidden;gap:0}
+  /* Coluna esquerda - número atual + grid */
+  .land-esq{width:38%;background:rgba(0,0,0,.3);border-right:1px solid rgba(201,162,39,.2);display:flex;flex-direction:column;padding:10px;gap:8px;overflow-y:auto}
+  /* Coluna direita - cartela */
+  .land-dir{flex:1;display:flex;flex-direction:column;padding:10px;gap:8px;overflow-y:auto}
+  /* Aviso girar em portrait nas telas de formulario */
+  #t1,#t2,#t4{max-width:100%;padding:10px}
+}
+/* COMPONENTES */
+.logo-area{text-align:center;padding:14px 0 8px}
+.logo-img{width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 20px rgba(201,162,39,.4)}
+.logo-title{font-size:22px;font-weight:900;color:var(--gold2);letter-spacing:4px;margin:5px 0 2px}
+.logo-sub{font-size:10px;color:var(--textl);letter-spacing:2px}
+.card{background:var(--card);border:1px solid rgba(201,162,39,.2);border-radius:14px;padding:14px;margin-bottom:10px}
+.ct{font-size:10px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+.lbl{font-size:10px;color:var(--textl);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;display:block}
+.inp{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.3);border-radius:11px;padding:11px;color:var(--gold2);font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
+.inp:focus{border-color:var(--gold2)}
 .inp::placeholder{color:var(--textl)}
-.btn-g{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:13px;font-size:15px;font-weight:900;color:var(--navy);letter-spacing:2px;cursor:pointer;margin-bottom:8px}
-.btn-b{width:100%;padding:13px;background:transparent;border:2px solid rgba(201,162,39,.4);border-radius:13px;font-size:14px;font-weight:900;color:var(--gold2);letter-spacing:2px;cursor:pointer;margin-bottom:8px}
-.info-box{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center}
+.btn-g{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;font-size:14px;font-weight:900;color:var(--navy);letter-spacing:2px;cursor:pointer;margin-bottom:8px}
+.btn-b{width:100%;padding:11px;background:transparent;border:2px solid rgba(201,162,39,.4);border-radius:12px;font-size:13px;font-weight:900;color:var(--gold2);letter-spacing:2px;cursor:pointer;margin-bottom:8px}
+.info-box{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:11px;padding:12px;margin-bottom:12px;text-align:center}
 .info-cod{font-size:11px;color:var(--textl);letter-spacing:2px}
-.aguard{text-align:center;padding:30px 20px;background:rgba(201,162,39,.08);border:2px solid rgba(201,162,39,.3);border-radius:16px;margin-bottom:14px}
-.aguard-icon{font-size:40px;display:block;margin-bottom:8px}
-.aguard-title{font-size:18px;font-weight:900;color:var(--gold2);letter-spacing:1px}
-.aguard-sub{font-size:12px;color:var(--textl);margin-top:6px;line-height:1.5}
-.cartela-wrap{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:16px;overflow:hidden;margin-bottom:14px}
-.cartela-header{background:linear-gradient(135deg,#0a1628,var(--navy2));border-bottom:2px solid var(--gold);padding:12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
-.cartela-logo{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold)}
-.cartela-titulo{font-size:15px;font-weight:900;color:var(--gold2);letter-spacing:2px}
-.cartela-sub{font-size:10px;color:var(--textl);margin-top:1px}
-.letras{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:8px 8px 0}
-.letra{text-align:center;font-size:18px;font-weight:900;color:var(--gold);padding:4px 0}
-.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:4px 8px 8px}
-.cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:17px;font-weight:900;color:var(--text);cursor:pointer;user-select:none}
+.aguard{text-align:center;padding:24px 16px;background:rgba(201,162,39,.08);border:2px solid rgba(201,162,39,.3);border-radius:14px;margin-bottom:12px}
+.aguard-icon{font-size:36px;display:block;margin-bottom:8px}
+.aguard-title{font-size:16px;font-weight:900;color:var(--gold2)}
+.aguard-sub{font-size:11px;color:var(--textl);margin-top:5px;line-height:1.5}
+/* NÚMERO ATUAL */
+.num-atual{text-align:center;padding:12px;background:rgba(0,0,0,.3);border:1px solid rgba(201,162,39,.2);border-radius:12px}
+.na-label{font-size:9px;color:var(--textl);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.na-num{font-size:64px;font-weight:900;color:var(--gold2);line-height:1;text-shadow:0 0 20px rgba(201,162,39,.5)}
+/* CARTELA */
+.cartela-wrap{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:14px;overflow:hidden}
+.cartela-header{background:linear-gradient(135deg,#0a1628,var(--navy2));border-bottom:2px solid var(--gold);padding:10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.cartela-logo{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold)}
+.cartela-titulo{font-size:13px;font-weight:900;color:var(--gold2);letter-spacing:2px}
+.cartela-sub{font-size:9px;color:var(--textl)}
+.letras{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:6px 6px 0}
+.letra{text-align:center;font-size:16px;font-weight:900;color:var(--gold);padding:3px 0}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px 6px 6px}
+.cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:16px;font-weight:900;color:var(--text);cursor:pointer;user-select:none}
 .cel.marc{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy)}
 .cel.free{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy);cursor:default}
-.numeros{background:var(--card);border:1px solid rgba(201,162,39,.15);border-radius:14px;padding:14px;margin-bottom:14px}
-.ng{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:8px}
-.nm{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;background:rgba(255,255,255,.04);font-size:9px;font-weight:700;color:rgba(232,213,163,.3)}
+/* GRID NÚMEROS */
+.numeros-box{background:var(--card);border:1px solid rgba(201,162,39,.15);border-radius:12px;padding:10px}
+.ng{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-top:6px}
+.nm{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;background:rgba(255,255,255,.04);font-size:9px;font-weight:700;color:rgba(232,213,163,.3)}
 .nm.s{background:rgba(201,162,39,.2);color:var(--gold)}
 .nm.u{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy)}
-.num-atual{text-align:center;padding:16px;background:rgba(0,0,0,.3);border:1px solid rgba(201,162,39,.2);border-radius:14px;margin-bottom:14px}
-.na-label{font-size:10px;color:var(--textl);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
-.na-num{font-size:72px;font-weight:900;color:var(--gold2);line-height:1;text-shadow:0 0 20px rgba(201,162,39,.5)}
-.bingo-banner{background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:16px;padding:20px;text-align:center;margin-bottom:14px}
-.bb-icon{font-size:48px;display:block;margin-bottom:6px}
-.bb-title{font-size:24px;font-weight:900;color:var(--navy);letter-spacing:2px}
-.bb-sub{font-size:13px;color:rgba(13,27,46,.7);margin-top:4px}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);padding:10px 22px;border-radius:50px;font-weight:900;font-size:12px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+/* ALERTA */
+.alerta-quase{background:rgba(201,162,39,.15);border:2px solid var(--gold);color:var(--gold2);border-radius:12px;padding:10px;text-align:center;font-weight:900;font-size:12px}
+.alerta-bingo{background:rgba(46,204,113,.15);border:2px solid #2ecc71;color:#2ecc71;border-radius:12px;padding:10px;text-align:center;font-weight:900;font-size:12px}
+/* PAGAMENTO */
+.pix-val{font-size:32px;font-weight:900;color:var(--gold2);text-align:center;margin:6px 0}
+.pix-chave{font-size:14px;font-weight:900;color:var(--gold2);padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);border-radius:10px;word-break:break-all;text-align:center}
+/* TOAST */
+.toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);padding:8px 20px;border-radius:50px;font-weight:900;font-size:12px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
 .toast.err{background:#e74c3c;color:#fff}
+/* BINGO BANNER */
+.bingo-banner{background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:14px;padding:16px;text-align:center;margin-bottom:10px}
+.bb-icon{font-size:40px;display:block;margin-bottom:4px}
+.bb-title{font-size:20px;font-weight:900;color:var(--navy);letter-spacing:2px}
+.bb-sub{font-size:12px;color:rgba(13,27,46,.7);margin-top:3px}
+/* TELAS */
 #t1,#t2,#t3,#t4{display:none}
 #t1.ok,#t2.ok,#t3.ok,#t4.ok{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-.alerta-quase{background:rgba(201,162,39,.15);border:2px solid var(--gold);color:var(--gold2);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px;font-weight:900;font-size:14px;animation:fadeIn .3s ease}
-.alerta-bingo{background:rgba(46,204,113,.15);border:2px solid #2ecc71;color:#2ecc71;border-radius:14px;padding:14px;text-align:center;margin-bottom:14px;font-weight:900;font-size:14px}
+@media (orientation:landscape){
+  #t3.ok{display:flex !important}
+}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
-<div class="wrap">
+
+<!-- PORTRAIT: formulário, aguard, rejeitado -->
+<div class="port-wrap">
   <div class="logo-area">
-    <img src="${LOGO}" class="logo-img">
+    <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
     <div class="logo-title">LUX BINGO</div>
     <div class="logo-sub">JOGO AO VIVO</div>
   </div>
 
+  <!-- T1: DADOS -->
   <div id="t1" class="ok">
     <div class="info-box"><div class="info-cod">SALA: ${codigo}</div></div>
     <div class="card">
@@ -111,6 +140,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--n
     </div>
   </div>
 
+  <!-- T2: AGUARDANDO -->
   <div id="t2">
     <div class="aguard">
       <span class="aguard-icon">⏳</span>
@@ -119,26 +149,52 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--n
     </div>
     <div class="card">
       <div class="ct" style="text-align:center">💳 REALIZE O PAGAMENTO</div>
-      <div style="text-align:center">
-        <div style="font-size:13px;color:var(--textl);margin-bottom:6px">Valor da cartela:</div>
-        <div style="font-size:36px;font-weight:900;color:var(--gold2)" id="pValor">R$ --</div>
-        <div style="font-size:13px;color:var(--textl);margin:10px 0 4px">Chave Pix do sorteador:</div>
-        <div style="font-size:16px;font-weight:900;color:var(--gold2);padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);border-radius:10px;word-break:break-all" id="pChave">--</div>
-        <div id="pHorario" style="display:none;font-size:14px;font-weight:700;color:var(--gold2);margin-top:10px;padding:8px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:8px"></div>
-        <div style="font-size:11px;color:var(--textl);margin-top:8px">Após pagar aguarde a confirmação</div>
-      </div>
+      <div style="font-size:12px;color:var(--textl);text-align:center;margin-bottom:6px">Valor da cartela:</div>
+      <div class="pix-val" id="pValor">R$ --</div>
+      <div style="font-size:12px;color:var(--textl);text-align:center;margin:10px 0 6px">Chave Pix do sorteador:</div>
+      <div class="pix-chave" id="pChave">--</div>
+      <div id="pHorario" style="display:none;font-size:13px;font-weight:700;color:var(--gold2);margin-top:10px;padding:8px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:8px;text-align:center"></div>
+      <div style="font-size:11px;color:var(--textl);text-align:center;margin-top:8px">Após pagar aguarde a confirmação</div>
     </div>
   </div>
 
-  <div id="t3">
+  <!-- T4: REJEITADO -->
+  <div id="t4">
+    <div class="card" style="text-align:center;padding:28px">
+      <div style="font-size:44px;margin-bottom:10px">❌</div>
+      <div style="font-size:17px;font-weight:900;color:#e74c3c;margin-bottom:8px">Solicitação Rejeitada</div>
+      <div style="font-size:12px;color:var(--textl);margin-bottom:18px" id="motivo">Pagamento não confirmado.</div>
+      <button class="btn-b" id="btnVoltar">Tentar Novamente</button>
+    </div>
+  </div>
+</div>
+
+<!-- T3: JOGO (landscape) -->
+<div id="t3">
+  <!-- COLUNA ESQUERDA -->
+  <div class="land-esq">
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+      <img src="https://luxbingo-server-production.up.railway.app/logo.png" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold)">
+      <div style="font-size:12px;font-weight:900;color:var(--gold2);letter-spacing:2px">LUX BINGO</div>
+      <div style="margin-left:auto;font-size:10px;color:var(--textl)">${codigo}</div>
+    </div>
     <div id="alertaBox" style="display:none"></div>
     <div class="num-atual">
       <div class="na-label">Número Atual</div>
       <div class="na-num" id="nAtual">--</div>
     </div>
+    <div class="numeros-box">
+      <div style="font-size:9px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1.5px">Números Sorteados</div>
+      <div class="ng" id="nGrid"></div>
+    </div>
+    <button class="btn-g" id="btnBingo" style="display:none;padding:11px;font-size:14px">🎉 GRITAR BINGO!</button>
+    <button class="btn-b" id="btnAudio" style="padding:9px;font-size:12px">🔊 Áudio ON</button>
+  </div>
+  <!-- COLUNA DIREITA -->
+  <div class="land-dir">
     <div class="cartela-wrap" id="cWrap" style="display:none">
       <div class="cartela-header">
-        <img src="${LOGO}" class="cartela-logo">
+        <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="cartela-logo">
         <div class="cartela-titulo">🎟️ SUA CARTELA</div>
         <div class="cartela-sub" id="cHorario">SALA: ${codigo}</div>
       </div>
@@ -147,21 +203,7 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--n
       </div>
       <div class="grid" id="cGrid"></div>
     </div>
-    <div class="numeros">
-      <div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1.5px">Números Sorteados</div>
-      <div class="ng" id="nGrid"></div>
-    </div>
-    <button class="btn-g" id="btnBingo" style="display:none;font-size:18px;padding:16px">🎉 GRITAR BINGO!</button>
-    <button class="btn-b" id="btnAudio" style="margin-top:4px">🔊 Áudio ON</button>
-  </div>
-
-  <div id="t4">
-    <div class="card" style="text-align:center;padding:30px">
-      <div style="font-size:48px;margin-bottom:12px">❌</div>
-      <div style="font-size:18px;font-weight:900;color:#e74c3c;margin-bottom:8px">Solicitação Rejeitada</div>
-      <div style="font-size:13px;color:var(--textl);margin-bottom:20px" id="motivo">Pagamento não confirmado.</div>
-      <button class="btn-b" id="btnVoltar">Tentar Novamente</button>
-    </div>
+    <div style="font-size:11px;color:var(--textl);text-align:center;padding:20px" id="semCartela">Aguardando cartela ser liberada...</div>
   </div>
 </div>
 
@@ -179,7 +221,12 @@ document.getElementById('iCel').oninput=function(){
   this.value=v;
 };
 
-function tela(n){['t1','t2','t3','t4'].forEach(function(t){document.getElementById(t).className=t===('t'+n)?'ok':'';});}
+function tela(n){
+  ['t1','t2','t4'].forEach(function(t){document.getElementById(t).className='';});
+  document.getElementById('t3').className='';
+  if(n===3){document.getElementById('t3').className='ok';}
+  else{document.getElementById('t'+n).className='ok';}
+}
 function toast(m,e){var t=document.getElementById('toast');t.textContent=m;t.className='toast on'+(e?' err':'');setTimeout(function(){t.className='toast';},3000);}
 
 document.getElementById('btnConectar').onclick=function(){
@@ -207,19 +254,19 @@ document.getElementById('btnConectar').onclick=function(){
   sock.on('cartela_aprovada',function(d){
     cart=d.cartela;cId=cart.id;nums=d.sorteados||[];marc=nums.slice();
     if(d.horario){var h=document.getElementById('cHorario');if(h)h.textContent='SALA: ${codigo} · 🕐 '+d.horario;}
+    document.getElementById('semCartela').style.display='none';
     salvarLocal();renderCart();renderGrid();tela(3);toast('🎉 Cartela liberada! Boa sorte!');
   });
   sock.on('cartela_rejeitada',function(d){document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);});
   sock.on('numero_sorteado',function(d){
-    nums=d.sorteados||nums;
-    document.getElementById('nAtual').textContent=d.numero||d;
+    nums=d.sorteados||nums;document.getElementById('nAtual').textContent=d.numero||d;
     if(marc.indexOf(d.numero)===-1)marc.push(d.numero);
     salvarLocal();renderCart();renderGrid();verBingo();falarNumero(d.numero);
   });
   sock.on('bingo_confirmado',function(d){
     var b=document.createElement('div');b.className='bingo-banner';
     b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>';
-    document.querySelector('.wrap').insertBefore(b,document.getElementById('t3'));
+    document.getElementById('t3').insertBefore(b,document.getElementById('t3').firstChild);
   });
   sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou. Jogo continua!');});
   sock.on('alerta_jogador',function(d){
@@ -233,7 +280,6 @@ document.getElementById('btnVoltar').onclick=function(){tela(1);};
 document.getElementById('btnAudio').onclick=function(){
   audioOn=!audioOn;
   this.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';
-  this.style.background=audioOn?'transparent':'rgba(231,76,60,.2)';
   this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
   this.style.color=audioOn?'var(--gold2)':'#e74c3c';
 };
@@ -275,17 +321,16 @@ function falarNumero(num){
   window.speechSynthesis.cancel();
   var m1=new SpeechSynthesisUtterance('Número '+num);m1.lang='pt-BR';m1.rate=0.9;m1.pitch=1;m1.volume=1;
   var m2=new SpeechSynthesisUtterance('Número '+num);m2.lang='pt-BR';m2.rate=0.9;m2.pitch=1;m2.volume=1;
-  window.speechSynthesis.speak(m1);
-  m1.onend=function(){setTimeout(function(){window.speechSynthesis.speak(m2);},800);};
+  window.speechSynthesis.speak(m1);m1.onend=function(){setTimeout(function(){window.speechSynthesis.speak(m2);},800);};
 }
 function salvarLocal(){
-  if(!cart)return;
-  localStorage.setItem('luxbingo_'+COD,JSON.stringify({cart:cart,cId:cId,marc:marc,nums:nums}));
+  if(!cart)return;localStorage.setItem('luxbingo_'+COD,JSON.stringify({cart:cart,cId:cId,marc:marc,nums:nums}));
 }
 function restaurarLocal(){
   try{
     var s=localStorage.getItem('luxbingo_'+COD);if(!s)return false;
     var d=JSON.parse(s);cart=d.cart;cId=d.cId;marc=d.marc;nums=d.nums;
+    document.getElementById('semCartela').style.display='none';
     renderCart();renderGrid();verBingo();tela(3);toast('✅ Cartela restaurada!');return true;
   }catch(e){return false;}
 }
@@ -312,12 +357,12 @@ window.onload=function(){
     sock.on('bingo_confirmado',function(d){
       var b=document.createElement('div');b.className='bingo-banner';
       b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>';
-      document.querySelector('.wrap').insertBefore(b,document.getElementById('t3'));
+      document.getElementById('t3').insertBefore(b,document.getElementById('t3').firstChild);
     });
   }
 };
 renderGrid();
-</script>
+<\/script>
 </body>
 </html>`);
 });
