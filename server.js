@@ -54,11 +54,10 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .aguard-sub{font-size:11px;color:var(--textl);margin-top:5px;line-height:1.5}
 
 /* TELA DO JOGO — LANDSCAPE FORÇADO */
-.tela-jogo{display:none;flex-direction:row;width:100vw;height:100vh;overflow:hidden}
+./* TELA DO JOGO — PORTRAIT */
+.tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
 .tela-jogo.ativo{display:flex}
-/* Coluna esquerda */
-.jogo-esq{width:45%;background:rgba(0,0,0,.35);border-right:1px solid rgba(201,162,39,.2);display:flex;flex-direction:column;padding:8px;gap:6px;overflow-y:auto}
-/* Coluna direita */
+.jogo-esq{width:100%;background:rgba(0,0,0,.35);border-bottom:1px solid rgba(201,162,39,.2);display:flex;flex-direction:column;padding:8px;gap:6px;overflow-y:auto;max-height:45vh}
 .jogo-dir{flex:1;display:flex;flex-direction:column;padding:8px;gap:6px;overflow-y:auto}
 
 /* Header topo jogo */
