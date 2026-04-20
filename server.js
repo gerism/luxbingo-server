@@ -628,17 +628,18 @@ io.on('connection',(socket)=>{
     io.to(s.adm.socketId).emit('jogador_entrou',{jogadorId:jid,nome:nomeJogador,total:Object.keys(s.jogadores).length});
     cb({ok:true,sorteados:s.sorteados,ativa:s.ativa,valorCartela:s.valorCartela,chavePix:s.chavePix,horario:s.horario,youtubeLink:s.youtubeLink});
   });
-
-  socket.on('solicitar_cartela',({codigo,dados},cb)=>{
+socket.on('solicitar_cartela',({codigo,dados},cb)=>{
     const s=salas[codigo];if(!s)return cb({ok:false,erro:'Sala não encontrada'});
     const jid=socket.id;
+    const nome=dados.nome||s.jogadores[jid]?.nome||'Jogador';
     const cj=s.cartelasVendidas[jid]||[];
     if(cj.length>=5)return cb({ok:false,erro:'Máximo de 5 cartelas!'});
     const sol=s.solicitacoes[jid];
     if(sol&&sol.status==='pendente')return cb({ok:false,erro:'Você já tem uma solicitação pendente.'});
     s.solicitacoes[jid]={
       jogadorId:jid,
-      nome:dados.nome||s.jogadores[jid]?.nome||'Jogador',
+      socketAtual:socket.id,
+      nome:nome,
       cpf:dados.cpf||'',celular:dados.celular||'',
       chavePix:dados.chavePix||'',email:dados.email||'',
       status:'pendente',timestamp:Date.now(),
