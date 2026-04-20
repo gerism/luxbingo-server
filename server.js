@@ -384,13 +384,21 @@ function gerarCodigo(){
   return c;
 }
 function gerarCartela75(){
-  const faixas=[[1,15],[16,30],[31,45],[46,60],[61,75]];const cartela=[];
-  for(let col=0;col<5;col++){
-    const[min,max]=faixas[col];const pool=Array.from({length:max-min+1},(_,i)=>i+min);const e=[];
-    for(let row=0;row<5;row++){const idx=Math.floor(Math.random()*pool.length);e.push(pool.splice(idx,1)[0]);}
-    cartela.push(e);
+  const nums=[];
+  while(nums.length<24){
+    const n=Math.floor(Math.random()*90)+1;
+    if(nums.indexOf(n)===-1)nums.push(n);
   }
-  return Array.from({length:5},(_,row)=>Array.from({length:5},(_,col)=>(row===2&&col===2?'FREE':cartela[col][row])));
+  let idx=0;const grid=[];
+  for(let r=0;r<5;r++){
+    const row=[];
+    for(let c=0;c<5;c++){
+      if(r===2&&c===2)row.push('FREE');
+      else row.push(nums[idx++]);
+    }
+    grid.push(row);
+  }
+  return grid;
 }
 function gerarBolao(sala,qtd){
   return Array.from({length:qtd},(_,i)=>({
@@ -426,7 +434,7 @@ io.on('connection',(socket)=>{
     let codigo;do{codigo=gerarCodigo();}while(salas[codigo]);
     const cartelas=gerarBolao(codigo,quantidadeCartelas||100);
     salas[codigo]={codigo,adm:{socketId:socket.id,nome:nomeAdm},jogadores:{},cartelas,cartelasVendidas:{},solicitacoes:{},
-      numeros:Array.from({length:75},(_,i)=>i+1),sorteados:[],ativa:false,
+      numeros:Array.from({length:90},(_,i)=>i+1),sorteados:[],ativa:false,
       valorCartela:valorCartela||0,chavePix:chavePix||'',horario:horario||'',vencedor:null};
     socket.join(codigo);socket.data.sala=codigo;socket.data.papel='adm';
     console.log(`[SALA] ${codigo} por ${nomeAdm}`);cb({ok:true,codigo,cartelas:cartelas.length});
