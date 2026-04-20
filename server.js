@@ -657,6 +657,8 @@ socket.on('aprovar_cartela',({codigo,jogadorId},cb)=>{
     const s=salas[codigo];
     if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
     const sol=s.solicitacoes[jogadorId];
+    console.log('[APROVAR] jogadorId:',jogadorId,'sol:',sol?'encontrada':'NAO ENCONTRADA');
+    console.log('[APROVAR] solicitacoes keys:',Object.keys(s.solicitacoes));
     if(!sol)return cb({ok:false,erro:'Solicitação não encontrada'});
     const vendidas=Object.values(s.cartelasVendidas).flat().map(c=>c.id);
     const disp=s.cartelas.filter(c=>!vendidas.includes(c.id));
