@@ -653,7 +653,7 @@ io.on('connection',(socket)=>{
     cb({ok:true,mensagem:'Solicitação enviada!'});
   });
 
-  socket.on('aprovar_cartela',({codigo,jogadorId},cb)=>{
+socket.on('aprovar_cartela',({codigo,jogadorId},cb)=>{
     const s=salas[codigo];
     if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
     const sol=s.solicitacoes[jogadorId];
@@ -664,7 +664,13 @@ io.on('connection',(socket)=>{
     const cartela=disp[0];
     s.cartelasVendidas[jogadorId]=[...(s.cartelasVendidas[jogadorId]||[]),cartela];
     s.solicitacoes[jogadorId].status='aprovado';
-    io.to(jogadorId).emit('cartela_aprovada',{
+    // Buscar socket atual do jogador (pode ter reconectado com novo ID)
+    const nomeJog=sol.nome;
+    let socketAtual=jogadorId;
+    Object.entries(s.jogadores).forEach(function([sid,j]){
+      if(j.nome===nomeJog)socketAtual=sid;
+    });
+    io.to(socketAtual).emit('cartela_aprovada',{
       cartela,sorteados:s.sorteados,
       horario:s.horario||'',
       youtubeLink:s.youtubeLink||'',
