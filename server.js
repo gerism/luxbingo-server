@@ -302,7 +302,6 @@ document.getElementById('btnConectar').onclick=function(){
 
 function registrarEventos(nome){
   sock.on('cartela_aprovada',function(d){
-    if(d.nomeJogador&&d.nomeJogador.trim().toLowerCase()!==nome.trim().toLowerCase())return;
     var cart=d.cartela;
     cartelas.push(cart);
     if(!marc[cart.id])marc[cart.id]=[];
