@@ -302,6 +302,7 @@ document.getElementById('btnConectar').onclick=function(){
 
 function registrarEventos(nome){
   sock.on('cartela_aprovada',function(d){
+    if(d.nomeJogador&&d.nomeJogador!==nome)return;
     var cart=d.cartela;
     cartelas.push(cart);
     if(!marc[cart.id])marc[cart.id]=[];
@@ -628,18 +629,17 @@ io.on('connection',(socket)=>{
     io.to(s.adm.socketId).emit('jogador_entrou',{jogadorId:jid,nome:nomeJogador,total:Object.keys(s.jogadores).length});
     cb({ok:true,sorteados:s.sorteados,ativa:s.ativa,valorCartela:s.valorCartela,chavePix:s.chavePix,horario:s.horario,youtubeLink:s.youtubeLink});
   });
-socket.on('solicitar_cartela',({codigo,dados},cb)=>{
+
+  socket.on('solicitar_cartela',({codigo,dados},cb)=>{
     const s=salas[codigo];if(!s)return cb({ok:false,erro:'Sala não encontrada'});
     const jid=socket.id;
-    const nome=dados.nome||s.jogadores[jid]?.nome||'Jogador';
     const cj=s.cartelasVendidas[jid]||[];
     if(cj.length>=5)return cb({ok:false,erro:'Máximo de 5 cartelas!'});
     const sol=s.solicitacoes[jid];
     if(sol&&sol.status==='pendente')return cb({ok:false,erro:'Você já tem uma solicitação pendente.'});
     s.solicitacoes[jid]={
       jogadorId:jid,
-      socketAtual:socket.id,
-      nome:nome,
+      nome:dados.nome||s.jogadores[jid]?.nome||'Jogador',
       cpf:dados.cpf||'',celular:dados.celular||'',
       chavePix:dados.chavePix||'',email:dados.email||'',
       status:'pendente',timestamp:Date.now(),
@@ -654,12 +654,10 @@ socket.on('solicitar_cartela',({codigo,dados},cb)=>{
     cb({ok:true,mensagem:'Solicitação enviada!'});
   });
 
-socket.on('aprovar_cartela',({codigo,jogadorId},cb)=>{
+  socket.on('aprovar_cartela',({codigo,jogadorId},cb)=>{
     const s=salas[codigo];
     if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
     const sol=s.solicitacoes[jogadorId];
-    console.log('[APROVAR] jogadorId:',jogadorId,'sol:',sol?'encontrada':'NAO ENCONTRADA');
-    console.log('[APROVAR] solicitacoes keys:',Object.keys(s.solicitacoes));
     if(!sol)return cb({ok:false,erro:'Solicitação não encontrada'});
     const vendidas=Object.values(s.cartelasVendidas).flat().map(c=>c.id);
     const disp=s.cartelas.filter(c=>!vendidas.includes(c.id));
@@ -667,16 +665,13 @@ socket.on('aprovar_cartela',({codigo,jogadorId},cb)=>{
     const cartela=disp[0];
     s.cartelasVendidas[jogadorId]=[...(s.cartelasVendidas[jogadorId]||[]),cartela];
     s.solicitacoes[jogadorId].status='aprovado';
-    // Buscar socket atual do jogador (pode ter reconectado com novo ID)
     const nomeJog=sol.nome;
-    let socketAtual=jogadorId;
-    Object.entries(s.jogadores).forEach(function([sid,j]){
-      if(j.nome===nomeJog)socketAtual=sid;
-    });
-    io.to(socketAtual).emit('cartela_aprovada',{
+    console.log('[APROVAR] broadcast sala',codigo,'para',nomeJog);
+    io.to(codigo).emit('cartela_aprovada',{
       cartela,sorteados:s.sorteados,
       horario:s.horario||'',
       youtubeLink:s.youtubeLink||'',
+      nomeJogador:nomeJog,
       mensagem:'✅ Cartela liberada!'
     });
     cb({ok:true});
