@@ -302,6 +302,7 @@ document.getElementById('btnConectar').onclick=function(){
 
 function registrarEventos(nome){
   sock.on('cartela_aprovada',function(d){
+    if(d.nomeJogador&&d.nomeJogador.trim().toLowerCase()!==nome.trim().toLowerCase())return;
     var cart=d.cartela;
     cartelas.push(cart);
     if(!marc[cart.id])marc[cart.id]=[];
@@ -626,6 +627,13 @@ io.on('connection',(socket)=>{
     s.jogadores[jid]={nome:nomeJogador,socketId:socket.id};
     socket.join(codigo.toUpperCase());socket.data.sala=codigo.toUpperCase();socket.data.papel='jogador';
     io.to(s.adm.socketId).emit('jogador_entrou',{jogadorId:jid,nome:nomeJogador,total:Object.keys(s.jogadores).length});
+    // Entregar cartela pendente se existir
+    if(s.pendingCartelas&&s.pendingCartelas[nomeJogador]){
+      const payload=s.pendingCartelas[nomeJogador];
+      delete s.pendingCartelas[nomeJogador];
+      console.log('[ENTRAR] entregando cartela pendente para:',nomeJogador);
+      setTimeout(()=>socket.emit('cartela_aprovada',payload),500);
+    }
     cb({ok:true,sorteados:s.sorteados,ativa:s.ativa,valorCartela:s.valorCartela,chavePix:s.chavePix,horario:s.horario,youtubeLink:s.youtubeLink});
   });
 
@@ -664,12 +672,18 @@ io.on('connection',(socket)=>{
     const cartela=disp[0];
     s.cartelasVendidas[jogadorId]=[...(s.cartelasVendidas[jogadorId]||[]),cartela];
     s.solicitacoes[jogadorId].status='aprovado';
-    io.to(jogadorId).emit('cartela_aprovada',{
-      cartela,sorteados:s.sorteados,
-      horario:s.horario||'',
-      youtubeLink:s.youtubeLink||'',
-      mensagem:'✅ Cartela liberada!'
-    });
+    const payload={cartela,sorteados:s.sorteados,horario:s.horario||'',youtubeLink:s.youtubeLink||'',mensagem:'✅ Cartela liberada!'};
+    // Tentar socket atual do jogador
+    const socketAtual=s.jogadores[jogadorId]?.socketId||jogadorId;
+    const entregue=io.sockets.sockets.has(socketAtual);
+    if(entregue){
+      io.to(socketAtual).emit('cartela_aprovada',payload);
+    } else {
+      // Guardar pendente para quando reconectar
+      s.pendingCartelas=s.pendingCartelas||{};
+      s.pendingCartelas[sol.nome]=payload;
+      console.log('[APROVAR] jogador offline, guardando pendente para:',sol.nome);
+    }
     cb({ok:true});
   });
 
