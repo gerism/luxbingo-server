@@ -174,27 +174,9 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 </div>
 
 <!-- TELA 3: JOGO (2 colunas) -->
+<!-- TELA 3: JOGO (portrait) -->
 <div class="tela-jogo" id="t3">
-  <!-- ESQUERDA: número + grid -->
-  <div class="jogo-esq">
-    <div class="jogo-header">
-      <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="jogo-logo">
-      <div class="jogo-titulo">LUX BINGO</div>
-      <div class="jogo-sala">${codigo}</div>
-    </div>
-    <div id="alertaBox" style="display:none"></div>
-    <div class="num-box">
-      <div class="num-label">Número Atual</div>
-      <div class="num-grande" id="nAtual">--</div>
-    </div>
-    <div class="nums-box">
-      <div class="nums-titulo">Números Sorteados</div>
-      <div class="ng" id="nGrid"></div>
-    </div>
-    <button class="btn-bingo" id="btnBingo">🎉 GRITAR BINGO!</button>
-    <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
-  </div>
-  <!-- DIREITA: cartela -->
+  <!-- CIMA: cartela -->
   <div class="jogo-dir">
     <div class="cartela-wrap" id="cWrap" style="display:none">
       <div class="cartela-header">
@@ -213,6 +195,25 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
       ⏳ Aguardando cartela ser liberada...
     </div>
     <div id="bingoBox"></div>
+  </div>
+  <!-- BAIXO: número + grid -->
+  <div class="jogo-esq">
+    <div class="jogo-header">
+      <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="jogo-logo">
+      <div class="jogo-titulo">LUX BINGO</div>
+      <div class="jogo-sala">${codigo}</div>
+    </div>
+    <div id="alertaBox" style="display:none"></div>
+    <div class="num-box">
+      <div class="num-label">Número Atual</div>
+      <div class="num-grande" id="nAtual">--</div>
+    </div>
+    <div class="nums-box">
+      <div class="nums-titulo">Números Sorteados</div>
+      <div class="ng" id="nGrid"></div>
+    </div>
+    <button class="btn-bingo" id="btnBingo">🎉 GRITAR BINGO!</button>
+    <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
   </div>
 </div>
 
