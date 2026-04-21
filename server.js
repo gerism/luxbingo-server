@@ -670,6 +670,7 @@ io.on('connection', (socket) => {
       cartelasJaTem: cj.length
     };
     
+    console.log('[SOLICITACAO] emitindo para adm socketId:',s.adm.socketId);
     io.to(s.adm.socketId).emit('nova_solicitacao', {
       idUnico: idUnico,
       nome: s.solicitacoes[idUnico].nome,
