@@ -234,6 +234,7 @@ document.getElementById('btnConectar').onclick=function(){
   sock=io(SERVER,{transports:['websocket']});
 sock.on('connect',function(){
     localStorage.setItem('luxbingo_nome_'+COD,nome);
+    registrarEventos(nome);
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);sock.disconnect();return;}
       document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
