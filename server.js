@@ -31,17 +31,11 @@ app.get('/jogo/:codigo', (req, res) => {
 :root{--navy:#0d1b2e;--navy2:#1a2d4e;--gold:#c9a227;--gold2:#f0c040;--gold3:#ffd966;--card:#0f2240;--text:#e8d5a3;--textl:rgba(232,213,163,.6)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);overflow:hidden;width:100vw;height:100vh}
-
-/* ── TELAS GERAIS ── */
 .tela{display:none;flex-direction:column;align-items:center;width:100vw;height:100vh;overflow-y:auto;padding:20px 16px 40px}
 .tela.ativo{display:flex}
-
-/* ── HEADER ── */
 .logo-img{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 20px rgba(201,162,39,.4);margin-bottom:6px}
 .logo-title{font-size:22px;font-weight:900;color:var(--gold2);letter-spacing:4px;margin-bottom:2px}
 .logo-sub{font-size:10px;color:var(--textl);letter-spacing:2px;margin-bottom:16px}
-
-/* ── CARDS ── */
 .card{background:var(--card);border:1px solid rgba(201,162,39,.2);border-radius:14px;padding:16px;width:100%;max-width:400px;margin-bottom:10px}
 .ct{font-size:10px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
 .lbl{font-size:10px;color:var(--textl);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;display:block}
@@ -52,24 +46,16 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .btn-b{width:100%;padding:11px;background:transparent;border:2px solid rgba(201,162,39,.4);border-radius:12px;font-size:13px;font-weight:900;color:var(--gold2);cursor:pointer;margin-bottom:8px}
 .info-box{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:10px;padding:8px 14px;margin-bottom:12px;text-align:center;width:100%;max-width:400px}
 .info-cod{font-size:11px;color:var(--textl);letter-spacing:2px}
-
-/* ── AGUARDANDO ── */
 .aguard{text-align:center;padding:20px 16px;background:rgba(201,162,39,.08);border:2px solid rgba(201,162,39,.3);border-radius:14px;margin-bottom:10px;width:100%;max-width:400px}
 .aguard-icon{font-size:36px;display:block;margin-bottom:8px}
 .aguard-title{font-size:16px;font-weight:900;color:var(--gold2)}
 .aguard-sub{font-size:11px;color:var(--textl);margin-top:5px;line-height:1.5}
 .pix-val{font-size:28px;font-weight:900;color:var(--gold2);text-align:center;margin:6px 0}
 .pix-chave{font-size:13px;font-weight:900;color:var(--gold2);padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);border-radius:8px;word-break:break-all;text-align:center}
-
-/* ── TELA JOGO (portrait) ── */
 .tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
 .tela-jogo.ativo{display:flex}
-
-/* YouTube */
 .yt-wrap{width:100%;background:#000;flex-shrink:0;position:relative}
 .yt-wrap iframe{width:100%;display:block;border:none}
-
-/* Número atual + grid 90 — barra compacta */
 .info-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(201,162,39,.2);flex-shrink:0}
 .num-atual{font-size:32px;font-weight:900;color:var(--gold2);min-width:44px;text-align:center;line-height:1}
 .num-lbl{font-size:7px;color:var(--textl);text-transform:uppercase;letter-spacing:1px;display:block}
@@ -77,15 +63,11 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .nm90{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:2px;background:rgba(255,255,255,.04);font-size:6px;font-weight:700;color:rgba(232,213,163,.3)}
 .nm90.s{background:rgba(201,162,39,.25);color:var(--gold)}
 .nm90.u{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy)}
-
-/* Cartelas scroll */
 .cartelas-area{flex:1;overflow:hidden;display:flex;flex-direction:column}
 .cartelas-tabs{display:flex;gap:4px;padding:6px 10px 0;flex-shrink:0}
 .tab-btn{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:900;cursor:pointer;border:1.5px solid rgba(201,162,39,.3);background:transparent;color:var(--textl);font-family:inherit}
 .tab-btn.ok{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:transparent;color:var(--navy)}
 .cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 10px}
-
-/* Cartela 5x5 */
 .cartela-card{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;margin-bottom:8px}
 .cartela-header{background:linear-gradient(135deg,#0a1628,var(--navy2));border-bottom:2px solid var(--gold);padding:6px 10px;display:flex;align-items:center;justify-content:space-between}
 .cartela-titulo{font-size:11px;font-weight:900;color:var(--gold2);letter-spacing:1px}
@@ -97,26 +79,18 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .cel.marc{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy)}
 .cel.free{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy);cursor:default}
 .bingo-btn{width:100%;padding:10px;background:linear-gradient(135deg,#2ecc71,#27ae60);border:none;border-radius:0 0 10px 10px;font-size:14px;font-weight:900;color:#fff;letter-spacing:2px;cursor:pointer;display:none}
-
-/* Alertas */
 .alerta-quase{background:rgba(201,162,39,.15);border:2px solid var(--gold);color:var(--gold2);border-radius:10px;padding:8px 10px;text-align:center;font-weight:900;font-size:11px;margin:4px 10px}
 .alerta-bingo{background:rgba(46,204,113,.15);border:2px solid #2ecc71;color:#2ecc71;border-radius:10px;padding:8px 10px;text-align:center;font-weight:900;font-size:11px;margin:4px 10px}
 .bingo-banner{background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:12px;text-align:center;margin:4px 10px}
 .bb-icon{font-size:28px;display:block;margin-bottom:2px}
 .bb-title{font-size:15px;font-weight:900;color:var(--navy);letter-spacing:2px}
 .bb-sub{font-size:10px;color:rgba(13,27,46,.7);margin-top:2px}
-
-/* Barra inferior */
 .bottom-bar{display:flex;gap:6px;padding:6px 10px 10px;flex-shrink:0;border-top:1px solid rgba(201,162,39,.15)}
 .btn-audio{flex:1;padding:9px;background:transparent;border:1.5px solid rgba(201,162,39,.4);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit}
 .btn-mais{flex:1;padding:9px;background:rgba(201,162,39,.1);border:1.5px solid rgba(201,162,39,.3);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit}
-
-/* Toast */
 .toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);padding:8px 18px;border-radius:50px;font-weight:900;font-size:11px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
 .toast.err{background:#e74c3c;color:#fff}
-
-/* Divider */
 .divider{display:flex;align-items:center;gap:8px;margin:4px 0 10px;width:100%;max-width:400px}
 .divider-line{flex:1;height:1px;background:rgba(201,162,39,.2)}
 .divider-txt{font-size:10px;color:var(--textl);font-weight:700;letter-spacing:1px}
@@ -124,24 +98,18 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 </head>
 <body>
 <div class="toast" id="toast"></div>
-
-<!-- TELA 1: DADOS -->
 <div class="tela ativo" id="t1">
   <img src="${LOGO}" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="info-box"><div class="info-cod">SALA: ${codigo}</div></div>
-
-  <!-- Recuperar cartela de outro dia -->
   <div class="card">
     <div class="ct">🔑 Já tem cartela?</div>
     <label class="lbl">Código da sua cartela</label>
     <input class="inp" id="iCodCart" type="text" placeholder="Ex: ABC123-1" style="text-transform:uppercase">
     <button class="btn-b" id="btnRecuperar">RECUPERAR CARTELA →</button>
   </div>
-
   <div class="divider"><div class="divider-line"></div><div class="divider-txt">OU SOLICITAR NOVA</div><div class="divider-line"></div></div>
-
   <div class="card">
     <div class="ct">📝 Seus Dados</div>
     <label class="lbl">Nome completo *</label>
@@ -157,8 +125,6 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
     <button class="btn-g" id="btnConectar">SOLICITAR CARTELA →</button>
   </div>
 </div>
-
-<!-- TELA 2: AGUARDANDO -->
 <div class="tela" id="t2">
   <img src="${LOGO}" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
@@ -178,8 +144,6 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
     <div style="font-size:10px;color:var(--textl);text-align:center;margin-top:8px">Após pagar aguarde a confirmação</div>
   </div>
 </div>
-
-<!-- TELA 4: REJEITADO -->
 <div class="tela" id="t4">
   <img src="${LOGO}" class="logo-img">
   <div class="card" style="max-width:400px;text-align:center;padding:24px">
@@ -189,16 +153,10 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
     <button class="btn-b" id="btnVoltar">Tentar Novamente</button>
   </div>
 </div>
-
-<!-- TELA 3: JOGO (portrait) -->
 <div class="tela-jogo" id="t3">
-
-  <!-- YouTube (aparece só se tiver link) -->
   <div class="yt-wrap" id="ytWrap" style="display:none">
     <iframe id="ytFrame" allowfullscreen allow="autoplay"></iframe>
   </div>
-
-  <!-- Barra número atual + grid 90 -->
   <div class="info-bar">
     <div>
       <span class="num-lbl">Último</span>
@@ -206,12 +164,8 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
     </div>
     <div class="ng90" id="nGrid"></div>
   </div>
-
-  <!-- Alertas -->
   <div id="alertaBox" style="display:none"></div>
   <div id="bingoBox"></div>
-
-  <!-- Área cartelas -->
   <div class="cartelas-area">
     <div class="cartelas-tabs" id="cartTabs"></div>
     <div class="cartelas-scroll" id="cartScroll">
@@ -220,19 +174,18 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
       </div>
     </div>
   </div>
-
-  <!-- Barra inferior -->
   <div class="bottom-bar">
     <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
     <button class="btn-mais" id="btnMais" style="display:none">＋ Mais Cartelas</button>
   </div>
-
 </div>
-
 <script>
 var COD='${codigo}',SERVER=window.location.origin,sock=null;
 var cartelas=[],marc={},nums=[],audioOn=true,tabAtiva=0;
-
+var meuIdUnico = localStorage.getItem('luxbingo_id_'+COD) || null;
+function gerarIdUnico() {
+  return 'jog_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
 function tela(n){
   document.querySelectorAll('.tela,.tela-jogo').forEach(function(el){el.classList.remove('ativo');});
   document.getElementById('t'+n).classList.add('ativo');
@@ -241,8 +194,6 @@ function toast(m,e){
   var t=document.getElementById('toast');t.textContent=m;t.className='toast on'+(e?' err':'');
   setTimeout(function(){t.className='toast';},3000);
 }
-
-// Máscaras
 document.getElementById('iCpf').oninput=function(){
   var v=this.value.replace(/\\D/g,'');
   v=v.replace(/(\\d{3})(\\d)/,'$1.$2').replace(/(\\d{3})(\\d)/,'$1.$2').replace(/(\\d{3})(\\d{1,2})$/,'$1-$2');
@@ -256,8 +207,6 @@ document.getElementById('iCel').oninput=function(){
 document.getElementById('iCodCart').oninput=function(){
   this.value=this.value.toUpperCase();
 };
-
-// ─── RECUPERAR CARTELA ───
 document.getElementById('btnRecuperar').onclick=function(){
   var cod=document.getElementById('iCodCart').value.trim().toUpperCase();
   if(!cod){toast('❌ Digite o código da cartela!',true);return;}
@@ -270,8 +219,6 @@ document.getElementById('btnRecuperar').onclick=function(){
     tela(3);toast('✅ Cartela recuperada!');
   }catch(e){toast('❌ Erro ao recuperar!',true);}
 };
-
-// ─── SOLICITAR NOVA ───
 document.getElementById('btnConectar').onclick=function(){
   var nome=document.getElementById('iNome').value.trim();
   var cpf=document.getElementById('iCpf').value.trim();
@@ -279,19 +226,36 @@ document.getElementById('btnConectar').onclick=function(){
   var pix=document.getElementById('iPix').value.trim();
   var email=document.getElementById('iEmail').value.trim();
   if(!nome||!cpf||!cel||!pix){toast('❌ Preencha todos os campos!',true);return;}
+  if(!meuIdUnico) {
+    meuIdUnico = gerarIdUnico();
+    localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
+  }
   if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
   sock.on('connect',function(){
-    meuIdSock=sock.id;
     localStorage.setItem('luxbingo_nome_'+COD,nome);
-    sock.emit('entrar_sala',{codigo:COD,nomeJogador:nome},function(r){
+    sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);sock.disconnect();return;}
       document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
       document.getElementById('pChave').textContent=r.chavePix||'--';
       if(r.horario){document.getElementById('pHorario').textContent='🕐 '+r.horario;document.getElementById('pHorario').style.display='block';}
-      // Configurar YouTube se tiver link
       if(r.youtubeLink){setYoutube(r.youtubeLink);}
-      sock.emit('solicitar_cartela',{codigo:COD,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
+      if(r.cartelasExistentes && r.cartelasExistentes.length > 0) {
+        cartelas = r.cartelasExistentes;
+        nums = r.sorteados || [];
+        cartelas.forEach(function(c) {
+          if(!marc[c.id]) marc[c.id] = [];
+          nums.forEach(function(n) {
+            if(marc[c.id].indexOf(n) === -1) marc[c.id].push(n);
+          });
+        });
+        renderCartelas();
+        renderGrid();
+        tela(3);
+        toast('✅ Cartelas carregadas!');
+        return;
+      }
+      sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
         if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
         tela(2);toast('✅ Solicitação enviada!');
       });
@@ -300,21 +264,17 @@ document.getElementById('btnConectar').onclick=function(){
   sock.on('connect_error',function(){toast('❌ Erro de conexão!',true);});
   registrarEventos(nome);
 };
-
-var meuIdSock=null;
-
 function registrarEventos(nome){
   sock.on('cartela_aprovada',function(d){
+    console.log('📢 CARTELA APROVADA RECEBIDA:', d);
     var cart=d.cartela;
     cartelas.push(cart);
     if(!marc[cart.id])marc[cart.id]=[];
-    // marcar números já sorteados
     nums=d.sorteados||nums;
     nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
     if(d.youtubeLink)setYoutube(d.youtubeLink);
     document.getElementById('semCartela').style.display='none';
     salvarLocal(nome);renderCartelas();renderGrid();
-    // Mostrar botão mais cartelas se permitido
     if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
     else document.getElementById('btnMais').style.display='none';
     tela(3);toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
@@ -325,7 +285,6 @@ function registrarEventos(nome){
   sock.on('numero_sorteado',function(d){
     nums=d.sorteados||nums;
     document.getElementById('nAtual').textContent=d.numero;
-    // Marcar em todas as cartelas
     cartelas.forEach(function(c){
       if(marc[c.id].indexOf(d.numero)===-1)marc[c.id].push(d.numero);
     });
@@ -343,63 +302,53 @@ function registrarEventos(nome){
     if(d.tipo!=='bingo')setTimeout(function(){box.style.display='none';},5000);
   });
   sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
-  // Reconexão: verificar cartela pendente
-  sock.on('connect',function(){
-    if(!meuIdSock)return;
-    var nomeSalvo=localStorage.getItem('luxbingo_nome_'+COD)||nome;
-    sock.emit('entrar_sala',{codigo:COD,nomeJogador:nomeSalvo},function(r){
-      if(r&&r.ok){
-        // verificar pendente pelo nome (servidor já entrega via timeout)
-      }
-    });
-  });
 }
-
 function conectarJogo(nome){
+  if(!meuIdUnico) {
+    meuIdUnico = localStorage.getItem('luxbingo_id_'+COD);
+    if(!meuIdUnico) {
+      meuIdUnico = gerarIdUnico();
+      localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
+    }
+  }
   if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
   sock.on('connect',function(){
-    sock.emit('entrar_sala',{codigo:COD,nomeJogador:nome},function(r){
+    sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(r&&r.ok){
         nums=r.sorteados||nums;
         if(r.youtubeLink)setYoutube(r.youtubeLink);
-        cartelas.forEach(function(c){
-          nums.forEach(function(n){if(marc[c.id].indexOf(n)===-1)marc[c.id].push(n);});
-        });
+        if(r.cartelasExistentes && r.cartelasExistentes.length > 0) {
+          cartelas = r.cartelasExistentes;
+          cartelas.forEach(function(c){
+            if(!marc[c.id]) marc[c.id] = [];
+            nums.forEach(function(n){if(marc[c.id].indexOf(n)===-1)marc[c.id].push(n);});
+          });
+        }
         salvarLocal(nome);renderCartelas();renderGrid();verBingo();
       }
     });
   });
   registrarEventos(nome);
 }
-
-// ─── SOLICITAR MAIS CARTELAS ───
 document.getElementById('btnMais').onclick=function(){
   if(!sock||cartelas.length>=5){toast('❌ Máximo de 5 cartelas!',true);return;}
   var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
-  // Voltar pra tela de dados pra preencher pagamento de nova cartela
-  // Mas manter conexão - só emitir nova solicitação
-  sock.emit('solicitar_cartela',{codigo:COD,dados:{nome:nome,cpf:'',celular:'',chavePix:'',email:''}},function(r){
+  sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:'',celular:'',chavePix:'',email:''}},function(r){
     if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);return;}
     toast('✅ Solicitação de cartela '+(cartelas.length+1)+' enviada!');
   });
 };
-
-// ─── REJEITAR → VOLTAR ───
 document.getElementById('btnVoltar').onclick=function(){tela(1);};
-
-// ─── ÁUDIO ───
 document.getElementById('btnAudio').onclick=function(){
   audioOn=!audioOn;this.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';
   this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
   this.style.color=audioOn?'var(--gold2)':'#e74c3c';
 };
-
-// ─── YOUTUBE ───
 function setYoutube(link){
   if(!link)return;
   var vid='';
-  var m=link.match(/(?:youtu\.be\\/|v=)([\\w-]{11})/);
+  var m=link.match(/(?:youtu\\.be\\/|v=)([\\w-]{11})/);
   if(m)vid=m[1];
   if(!vid)return;
   var wrap=document.getElementById('ytWrap');
@@ -409,8 +358,6 @@ function setYoutube(link){
   frame.style.height=h+'px';
   frame.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=0';
 }
-
-// ─── RENDER GRID 90 ───
 function renderGrid(){
   var g=document.getElementById('nGrid');g.innerHTML='';var u=nums[nums.length-1];
   for(var i=1;i<=90;i++){
@@ -419,11 +366,8 @@ function renderGrid(){
     d.textContent=i;g.appendChild(d);
   }
 }
-
-// ─── RENDER CARTELAS ───
 function renderCartelas(){
   if(!cartelas.length)return;
-  // Tabs
   var tabs=document.getElementById('cartTabs');tabs.innerHTML='';
   cartelas.forEach(function(c,i){
     var b=document.createElement('button');b.className='tab-btn'+(i===tabAtiva?' ok':'');
@@ -431,17 +375,14 @@ function renderCartelas(){
     (function(idx){b.onclick=function(){tabAtiva=idx;renderCartelas();};})(i);
     tabs.appendChild(b);
   });
-  // Scroll — mostrar cartela ativa
   var scroll=document.getElementById('cartScroll');scroll.innerHTML='';
   var c=cartelas[tabAtiva];
   var m=marc[c.id]||[];
   var div=document.createElement('div');div.className='cartela-card';
   div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div></div>';
-  // Letras
   var letRow=document.createElement('div');letRow.className='letras-row';
   ['B','I','N','G','O'].forEach(function(l){var s=document.createElement('div');s.className='letra';s.textContent=l;letRow.appendChild(s);});
   div.appendChild(letRow);
-  // Grid 5x5
   var grid=document.createElement('div');grid.className='grid5';
   for(var r=0;r<5;r++)for(var col=0;col<5;col++){
     var v=c.grid[r][col];var el=document.createElement('div');
@@ -459,7 +400,6 @@ function renderCartelas(){
     grid.appendChild(el);
   }
   div.appendChild(grid);
-  // Botão bingo
   var btnB=document.createElement('button');btnB.className='bingo-btn';btnB.textContent='🎉 GRITAR BINGO!';
   btnB.id='bBtn_'+tabAtiva;
   (function(cid){btnB.onclick=function(){
@@ -470,11 +410,9 @@ function renderCartelas(){
   };})(c.id);
   div.appendChild(btnB);
   scroll.appendChild(div);
-  // Verificar bingo nessa cartela
   verBingoCartela(c,m,btnB);
   document.getElementById('semCartela').style.display='none';
 }
-
 function verBingoCartela(c,m,btn){
   var ok=true;
   for(var r=0;r<5;r++)for(var col=0;col<5;col++){
@@ -482,7 +420,6 @@ function verBingoCartela(c,m,btn){
   }
   if(btn)btn.style.display=ok?'block':'none';
 }
-
 function verBingo(){
   cartelas.forEach(function(c,i){
     var m=marc[c.id]||[];
@@ -490,7 +427,6 @@ function verBingo(){
     if(btn)verBingoCartela(c,m,btn);
   });
 }
-
 function falarNumero(num){
   if(!audioOn||!window.speechSynthesis)return;
   window.speechSynthesis.cancel();
@@ -498,21 +434,16 @@ function falarNumero(num){
   var m2=new SpeechSynthesisUtterance('Número '+num);m2.lang='pt-BR';m2.rate=0.9;m2.volume=1;
   window.speechSynthesis.speak(m1);m1.onend=function(){setTimeout(function(){window.speechSynthesis.speak(m2);},800);};
 }
-
 function salvarLocal(nome){
   if(!cartelas.length)return;
   var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
   localStorage.setItem(chave,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
-  // Salvar código de cada cartela individualmente para recuperação
   cartelas.forEach(function(c){
     localStorage.setItem('luxbingo_cart_'+COD+'_'+c.id,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
   });
 }
-
-// ─── RESTAURAR AO CARREGAR ───
 window.onload=function(){
   renderGrid();
-  // Tentar restaurar sessão anterior
   var nome=localStorage.getItem('luxbingo_nome_'+COD);
   if(nome){
     var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
@@ -537,36 +468,36 @@ window.onload=function(){
 
 const salas = {};
 
-function gerarCodigo(){
-  const l='ABCDEFGHJKLMNPQRSTUVWXYZ',n='23456789';let c='';
-  for(let i=0;i<3;i++)c+=l[Math.floor(Math.random()*l.length)];
-  for(let i=0;i<3;i++)c+=n[Math.floor(Math.random()*n.length)];
+function gerarCodigo() {
+  const l = 'ABCDEFGHJKLMNPQRSTUVWXYZ', n = '23456789';
+  let c = '';
+  for (let i = 0; i < 3; i++) c += l[Math.floor(Math.random() * l.length)];
+  for (let i = 0; i < 3; i++) c += n[Math.floor(Math.random() * n.length)];
   return c;
 }
 
-// Gerar cartela 5x5 com 90 números, sem repetição entre cartelas da sala
-function gerarCartela90(usados){
-  const grid=[];
-  const numeros=[];
-  // Gerar 24 números únicos de 1-90 não usados ainda globalmente
-  let tentativas=0;
-  while(numeros.length<24&&tentativas<1000){
-    const n=Math.floor(Math.random()*90)+1;
-    if(numeros.indexOf(n)===-1&&usados.indexOf(n)===-1)numeros.push(n);
+function gerarCartela90(usados) {
+  const grid = [];
+  const numeros = [];
+  let tentativas = 0;
+  while (numeros.length < 24 && tentativas < 1000) {
+    const n = Math.floor(Math.random() * 90) + 1;
+    if (numeros.indexOf(n) === -1 && usados.indexOf(n) === -1) numeros.push(n);
     tentativas++;
   }
-  // Se não conseguiu 24 únicos globais, pegar qualquer único na cartela
-  while(numeros.length<24){
-    const n=Math.floor(Math.random()*90)+1;
-    if(numeros.indexOf(n)===-1)numeros.push(n);
+  while (numeros.length < 24) {
+    const n = Math.floor(Math.random() * 90) + 1;
+    if (numeros.indexOf(n) === -1) numeros.push(n);
   }
-  // Embaralhar
-  for(let i=numeros.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[numeros[i],numeros[j]]=[numeros[j],numeros[i]];}
-  let idx=0;
-  for(let r=0;r<5;r++){
-    const row=[];
-    for(let c=0;c<5;c++){
-      if(r===2&&c===2)row.push('FREE');
+  for (let i = numeros.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [numeros[i], numeros[j]] = [numeros[j], numeros[i]];
+  }
+  let idx = 0;
+  for (let r = 0; r < 5; r++) {
+    const row = [];
+    for (let c = 0; c < 5; c++) {
+      if (r === 2 && c === 2) row.push('FREE');
       else row.push(numeros[idx++]);
     }
     grid.push(row);
@@ -574,214 +505,278 @@ function gerarCartela90(usados){
   return grid;
 }
 
-function gerarBolao(sala,qtd){
-  const cartelas=[];
-  const usados=[];
-  for(let i=0;i<qtd;i++){
-    const grid=gerarCartela90(usados);
-    // Adicionar números dessa cartela ao usados (para minimizar repetição)
-    grid.forEach(row=>row.forEach(v=>{if(v!=='FREE'&&usados.indexOf(v)===-1)usados.push(v);}));
-    cartelas.push({id:`${sala}-${i+1}`,numero:i+1,grid});
+function gerarBolao(sala, qtd) {
+  const cartelas = [];
+  const usados = [];
+  for (let i = 0; i < qtd; i++) {
+    const grid = gerarCartela90(usados);
+    grid.forEach(row => row.forEach(v => { if (v !== 'FREE' && usados.indexOf(v) === -1) usados.push(v); }));
+    cartelas.push({ id: `${sala}-${i + 1}`, numero: i + 1, grid });
   }
   return cartelas;
 }
 
-function validarBingo(cartela,sorteados){
-  const g=cartela.grid;
-  const m=g.map(row=>row.map(v=>v==='FREE'||sorteados.includes(v)));
-  for(let i=0;i<5;i++){
-    if(m[i].every(Boolean))return true;
-    if(m.every(row=>row[i]))return true;
+function validarBingo(cartela, sorteados) {
+  const g = cartela.grid;
+  const m = g.map(row => row.map(v => v === 'FREE' || sorteados.includes(v)));
+  for (let i = 0; i < 5; i++) {
+    if (m[i].every(Boolean)) return true;
+    if (m.every(row => row[i])) return true;
   }
-  if([0,1,2,3,4].every(i=>m[i][i]))return true;
-  if([0,1,2,3,4].every(i=>m[i][4-i]))return true;
+  if ([0, 1, 2, 3, 4].every(i => m[i][i])) return true;
+  if ([0, 1, 2, 3, 4].every(i => m[i][4 - i])) return true;
   return false;
 }
 
-function sorteiarNumero(sala){
-  const s=salas[sala];if(!s||!s.ativa)return null;
-  const rest=s.numeros.filter(n=>!s.sorteados.includes(n));if(!rest.length)return null;
-  const num=rest[Math.floor(Math.random()*rest.length)];s.sorteados.push(num);
-  return{numero:num,sorteados:s.sorteados};
+function sorteiarNumero(sala) {
+  const s = salas[sala];
+  if (!s || !s.ativa) return null;
+  const rest = s.numeros.filter(n => !s.sorteados.includes(n));
+  if (!rest.length) return null;
+  const num = rest[Math.floor(Math.random() * rest.length)];
+  s.sorteados.push(num);
+  return { numero: num, sorteados: s.sorteados };
 }
 
-io.on('connection',(socket)=>{
+io.on('connection', (socket) => {
   console.log(`[+] ${socket.id}`);
 
-  socket.on('reconectar_adm',({codigo},cb)=>{
-    const s=salas[codigo];if(!s)return cb&&cb({ok:false});
-    s.adm.socketId=socket.id;socket.join(codigo);socket.data.sala=codigo;socket.data.papel='adm';
-    console.log(`[RECONEXAO] ADM ${codigo}`);cb&&cb({ok:true});
+  socket.on('reconectar_adm', ({ codigo }, cb) => {
+    const s = salas[codigo];
+    if (!s) return cb && cb({ ok: false });
+    s.adm.socketId = socket.id;
+    socket.join(codigo);
+    socket.data.sala = codigo;
+    socket.data.papel = 'adm';
+    console.log(`[RECONEXAO] ADM ${codigo}`);
+    cb && cb({ ok: true });
   });
 
-  socket.on('criar_sala',({nomeAdm,valorCartela,chavePix,quantidadeCartelas,horario,youtubeLink},cb)=>{
-    let codigo;do{codigo=gerarCodigo();}while(salas[codigo]);
-    const cartelas=gerarBolao(codigo,quantidadeCartelas||100);
-    salas[codigo]={
-      codigo,adm:{socketId:socket.id,nome:nomeAdm},
-      jogadores:{},cartelas,cartelasVendidas:{},solicitacoes:{},
-      numeros:Array.from({length:90},(_,i)=>i+1),
-      sorteados:[],ativa:false,
-      valorCartela:valorCartela||0,chavePix:chavePix||'',
-      horario:horario||'',youtubeLink:youtubeLink||'',
-      vencedor:null
-    };
-    socket.join(codigo);socket.data.sala=codigo;socket.data.papel='adm';
-    console.log(`[SALA] ${codigo} por ${nomeAdm}`);
-    cb({ok:true,codigo,cartelas:cartelas.length});
-  });
-
-  socket.on('entrar_sala',({codigo,nomeJogador},cb)=>{
-    const s=salas[codigo?.toUpperCase()];
-    if(!s)return cb({ok:false,erro:'Sala não encontrada'});
-    if(s.vencedor)return cb({ok:false,erro:'Jogo já encerrado'});
-    const socketId=socket.id;
-    // Se já existe jogador com esse nome, remove o antigo
-    // Se já existe jogador com esse nome, migra solicitação para novo socketId
-    for(const [id,jog] of Object.entries(s.jogadores)){
-      if(jog.nome===nomeJogador){
-        delete s.jogadores[id];
-        // Migrar solicitação pendente para novo ID
-        if(s.solicitacoes[id]){
-          s.solicitacoes[socketId]=s.solicitacoes[id];
-          s.solicitacoes[socketId].jogadorId=socketId;
-          delete s.solicitacoes[id];
-        }
-        // Migrar cartelas vendidas
-        if(s.cartelasVendidas[id]){
-          s.cartelasVendidas[socketId]=s.cartelasVendidas[id];
-          delete s.cartelasVendidas[id];
-        }
-        break;
-      }
+  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink }, cb) => {
+    console.log('[DEBUG] criar_sala recebido:', { nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink });
+    
+    if (!nomeAdm) {
+      return cb({ ok: false, erro: 'Nome do administrador é obrigatório' });
     }
-    s.jogadores[socketId]={id:socketId,nome:nomeJogador,socketId};
-    socket.join(codigo.toUpperCase());socket.data.sala=codigo.toUpperCase();socket.data.papel='jogador';
-    io.to(s.adm.socketId).emit('jogador_entrou',{jogadorId:socketId,nome:nomeJogador,total:Object.keys(s.jogadores).length});
-    // Entregar cartela pendente se existir (pelo nome)
-    if(s.pendingCartelas&&s.pendingCartelas[nomeJogador]){
-      const payload=s.pendingCartelas[nomeJogador];
-      delete s.pendingCartelas[nomeJogador];
-      console.log('[ENTRAR] entregando cartela pendente para:',nomeJogador);
-      setTimeout(()=>socket.emit('cartela_aprovada',payload),500);
+    if (!valorCartela && valorCartela !== 0) {
+      return cb({ ok: false, erro: 'Valor da cartela é obrigatório' });
     }
-    cb({ok:true,sorteados:s.sorteados,ativa:s.ativa,valorCartela:s.valorCartela,chavePix:s.chavePix,horario:s.horario,youtubeLink:s.youtubeLink,jogadorId:socketId});
-  });
-
-  socket.on('solicitar_cartela',({codigo,dados},cb)=>{
-    const s=salas[codigo];if(!s)return cb({ok:false,erro:'Sala não encontrada'});
-    const jid=socket.id;
-    const cj=s.cartelasVendidas[jid]||[];
-    if(cj.length>=5)return cb({ok:false,erro:'Máximo de 5 cartelas!'});
-    const sol=s.solicitacoes[jid];
-    if(sol&&sol.status==='pendente')return cb({ok:false,erro:'Você já tem uma solicitação pendente.'});
-    s.solicitacoes[jid]={
-      jogadorId:jid,
-      nome:dados.nome||s.jogadores[jid]?.nome||'Jogador',
-      cpf:dados.cpf||'',celular:dados.celular||'',
-      chavePix:dados.chavePix||'',email:dados.email||'',
-      status:'pendente',timestamp:Date.now(),
-      cartelasJaTem:cj.length
+    if (!chavePix) {
+      return cb({ ok: false, erro: 'Chave Pix é obrigatória' });
+    }
+    
+    let codigo;
+    do { codigo = gerarCodigo(); } while (salas[codigo]);
+    
+    const cartelas = gerarBolao(codigo, quantidadeCartelas || 100);
+    
+    salas[codigo] = {
+      codigo, 
+      adm: { socketId: socket.id, nome: nomeAdm },
+      jogadoresPorIdUnico: {},
+      jogadoresPorSocket: {},
+      cartelas, 
+      cartelasVendidasPorIdUnico: {},
+      solicitacoes: {},
+      numeros: Array.from({ length: 90 }, (_, i) => i + 1),
+      sorteados: [], 
+      ativa: false,
+      valorCartela: parseFloat(valorCartela) || 0, 
+      chavePix: chavePix || '',
+      horario: horario || '', 
+      youtubeLink: youtubeLink || '',
+      vencedor: null
     };
-    io.to(s.adm.socketId).emit('nova_solicitacao',{
-      jogadorId:jid,nome:s.solicitacoes[jid].nome,
-      cpf:dados.cpf||'',celular:dados.celular||'',
-      chavePix:dados.chavePix||'',email:dados.email||'',
-      cartelasJaTem:cj.length,timestamp:Date.now()
-    });
-    cb({ok:true,mensagem:'Solicitação enviada!'});
+    
+    socket.join(codigo);
+    socket.data.sala = codigo;
+    socket.data.papel = 'adm';
+    
+    console.log(`✅ SALA CRIADA: ${codigo} por ${nomeAdm}`);
+    cb({ ok: true, codigo, cartelas: cartelas.length });
   });
 
-  socket.on('aprovar_cartela',({codigo,jogadorId},cb)=>{
-    const s=salas[codigo];
-    if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
-    const sol=s.solicitacoes[jogadorId];
-    if(!sol)return cb({ok:false,erro:'Solicitação não encontrada'});
-    const vendidas=Object.values(s.cartelasVendidas).flat().map(c=>c.id);
-    const disp=s.cartelas.filter(c=>!vendidas.includes(c.id));
-    if(!disp.length)return cb({ok:false,erro:'Sem cartelas disponíveis'});
-    const cartela=disp[0];
-    s.cartelasVendidas[jogadorId]=[...(s.cartelasVendidas[jogadorId]||[]),cartela];
-    s.solicitacoes[jogadorId].status='aprovado';
-    const payload={cartela,sorteados:s.sorteados,horario:s.horario||'',youtubeLink:s.youtubeLink||'',mensagem:'✅ Cartela liberada!'};
-    // Tentar socket atual do jogador
-    const socketAtual=s.jogadores[jogadorId]?.socketId||jogadorId;
-    const entregue=io.sockets.sockets.has(socketAtual);
-    if(entregue){
-      io.to(socketAtual).emit('cartela_aprovada',payload);
+  socket.on('entrar_sala', ({ codigo, idUnico, nomeJogador }, cb) => {
+    const s = salas[codigo?.toUpperCase()];
+    if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
+    if (s.vencedor) return cb({ ok: false, erro: 'Jogo já encerrado' });
+    
+    const socketId = socket.id;
+    
+    if (s.jogadoresPorIdUnico[idUnico]) {
+      const oldSocketId = s.jogadoresPorIdUnico[idUnico].socketId;
+      delete s.jogadoresPorSocket[oldSocketId];
+      s.jogadoresPorIdUnico[idUnico].socketId = socketId;
+      s.jogadoresPorSocket[socketId] = idUnico;
     } else {
-      // Guardar pendente para quando reconectar
-      s.pendingCartelas=s.pendingCartelas||{};
-      s.pendingCartelas[sol.nome]=payload;
-      console.log('[APROVAR] jogador offline, guardando pendente para:',sol.nome);
+      s.jogadoresPorIdUnico[idUnico] = { socketId, nome: nomeJogador };
+      s.jogadoresPorSocket[socketId] = idUnico;
     }
-    cb({ok:true});
+    
+    socket.join(codigo.toUpperCase());
+    socket.data.sala = codigo.toUpperCase();
+    socket.data.papel = 'jogador';
+    socket.data.idUnico = idUnico;
+    
+    io.to(s.adm.socketId).emit('jogador_entrou', {
+      idUnico: idUnico,
+      nome: nomeJogador,
+      total: Object.keys(s.jogadoresPorIdUnico).length
+    });
+    
+    const cartelasExistentes = s.cartelasVendidasPorIdUnico[idUnico] || [];
+    
+    cb({
+      ok: true,
+      sorteados: s.sorteados,
+      ativa: s.ativa,
+      valorCartela: s.valorCartela,
+      chavePix: s.chavePix,
+      horario: s.horario,
+      youtubeLink: s.youtubeLink,
+      cartelasExistentes: cartelasExistentes
+    });
   });
 
-  socket.on('rejeitar_cartela',({codigo,jogadorId,motivo},cb)=>{
-    const s=salas[codigo];
-    if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
-    const sol=s.solicitacoes[jogadorId];
-    if(!sol)return cb({ok:false,erro:'Solicitação não encontrada'});
-    s.solicitacoes[jogadorId].status='rejeitado';
-    io.to(jogadorId).emit('cartela_rejeitada',{mensagem:motivo||'❌ Pagamento não confirmado.'});
-    cb({ok:true});
+  socket.on('solicitar_cartela', ({ codigo, idUnico, dados }, cb) => {
+    const s = salas[codigo];
+    if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
+    
+    const cj = s.cartelasVendidasPorIdUnico[idUnico] || [];
+    if (cj.length >= 5) return cb({ ok: false, erro: 'Máximo de 5 cartelas!' });
+    
+    const sol = s.solicitacoes[idUnico];
+    if (sol && sol.status === 'pendente') return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
+    
+    s.solicitacoes[idUnico] = {
+      idUnico: idUnico,
+      nome: dados.nome || s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador',
+      cpf: dados.cpf || '',
+      celular: dados.celular || '',
+      chavePix: dados.chavePix || '',
+      email: dados.email || '',
+      status: 'pendente',
+      timestamp: Date.now(),
+      cartelasJaTem: cj.length
+    };
+    
+    io.to(s.adm.socketId).emit('nova_solicitacao', {
+      idUnico: idUnico,
+      nome: s.solicitacoes[idUnico].nome,
+      cpf: dados.cpf || '',
+      celular: dados.celular || '',
+      chavePix: dados.chavePix || '',
+      email: dados.email || '',
+      cartelasJaTem: cj.length,
+      timestamp: Date.now()
+    });
+    
+    cb({ ok: true, mensagem: 'Solicitação enviada!' });
   });
 
-  socket.on('sortear',({codigo},cb)=>{
-    const s=salas[codigo];
-    if(!s||s.adm.socketId!==socket.id)return cb({ok:false});
-    if(!s.ativa)s.ativa=true;
-    const res=sorteiarNumero(codigo);
-    if(!res)return cb({ok:false,erro:'Sem números restantes'});
-    io.to(codigo).emit('numero_sorteado',res);
-    // Alertas
-    Object.entries(s.cartelasVendidas).forEach(([jid,carts])=>{
-      carts.forEach(cartela=>{
-        let marc=0,tot=0;
-        for(let r=0;r<5;r++)for(let c=0;c<5;c++){
-          const v=cartela.grid[r][c];
-          if(v==='FREE'){marc++;tot++;}
-          else{tot++;if(s.sorteados.includes(v))marc++;}
+  socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
+    const s = salas[codigo];
+    if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
+    
+    const sol = s.solicitacoes[idUnico];
+    if (!sol) return cb({ ok: false, erro: `Solicitação não encontrada: ${idUnico}` });
+    
+    const vendidas = Object.values(s.cartelasVendidasPorIdUnico).flat().map(c => c.id);
+    const disp = s.cartelas.filter(c => !vendidas.includes(c.id));
+    if (!disp.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
+    
+    const cartela = disp[0];
+    s.cartelasVendidasPorIdUnico[idUnico] = [...(s.cartelasVendidasPorIdUnico[idUnico] || []), cartela];
+    s.solicitacoes[idUnico].status = 'aprovado';
+    
+    const jogador = s.jogadoresPorIdUnico[idUnico];
+    if (jogador && jogador.socketId) {
+      io.to(jogador.socketId).emit('cartela_aprovada', {
+        cartela,
+        sorteados: s.sorteados,
+        horario: s.horario || '',
+        youtubeLink: s.youtubeLink || '',
+        mensagem: '✅ Cartela liberada!'
+      });
+      console.log(`[SUCESSO] Cartela enviada para ${idUnico}`);
+    }
+    
+    cb({ ok: true });
+  });
+
+  socket.on('rejeitar_cartela', ({ codigo, idUnico, motivo }, cb) => {
+    const s = salas[codigo];
+    if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
+    const sol = s.solicitacoes[idUnico];
+    if (!sol) return cb({ ok: false, erro: 'Solicitação não encontrada' });
+    s.solicitacoes[idUnico].status = 'rejeitado';
+    
+    const jogador = s.jogadoresPorIdUnico[idUnico];
+    if (jogador && jogador.socketId) {
+      io.to(jogador.socketId).emit('cartela_rejeitada', { mensagem: motivo || '❌ Pagamento não confirmado.' });
+    }
+    cb({ ok: true });
+  });
+
+  socket.on('sortear', ({ codigo }, cb) => {
+    const s = salas[codigo];
+    if (!s || s.adm.socketId !== socket.id) return cb({ ok: false });
+    if (!s.ativa) s.ativa = true;
+    const res = sorteiarNumero(codigo);
+    if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
+    io.to(codigo).emit('numero_sorteado', res);
+    
+    Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
+      carts.forEach(cartela => {
+        let marc = 0, tot = 0;
+        for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
+          const v = cartela.grid[r][c];
+          if (v === 'FREE') { marc++; tot++; }
+          else { tot++; if (s.sorteados.includes(v)) marc++; }
         }
-        const nome=s.jogadores[jid]?.nome||'Jogador';
-        if(marc===tot-1)io.to(codigo).emit('alerta_jogador',{nome,tipo:'quase',texto:'🔥 '+nome+' está quase!'});
-        if(marc===tot)io.to(codigo).emit('alerta_jogador',{nome,tipo:'bingo',texto:'🎉 '+nome+' completou!'});
+        const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
+        if (marc === tot - 1) io.to(codigo).emit('alerta_jogador', { nome, tipo: 'quase', texto: '🔥 ' + nome + ' está quase!' });
+        if (marc === tot) io.to(codigo).emit('alerta_jogador', { nome, tipo: 'bingo', texto: '🎉 ' + nome + ' completou!' });
       });
     });
-    cb({ok:true,...res});
+    cb({ ok: true, ...res });
   });
 
-  socket.on('gritar_bingo',({codigo,cartelaId},cb)=>{
-    const s=salas[codigo];
-    if(!s||!s.ativa||s.vencedor)return cb({ok:false});
-    const jid=socket.id;
-    const cj=s.cartelasVendidas[jid]||[];
-    const cartela=cj.find(c=>c.id===cartelaId);
-    if(!cartela)return cb({ok:false,erro:'Cartela não encontrada'});
-    if(!validarBingo(cartela,s.sorteados))return cb({ok:false,erro:'Bingo inválido'});
-    s.vencedor={jogadorId:jid,nome:s.jogadores[jid]?.nome,cartelaId};
-    s.ativa=false;
-    io.to(codigo).emit('bingo_confirmado',{vencedor:s.vencedor,sorteados:s.sorteados});
-    cb({ok:true});
+  socket.on('gritar_bingo', ({ codigo, cartelaId }, cb) => {
+    const s = salas[codigo];
+    if (!s || !s.ativa || s.vencedor) return cb({ ok: false });
+    const idUnico = socket.data.idUnico;
+    if (!idUnico) return cb({ ok: false, erro: 'Identificador não encontrado' });
+    
+    const cj = s.cartelasVendidasPorIdUnico[idUnico] || [];
+    const cartela = cj.find(c => c.id === cartelaId);
+    if (!cartela) return cb({ ok: false, erro: 'Cartela não encontrada' });
+    if (!validarBingo(cartela, s.sorteados)) return cb({ ok: false, erro: 'Bingo inválido' });
+    
+    s.vencedor = { idUnico: idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId };
+    s.ativa = false;
+    io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
+    cb({ ok: true });
   });
 
-  socket.on('disconnect',()=>{
-    const{sala,papel}=socket.data||{};
-    if(!sala||!salas[sala])return;
-    if(papel==='adm'){
+  socket.on('disconnect', () => {
+    const { sala, papel, idUnico } = socket.data || {};
+    if (!sala || !salas[sala]) return;
+    
+    if (papel === 'adm') {
       io.to(sala).emit('adm_desconectado');
       console.log(`[WARN] ADM ${sala} desconectou`);
-    }else{
-      const jog=salas[sala]?.jogadores[socket.id];
-      if(jog){
-        const nome=jog.nome;
-        delete salas[sala].jogadores[socket.id];
-        io.to(salas[sala].adm.socketId).emit('jogador_saiu',{nome,total:Object.keys(salas[sala].jogadores).length});
+    } else if (idUnico) {
+      const s = salas[sala];
+      if (s && s.jogadoresPorIdUnico[idUnico]) {
+        const nome = s.jogadoresPorIdUnico[idUnico].nome;
+        s.jogadoresPorIdUnico[idUnico].socketId = null;
+        delete s.jogadoresPorSocket[socket.id];
+        io.to(s.adm.socketId).emit('jogador_saiu', { nome, total: Object.keys(s.jogadoresPorIdUnico).length });
       }
     }
   });
 });
 
-const PORT=process.env.PORT||3000;
-server.listen(PORT,()=>console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`));
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`));
