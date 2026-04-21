@@ -624,6 +624,13 @@ io.on('connection', (socket) => {
       total: Object.keys(s.jogadoresPorIdUnico).length
     });
     
+    // Entregar cartela pendente se existir
+    if (s.pendingCartelas && s.pendingCartelas[idUnico]) {
+      const payload = s.pendingCartelas[idUnico];
+      delete s.pendingCartelas[idUnico];
+      setTimeout(() => socket.emit('cartela_aprovada', payload), 500);
+      console.log('[ENTRAR] entregando pendente para idUnico:',idUnico);
+    }
     const cartelasExistentes = s.cartelasVendidasPorIdUnico[idUnico] || [];
     
     cb({
@@ -696,15 +703,23 @@ socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     s.cartelasVendidasPorIdUnico[solKey] = [...(s.cartelasVendidasPorIdUnico[solKey] || []), cartela];
     s.solicitacoes[solKey].status = 'aprovado';
     
-    const jogador = s.jogadoresPorIdUnico[solKey];
-    if (jogador && jogador.socketId) {
-      io.to(jogador.socketId).emit('cartela_aprovada', {
+   const jogador = s.jogadoresPorIdUnico[solKey];
+    const socketDestino = jogador?.socketId;
+    console.log('[APROVAR] solKey:',solKey,'socketDestino:',socketDestino);
+    if (socketDestino && io.sockets.sockets.has(socketDestino)) {
+      io.to(socketDestino).emit('cartela_aprovada', {
+        cartela,
         sorteados: s.sorteados,
         horario: s.horario || '',
         youtubeLink: s.youtubeLink || '',
         mensagem: '✅ Cartela liberada!'
       });
-      console.log(`[SUCESSO] Cartela enviada para ${idUnico}`);
+      console.log('[SUCESSO] Cartela enviada para socket:',socketDestino);
+    } else {
+      // Socket offline — guardar pendente pelo idUnico
+      s.pendingCartelas = s.pendingCartelas || {};
+      s.pendingCartelas[solKey] = {cartela,sorteados:s.sorteados,horario:s.horario||'',youtubeLink:s.youtubeLink||'',mensagem:'✅ Cartela liberada!'};
+      console.log('[APROVAR] socket offline, pendente para idUnico:',solKey);
     }
     
     cb({ ok: true });
