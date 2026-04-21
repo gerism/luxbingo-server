@@ -753,7 +753,49 @@ io.on('connection', (socket) => {
     cb({ ok: true, mensagem: 'Solicitação enviada!' });
   });
 
-  socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
+  socket.on('aprovar_cartela', ({ codigo, idUnico, jogadorId }, cb) => {
+  const s = salas[codigo];
+  if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
+  
+  // DEBUG: Mostrar o que recebeu
+  console.log('[DEBUG] aprovar_cartela recebido:', { codigo, idUnico, jogadorId });
+  console.log('[DEBUG] Solicitações disponíveis:', Object.keys(s.solicitacoes));
+  
+  // Se veio como jogadorId, usar como idUnico
+  let idParaBuscar = idUnico || jogadorId;
+  
+  const sol = s.solicitacoes[idParaBuscar];
+  if (!sol) {
+    console.log('[DEBUG] Solicitação NÃO encontrada para:', idParaBuscar);
+    return cb({ ok: false, erro: `Solicitação não encontrada: ${idParaBuscar}` });
+  }
+  
+  console.log('[DEBUG] Solicitação encontrada:', sol);
+  
+  const vendidas = Object.values(s.cartelasVendidasPorIdUnico).flat().map(c => c.id);
+  const disp = s.cartelas.filter(c => !vendidas.includes(c.id));
+  if (!disp.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
+  
+  const cartela = disp[0];
+  s.cartelasVendidasPorIdUnico[idParaBuscar] = [...(s.cartelasVendidasPorIdUnico[idParaBuscar] || []), cartela];
+  s.solicitacoes[idParaBuscar].status = 'aprovado';
+  
+  const jogador = s.jogadoresPorIdUnico[idParaBuscar];
+  if (jogador && jogador.socketId) {
+    io.to(jogador.socketId).emit('cartela_aprovada', {
+      cartela,
+      sorteados: s.sorteados,
+      horario: s.horario || '',
+      youtubeLink: s.youtubeLink || '',
+      mensagem: '✅ Cartela liberada!'
+    });
+    console.log(`[SUCESSO] Cartela enviada para ${idParaBuscar}`);
+  } else {
+    console.log(`[ERRO] Jogador ${idParaBuscar} não está conectado!`);
+  }
+  
+  cb({ ok: true });
+});
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
     
