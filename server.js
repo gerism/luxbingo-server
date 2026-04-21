@@ -94,6 +94,8 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .divider{display:flex;align-items:center;gap:8px;margin:4px 0 10px;width:100%;max-width:400px}
 .divider-line{flex:1;height:1px;background:rgba(201,162,39,.2)}
 .divider-txt{font-size:10px;color:var(--textl);font-weight:700;letter-spacing:1px}
+.qt-btn{flex:1;padding:10px 4px;border:1.5px solid rgba(201,162,39,.3);border-radius:9px;font-size:13px;font-weight:900;color:var(--textl);background:transparent;cursor:pointer;font-family:inherit}
+.qt-btn.ok{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:transparent;color:var(--navy)}
 </style>
 </head>
 <body>
@@ -122,6 +124,14 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
     <input class="inp" id="iPix" type="text" placeholder="CPF, email ou celular...">
     <label class="lbl">Email (opcional)</label>
     <input class="inp" id="iEmail" type="email" placeholder="seu@email.com">
+    <label class="lbl">Quantidade de cartelas</label>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="qt-btn ok" data-q="1">1</button>
+      <button class="qt-btn" data-q="2">2</button>
+      <button class="qt-btn" data-q="3">3</button>
+      <button class="qt-btn" data-q="4">4</button>
+      <button class="qt-btn" data-q="5">5</button>
+    </div>
     <button class="btn-g" id="btnConectar">SOLICITAR CARTELA →</button>
   </div>
 </div>
@@ -185,6 +195,14 @@ var meuIdUnico = localStorage.getItem('luxbingo_id_'+COD) || null;
 function gerarIdUnico() {
   return 'jog_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
+var qtdCartelas=1;
+document.querySelectorAll('.qt-btn').forEach(function(b){
+  b.onclick=function(){
+    qtdCartelas=parseInt(this.dataset.q);
+    document.querySelectorAll('.qt-btn').forEach(function(x){x.classList.remove('ok');});
+    this.classList.add('ok');
+  };
+});
 function tela(n){
   document.querySelectorAll('.tela,.tela-jogo').forEach(function(el){el.classList.remove('ativo');});
   document.getElementById('t'+n).classList.add('ativo');
@@ -255,7 +273,7 @@ sock.on('connect',function(){
         toast('✅ Cartelas carregadas!');
         return;
       }
-sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
+sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
   if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
   tela(2);toast('✅ Solicitação enviada!');
 });
@@ -668,7 +686,8 @@ io.on('connection', (socket) => {
       email: dados.email || '',
       status: 'pendente',
       timestamp: Date.now(),
-      cartelasJaTem: cj.length
+       cartelasJaTem: cj.length,
+      qtdSolicitada: dados.qtd || 1
     };
     
     console.log('[SOLICITACAO] emitindo para adm socketId:',s.adm.socketId);
