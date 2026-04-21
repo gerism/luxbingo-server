@@ -173,6 +173,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
       <div class="num-atual" id="nAtual">--</div>
     </div>
   </div>
+  <div id="codigosBox" style="display:none"></div>
   <div id="alertaBox" style="display:none"></div>
   <div id="bingoBox"></div>
   <div class="cartelas-area">
@@ -312,7 +313,8 @@ function registrarEventos(nome){
     salvarLocal(nome);renderCartelas();renderGrid();
     if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
     else document.getElementById('btnMais').style.display='none';
-    toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
+   toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
+    mostrarCodigosCartelas();
   });
   sock.on('cartela_rejeitada',function(d){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
@@ -380,6 +382,37 @@ document.getElementById('btnAudio').onclick=function(){
   this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
   this.style.color=audioOn?'var(--gold2)':'#e74c3c';
 };
+function mostrarCodigosCartelas(){
+  if(!cartelas.length)return;
+  var box=document.getElementById('codigosBox');
+  if(!box)return;
+  var html='<div style="background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:10px;padding:10px;margin:6px 10px">';
+  html+='<div style="font-size:10px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">🎟️ Seus códigos de recuperação</div>';
+  cartelas.forEach(function(c,i){
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
+    html+='<span style="font-size:12px;font-weight:700;color:var(--gold2)">Cartela '+(i+1)+': <b>'+c.id+'</b></span>';
+    html+='<button onclick="copiarCodigo(\''+c.id+'\')" style="background:rgba(201,162,39,.2);border:1px solid rgba(201,162,39,.4);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:var(--gold2);cursor:pointer;font-family:inherit">📋</button>';
+    html+='</div>';
+  });
+  html+='<button onclick="copiarTodos()" style="width:100%;margin-top:6px;padding:8px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:8px;font-size:11px;font-weight:900;color:var(--navy);cursor:pointer;font-family:inherit">📋 Compartilhar todos os códigos</button>';
+  html+='</div>';
+  box.innerHTML=html;
+  box.style.display='block';
+}
+function copiarCodigo(id){
+  var txt=id;
+  if(navigator.share){navigator.share({title:'Código Cartela',text:txt});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){toast('📋 Código copiado!');});}
+  else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 Código copiado!');}
+}
+function copiarTodos(){
+  var txt='Lux Bingo - Meus códigos\nSala: '+COD+'\n\n';
+  cartelas.forEach(function(c,i){txt+='Cartela '+(i+1)+': '+c.id+'\n';});
+  txt+='\nUse esses códigos para recuperar suas cartelas!';
+  if(navigator.share){navigator.share({title:'Lux Bingo - Meus Códigos',text:txt});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){toast('📋 Códigos copiados!');});}
+  else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 Códigos copiados!');}
+}
 function setYoutube(link){
   if(!link)return;
   var vid='';
