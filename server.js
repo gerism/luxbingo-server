@@ -686,6 +686,7 @@ io.on('connection', (socket) => {
   });
 
 socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
+    console.log('[APROVAR_RECEBIDO] codigo:',codigo,'idUnico:',idUnico,'jogadores:',JSON.stringify(Object.keys(salas[codigo]?.jogadoresPorIdUnico||{})));
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
     
