@@ -256,10 +256,9 @@ sock.on('connect',function(){
         toast('✅ Cartelas carregadas!');
         return;
       }
-      sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
+sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
   if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
   tela(2);toast('✅ Solicitação enviada!');
-  registrarEventos(nome);
 });
     });
   });
