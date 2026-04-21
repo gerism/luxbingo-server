@@ -370,7 +370,7 @@ function setYoutube(link){
   frame.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=0';
 }
 function renderGrid(){
-  var g=document.getElementById('nGrid');g.innerHTML='';var u=nums[nums.length-1];
+  var g=document.getElementById('nGrid');if(!g)return;var u=nums[nums.length-1];
   for(var i=1;i<=90;i++){
     var d=document.createElement('div');
     d.className='nm90'+(nums.indexOf(i)!==-1?(i===u?' u':' s'):'');
