@@ -256,9 +256,10 @@ sock.on('connect',function(){
         return;
       }
       sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
-        if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
-        tela(2);toast('✅ Solicitação enviada!');
-      });
+  if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
+  tela(2);toast('✅ Solicitação enviada!');
+  registrarEventos(nome);
+});
     });
   });
  sock.on('connect_error',function(){toast('❌ Erro de conexão!',true);});
