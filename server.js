@@ -261,10 +261,12 @@ document.getElementById('btnConectar').onclick=function(){
       });
     });
   });
-  sock.on('connect_error',function(){toast('❌ Erro de conexão!',true);});
-  registrarEventos(nome);
+ sock.on('connect_error',function(){toast('❌ Erro de conexão!',true);});
 };
 function registrarEventos(nome){
+  sock.on('connect',function(){
+    sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
+  });
   sock.on('cartela_aprovada',function(d){
     console.log('📢 CARTELA APROVADA RECEBIDA:', d);
     var cart=d.cartela;
