@@ -725,8 +725,9 @@ socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     const disp = s.cartelas.filter(c => !vendidas.includes(c.id));
     if (!disp.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
     
-    const cartela = disp[0];
-    s.cartelasVendidasPorIdUnico[solKey] = [...(s.cartelasVendidasPorIdUnico[solKey] || []), cartela];
+    const qtd = s.solicitacoes[solKey].qtdSolicitada || 1;
+    const cartelas = disp.slice(0, qtd);
+    s.cartelasVendidasPorIdUnico[solKey] = [...(s.cartelasVendidasPorIdUnico[solKey] || []), ...cartelas];
     s.solicitacoes[solKey].status = 'aprovado';
     
    const jogador = s.jogadoresPorIdUnico[solKey];
@@ -734,8 +735,9 @@ const socketDestino = jogador?.socketId;
 console.log('[APROVAR] solKey:',solKey,'socketDestino:',socketDestino,'socketExiste:',socketDestino ? io.sockets.sockets.has(socketDestino) : false);
     if (socketDestino && io.sockets.sockets.has(socketDestino)) {
 setTimeout(()=>{
-        io.to(socketDestino).emit('cartela_aprovada', {
-          cartela,
+     io.to(socketDestino).emit('cartela_aprovada', {
+          cartelas: cartelas,
+          cartela: cartelas[0],
           sorteados: s.sorteados,
           horario: s.horario || '',
           youtubeLink: s.youtubeLink || '',
@@ -746,7 +748,7 @@ setTimeout(()=>{
     } else {
       // Socket offline — guardar pendente pelo idUnico
       s.pendingCartelas = s.pendingCartelas || {};
-      s.pendingCartelas[solKey] = {cartela,sorteados:s.sorteados,horario:s.horario||'',youtubeLink:s.youtubeLink||'',mensagem:'✅ Cartela liberada!'};
+      s.pendingCartelas[solKey] = {cartelas:cartelas,cartela:cartelas[0],sorteados:s.sorteados,horario:s.horario||'',youtubeLink:s.youtubeLink||'',mensagem:'✅ Cartela liberada!'};
       console.log('[APROVAR] socket offline, pendente para idUnico:',solKey);
     }
     
