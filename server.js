@@ -383,7 +383,8 @@ document.getElementById('btnAudio').onclick=function(){
 function setYoutube(link){
   if(!link)return;
   var vid='';
-  var m=link.match(/(?:youtu\\.be\\/|v=)([\\w-]{11})/);
+  var m=link.match(/(?:youtu\\.be\\/|v=|live\\/|shorts\\/)([\\w-]{11})/);
+  if(!m){var m2=link.match(/youtube\\.com\\/([\\w-]{11})/);if(m2)m=m2;}
   if(m)vid=m[1];
   if(!vid)return;
   var wrap=document.getElementById('ytWrap');
