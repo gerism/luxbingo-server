@@ -306,8 +306,9 @@ function registrarEventos(nome){
       nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
     });
   console.log('youtubeLink recebido:', d.youtubeLink);
-    if(d.youtubeLink)setYoutube(d.youtubeLink);
-   tela(3);
+if(d.youtubeLink)setYoutube(d.youtubeLink);
+    mostrarYoutube();
+    tela(3);
     document.getElementById('semCartela').style.display='none';
     salvarLocal(nome);renderCartelas();renderGrid();
     if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
@@ -380,19 +381,21 @@ document.getElementById('btnAudio').onclick=function(){
   this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
   this.style.color=audioOn?'var(--gold2)':'#e74c3c';
 };
+var ytVid='';
 function setYoutube(link){
   if(!link)return;
-  var vid='';
   var m=link.match(/(?:youtu\\.be\\/|v=|live\\/|shorts\\/)([\\w-]{11})/);
   if(!m){var m2=link.match(/youtube\\.com\\/([\\w-]{11})/);if(m2)m=m2;}
-  if(m)vid=m[1];
-  if(!vid)return;
+  if(m)ytVid=m[1];
+}
+function mostrarYoutube(){
+  if(!ytVid)return;
   var wrap=document.getElementById('ytWrap');
   var frame=document.getElementById('ytFrame');
   var h=Math.round(window.innerWidth*9/16);
   wrap.style.display='block';
   frame.style.height=h+'px';
-  frame.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=0';
+  frame.src='https://www.youtube.com/embed/'+ytVid+'?autoplay=1&mute=0';
 }
 function renderGrid(){
   var g=document.getElementById('nGrid');g.innerHTML='';var u=nums[nums.length-1];
