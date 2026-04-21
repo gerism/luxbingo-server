@@ -680,7 +680,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('solicitar_cartela', ({ codigo, idUnico, dados }, cb) => {
+  socket.on('solicitar_cartela', ({ codigo, idUnico, qtd, dados }, cb) => {
     const s = salas[codigo];
     if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
     
@@ -703,7 +703,7 @@ io.on('connection', (socket) => {
       status: 'pendente',
       timestamp: Date.now(),
        cartelasJaTem: cj.length,
-      qtdSolicitada: dados.qtd || 1
+     qtdSolicitada: qtd || dados.qtd || 1
     };
     
     console.log('[SOLICITACAO] emitindo para adm socketId:',s.adm.socketId);
