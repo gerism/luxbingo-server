@@ -243,6 +243,18 @@ document.getElementById('btnConectar').onclick=function(){
   var pix=document.getElementById('iPix').value.trim();
   var email=document.getElementById('iEmail').value.trim();
   if(!nome||!cpf||!cel||!pix){toast('❌ Preencha todos os campos!',true);return;}
+  if(!meuIdUnico){
+    meuIdUnico=gerarIdUnico();
+    localStorage.setItem('luxbingo_id_'+COD,meuIdUnico);
+  }
+  // Se já conectado, só solicita cartela
+  if(sock&&sock.connected){
+    sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
+      if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
+      tela(2);toast('✅ Solicitação enviada!');
+    });
+    return;
+  }
   if(!meuIdUnico) {
     meuIdUnico = gerarIdUnico();
     localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
@@ -675,8 +687,11 @@ io.on('connection', (socket) => {
     const cj = s.cartelasVendidasPorIdUnico[idUnico] || [];
     if (cj.length >= 5) return cb({ ok: false, erro: 'Máximo de 5 cartelas!' });
     
-    const sol = s.solicitacoes[idUnico];
+  const sol = s.solicitacoes[idUnico];
     if (sol && sol.status === 'pendente') return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
+    if (sol && sol.status === 'aprovado') {
+      // Permite nova solicitação se já tem cartelas mas quer mais
+    }
     
     s.solicitacoes[idUnico] = {
       idUnico: idUnico,
