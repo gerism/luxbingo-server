@@ -286,12 +286,13 @@ function registrarEventos(nome){
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
   });
   sock.on('cartela_aprovada',function(d){
-    console.log('📢 CARTELA APROVADA RECEBIDA:', d);
-    var cart=d.cartela;
-    cartelas.push(cart);
-    if(!marc[cart.id])marc[cart.id]=[];
-    nums=d.sorteados||nums;
-    nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
+    var novas=d.cartelas||[d.cartela];
+    novas.forEach(function(cart){
+      cartelas.push(cart);
+      if(!marc[cart.id])marc[cart.id]=[];
+      nums=d.sorteados||nums;
+      nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
+    });
   console.log('youtubeLink recebido:', d.youtubeLink);
     if(d.youtubeLink)setYoutube(d.youtubeLink);
    tela(3);
