@@ -674,25 +674,31 @@ io.on('connection', (socket) => {
     cb({ ok: true, mensagem: 'Solicitação enviada!' });
   });
 
-  socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
+socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
     
-    const sol = s.solicitacoes[idUnico];
-    if (!sol) return cb({ ok: false, erro: `Solicitação não encontrada: ${idUnico}` });
+    // Buscar pelo idUnico ou qualquer pendente
+    let sol = s.solicitacoes[idUnico];
+    let solKey = idUnico;
+    if (!sol) {
+      for (const [key, s2] of Object.entries(s.solicitacoes)) {
+        if (s2.status === 'pendente') { sol = s2; solKey = key; break; }
+      }
+    }
+    if (!sol) return cb({ ok: false, erro: 'Solicitação não encontrada' });
     
     const vendidas = Object.values(s.cartelasVendidasPorIdUnico).flat().map(c => c.id);
     const disp = s.cartelas.filter(c => !vendidas.includes(c.id));
     if (!disp.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
     
     const cartela = disp[0];
-    s.cartelasVendidasPorIdUnico[idUnico] = [...(s.cartelasVendidasPorIdUnico[idUnico] || []), cartela];
-    s.solicitacoes[idUnico].status = 'aprovado';
+    s.cartelasVendidasPorIdUnico[solKey] = [...(s.cartelasVendidasPorIdUnico[solKey] || []), cartela];
+    s.solicitacoes[solKey].status = 'aprovado';
     
-    const jogador = s.jogadoresPorIdUnico[idUnico];
+    const jogador = s.jogadoresPorIdUnico[solKey];
     if (jogador && jogador.socketId) {
       io.to(jogador.socketId).emit('cartela_aprovada', {
-        cartela,
         sorteados: s.sorteados,
         horario: s.horario || '',
         youtubeLink: s.youtubeLink || '',
