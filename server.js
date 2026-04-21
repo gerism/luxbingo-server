@@ -709,8 +709,8 @@ socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     s.solicitacoes[solKey].status = 'aprovado';
     
    const jogador = s.jogadoresPorIdUnico[solKey];
-    const socketDestino = jogador?.socketId;
-    console.log('[APROVAR] solKey:',solKey,'socketDestino:',socketDestino);
+const socketDestino = jogador?.socketId;
+console.log('[APROVAR] solKey:',solKey,'socketDestino:',socketDestino,'socketExiste:',socketDestino ? io.sockets.sockets.has(socketDestino) : false);
     if (socketDestino && io.sockets.sockets.has(socketDestino)) {
 setTimeout(()=>{
         io.to(socketDestino).emit('cartela_aprovada', {
