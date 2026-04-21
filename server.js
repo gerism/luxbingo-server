@@ -244,7 +244,7 @@ document.getElementById('btnConectar').onclick=function(){
   var pix=document.getElementById('iPix').value.trim();
   var email=document.getElementById('iEmail').value.trim();
   if(!nome||!cpf||!cel||!pix){toast('❌ Preencha todos os campos!',true);return;}
-  if(!meuIdUnico){
+if(!meuIdUnico){
     meuIdUnico=gerarIdUnico();
     localStorage.setItem('luxbingo_id_'+COD,meuIdUnico);
   }
@@ -256,9 +256,6 @@ document.getElementById('btnConectar').onclick=function(){
     });
     return;
   }
-  if(!meuIdUnico) {
-    meuIdUnico = gerarIdUnico();
-    localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
   }
   if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
@@ -427,7 +424,7 @@ function setYoutube(link){
   frame.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=0';
 }
 function renderGrid(){
-  var g=document.getElementById('nGrid');g.innerHTML='';var u=nums[nums.length-1];
+  var g=document.getElementById('nGrid');if(!g)return;g.innerHTML='';var u=nums[nums.length-1];
   for(var i=1;i<=90;i++){
     var d=document.createElement('div');
     d.className='nm90'+(nums.indexOf(i)!==-1?(i===u?' u':' s'):'');
