@@ -508,7 +508,7 @@ function salvarLocal(nome){
   });
 }
 window.onload=function(){
-  renderGrid();
+  // renderGrid removido - nGrid não existe mais
   var nome=localStorage.getItem('luxbingo_nome_'+COD);
   if(nome){
     var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
