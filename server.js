@@ -232,7 +232,11 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 <script>
 var COD='${codigo}',SERVER=window.location.origin,sock=null;
 var cartelas=[],marc={},nums=[],audioOn=true,tabAtiva=0;
-var meuId = null;
+var meuIdUnico = localStorage.getItem('luxbingo_id_'+COD) || null;
+
+function gerarIdUnico() {
+  return 'jog_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
 
 function tela(n){
   document.querySelectorAll('.tela,.tela-jogo').forEach(function(el){el.classList.remove('ativo');});
@@ -280,19 +284,45 @@ document.getElementById('btnConectar').onclick=function(){
   var pix=document.getElementById('iPix').value.trim();
   var email=document.getElementById('iEmail').value.trim();
   if(!nome||!cpf||!cel||!pix){toast('❌ Preencha todos os campos!',true);return;}
+  
+  // Gerar ID único para este jogador
+  if(!meuIdUnico) {
+    meuIdUnico = gerarIdUnico();
+    localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
+  }
+  
   if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
+  
   sock.on('connect',function(){
-    meuId = sock.id;
     localStorage.setItem('luxbingo_nome_'+COD,nome);
-    sock.emit('entrar_sala',{codigo:COD,nomeJogador:nome},function(r){
+    sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);sock.disconnect();return;}
-      meuId = r.jogadorId || sock.id;
+      
       document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
       document.getElementById('pChave').textContent=r.chavePix||'--';
       if(r.horario){document.getElementById('pHorario').textContent='🕐 '+r.horario;document.getElementById('pHorario').style.display='block';}
       if(r.youtubeLink){setYoutube(r.youtubeLink);}
-      sock.emit('solicitar_cartela',{codigo:COD,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
+      
+      // Se já tem cartelas, vai direto pro jogo
+      if(r.cartelasExistentes && r.cartelasExistentes.length > 0) {
+        cartelas = r.cartelasExistentes;
+        nums = r.sorteados || [];
+        cartelas.forEach(function(c) {
+          if(!marc[c.id]) marc[c.id] = [];
+          nums.forEach(function(n) {
+            if(marc[c.id].indexOf(n) === -1) marc[c.id].push(n);
+          });
+        });
+        renderCartelas();
+        renderGrid();
+        tela(3);
+        toast('✅ Cartelas carregadas!');
+        return;
+      }
+      
+      // Solicitar nova cartela
+      sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
         if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
         tela(2);toast('✅ Solicitação enviada!');
       });
@@ -304,6 +334,7 @@ document.getElementById('btnConectar').onclick=function(){
 
 function registrarEventos(nome){
   sock.on('cartela_aprovada',function(d){
+    console.log('📢 CARTELA APROVADA RECEBIDA:', d);
     var cart=d.cartela;
     cartelas.push(cart);
     if(!marc[cart.id])marc[cart.id]=[];
@@ -316,9 +347,11 @@ function registrarEventos(nome){
     else document.getElementById('btnMais').style.display='none';
     tela(3);toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
   });
+  
   sock.on('cartela_rejeitada',function(d){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
   });
+  
   sock.on('numero_sorteado',function(d){
     nums=d.sorteados||nums;
     document.getElementById('nAtual').textContent=d.numero;
@@ -328,51 +361,45 @@ function registrarEventos(nome){
     salvarLocal(localStorage.getItem('luxbingo_nome_'+COD)||'Jogador');
     renderCartelas();renderGrid();verBingo();falarNumero(d.numero);
   });
+  
   sock.on('bingo_confirmado',function(d){
     var b=document.createElement('div');b.className='bingo-banner';
     b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>';
     document.getElementById('bingoBox').innerHTML='';document.getElementById('bingoBox').appendChild(b);
   });
+  
   sock.on('alerta_jogador',function(d){
     var box=document.getElementById('alertaBox');
     box.textContent=d.texto;box.className=d.tipo==='bingo'?'alerta-bingo':'alerta-quase';box.style.display='block';
     if(d.tipo!=='bingo')setTimeout(function(){box.style.display='none';},5000);
   });
+  
   sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
-  sock.on('disconnect', function() {
-    toast('⚠️ Conexão perdida. Tentando reconectar...', true);
-  });
-  sock.on('connect', function() {
-    if (meuId) {
-      sock.emit('verificar_cartela_pendente', { codigo: COD, jogadorId: meuId }, function(res) {
-        if (res && res.ok && res.cartela) {
-          cartelas.push(res.cartela);
-          if (!marc[res.cartela.id]) marc[res.cartela.id] = [];
-          nums = res.sorteados || [];
-          renderCartelas();
-          renderGrid();
-          tela(3);
-          toast('✅ Cartela recuperada!');
-          salvarLocal(nome);
-        }
-      });
-    }
-  });
 }
 
 function conectarJogo(nome){
+  if(!meuIdUnico) {
+    meuIdUnico = localStorage.getItem('luxbingo_id_'+COD);
+    if(!meuIdUnico) {
+      meuIdUnico = gerarIdUnico();
+      localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
+    }
+  }
+  
   if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
   sock.on('connect',function(){
-    meuId = sock.id;
-    sock.emit('entrar_sala',{codigo:COD,nomeJogador:nome},function(r){
+    sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(r&&r.ok){
-        meuId = r.jogadorId || sock.id;
         nums=r.sorteados||nums;
         if(r.youtubeLink)setYoutube(r.youtubeLink);
-        cartelas.forEach(function(c){
-          nums.forEach(function(n){if(marc[c.id].indexOf(n)===-1)marc[c.id].push(n);});
-        });
+        if(r.cartelasExistentes && r.cartelasExistentes.length > 0) {
+          cartelas = r.cartelasExistentes;
+          cartelas.forEach(function(c){
+            if(!marc[c.id]) marc[c.id] = [];
+            nums.forEach(function(n){if(marc[c.id].indexOf(n)===-1)marc[c.id].push(n);});
+          });
+        }
         salvarLocal(nome);renderCartelas();renderGrid();verBingo();
       }
     });
@@ -384,7 +411,7 @@ function conectarJogo(nome){
 document.getElementById('btnMais').onclick=function(){
   if(!sock||cartelas.length>=5){toast('❌ Máximo de 5 cartelas!',true);return;}
   var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
-  sock.emit('solicitar_cartela',{codigo:COD,dados:{nome:nome,cpf:'',celular:'',chavePix:'',email:''}},function(r){
+  sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:'',celular:'',chavePix:'',email:''}},function(r){
     if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);return;}
     toast('✅ Solicitação de cartela '+(cartelas.length+1)+' enviada!');
   });
@@ -624,15 +651,15 @@ io.on('connection', (socket) => {
     const cartelas = gerarBolao(codigo, quantidadeCartelas || 100);
     salas[codigo] = {
       codigo, adm: { socketId: socket.id, nome: nomeAdm },
-      jogadores: {},
-      cartelas, cartelasVendidas: {},
-      solicitacoes: {},
+      jogadoresPorIdUnico: {}, // { idUnico: { socketId, nome, cartelas, ... } }
+      jogadoresPorSocket: {}, // { socketId: idUnico }
+      cartelas, cartelasVendidasPorIdUnico: {}, // { idUnico: [cartelas] }
+      solicitacoes: {}, // { idUnico: { ... } }
       numeros: Array.from({ length: 90 }, (_, i) => i + 1),
       sorteados: [], ativa: false,
       valorCartela: valorCartela || 0, chavePix: chavePix || '',
       horario: horario || '', youtubeLink: youtubeLink || '',
-      vencedor: null,
-      pendingCartelas: {}
+      vencedor: null
     };
     socket.join(codigo);
     socket.data.sala = codigo;
@@ -641,36 +668,40 @@ io.on('connection', (socket) => {
     cb({ ok: true, codigo, cartelas: cartelas.length });
   });
 
-  socket.on('entrar_sala', ({ codigo, nomeJogador }, cb) => {
+  socket.on('entrar_sala', ({ codigo, idUnico, nomeJogador }, cb) => {
     const s = salas[codigo?.toUpperCase()];
     if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
     if (s.vencedor) return cb({ ok: false, erro: 'Jogo já encerrado' });
     
     const socketId = socket.id;
     
-    let jogadorExistente = null;
-    for (let [id, jog] of Object.entries(s.jogadores)) {
-      if (jog.nome === nomeJogador) {
-        jogadorExistente = id;
-        break;
-      }
+    // Verificar se esse idUnico já existe
+    if (s.jogadoresPorIdUnico[idUnico]) {
+      // Jogador já existe, atualizar socketId
+      const oldSocketId = s.jogadoresPorIdUnico[idUnico].socketId;
+      delete s.jogadoresPorSocket[oldSocketId];
+      s.jogadoresPorIdUnico[idUnico].socketId = socketId;
+      s.jogadoresPorSocket[socketId] = idUnico;
+    } else {
+      // Novo jogador
+      s.jogadoresPorIdUnico[idUnico] = { socketId, nome: nomeJogador };
+      s.jogadoresPorSocket[socketId] = idUnico;
     }
     
-    if (jogadorExistente) {
-      delete s.jogadores[jogadorExistente];
-    }
-    
-    s.jogadores[socketId] = { id: socketId, nome: nomeJogador, socketId: socketId };
     socket.join(codigo.toUpperCase());
     socket.data.sala = codigo.toUpperCase();
     socket.data.papel = 'jogador';
-    socket.data.jogadorId = socketId;
+    socket.data.idUnico = idUnico;
     
+    // Notificar admin
     io.to(s.adm.socketId).emit('jogador_entrou', {
-      jogadorId: socketId,
+      idUnico: idUnico,
       nome: nomeJogador,
-      total: Object.keys(s.jogadores).length
+      total: Object.keys(s.jogadoresPorIdUnico).length
     });
+    
+    // Recuperar cartelas existentes
+    const cartelasExistentes = s.cartelasVendidasPorIdUnico[idUnico] || [];
     
     cb({
       ok: true,
@@ -680,25 +711,24 @@ io.on('connection', (socket) => {
       chavePix: s.chavePix,
       horario: s.horario,
       youtubeLink: s.youtubeLink,
-      jogadorId: socketId
+      cartelasExistentes: cartelasExistentes
     });
   });
 
-  socket.on('solicitar_cartela', ({ codigo, dados }, cb) => {
+  socket.on('solicitar_cartela', ({ codigo, idUnico, dados }, cb) => {
     const s = salas[codigo];
     if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
     
-    const socketId = socket.id;
-    const cj = s.cartelasVendidas[socketId] || [];
+    const cj = s.cartelasVendidasPorIdUnico[idUnico] || [];
     
     if (cj.length >= 5) return cb({ ok: false, erro: 'Máximo de 5 cartelas!' });
     
-    const sol = s.solicitacoes[socketId];
+    const sol = s.solicitacoes[idUnico];
     if (sol && sol.status === 'pendente') return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
     
-    s.solicitacoes[socketId] = {
-      jogadorId: socketId,
-      nome: dados.nome || s.jogadores[socketId]?.nome || 'Jogador',
+    s.solicitacoes[idUnico] = {
+      idUnico: idUnico,
+      nome: dados.nome || s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador',
       cpf: dados.cpf || '',
       celular: dados.celular || '',
       chavePix: dados.chavePix || '',
@@ -708,9 +738,10 @@ io.on('connection', (socket) => {
       cartelasJaTem: cj.length
     };
     
+    // Notificar admin
     io.to(s.adm.socketId).emit('nova_solicitacao', {
-      jogadorId: socketId,
-      nome: s.solicitacoes[socketId].nome,
+      idUnico: idUnico,
+      nome: s.solicitacoes[idUnico].nome,
       cpf: dados.cpf || '',
       celular: dados.celular || '',
       chavePix: dados.chavePix || '',
@@ -722,59 +753,49 @@ io.on('connection', (socket) => {
     cb({ ok: true, mensagem: 'Solicitação enviada!' });
   });
 
-  socket.on('verificar_cartela_pendente', ({ codigo, jogadorId }, cb) => {
-    const s = salas[codigo];
-    if (!s) return cb({ ok: false });
-    const pending = s.pendingCartelas?.[jogadorId];
-    if (pending) {
-      delete s.pendingCartelas[jogadorId];
-      cb({ ok: true, cartela: pending, sorteados: s.sorteados });
-    } else {
-      cb({ ok: false });
-    }
-  });
-
-  socket.on('aprovar_cartela', ({ codigo, jogadorId }, cb) => {
+  socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
     
-    const sol = s.solicitacoes[jogadorId];
+    const sol = s.solicitacoes[idUnico];
     if (!sol) return cb({ ok: false, erro: 'Solicitação não encontrada' });
     
-    const vendidas = Object.values(s.cartelasVendidas).flat().map(c => c.id);
+    const vendidas = Object.values(s.cartelasVendidasPorIdUnico).flat().map(c => c.id);
     const disp = s.cartelas.filter(c => !vendidas.includes(c.id));
     if (!disp.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
     
     const cartela = disp[0];
-    s.cartelasVendidas[jogadorId] = [...(s.cartelasVendidas[jogadorId] || []), cartela];
-    s.solicitacoes[jogadorId].status = 'aprovado';
+    s.cartelasVendidasPorIdUnico[idUnico] = [...(s.cartelasVendidasPorIdUnico[idUnico] || []), cartela];
+    s.solicitacoes[idUnico].status = 'aprovado';
     
-    if (s.jogadores[jogadorId]) {
-      io.to(jogadorId).emit('cartela_aprovada', {
+    // Enviar para o socket atual do jogador
+    const jogador = s.jogadoresPorIdUnico[idUnico];
+    if (jogador && jogador.socketId) {
+      io.to(jogador.socketId).emit('cartela_aprovada', {
         cartela,
         sorteados: s.sorteados,
         horario: s.horario || '',
         youtubeLink: s.youtubeLink || '',
         mensagem: '✅ Cartela liberada!'
       });
-      console.log(`[SUCESSO] Cartela enviada para ${jogadorId}`);
+      console.log(`[SUCESSO] Cartela enviada para ${idUnico} (socket: ${jogador.socketId})`);
     } else {
-      s.pendingCartelas = s.pendingCartelas || {};
-      s.pendingCartelas[jogadorId] = cartela;
-      console.log(`[PENDENTE] Cartela guardada para ${jogadorId}`);
+      console.log(`[ERRO] Jogador ${idUnico} não está conectado!`);
     }
     
     cb({ ok: true });
   });
 
-  socket.on('rejeitar_cartela', ({ codigo, jogadorId, motivo }, cb) => {
+  socket.on('rejeitar_cartela', ({ codigo, idUnico, motivo }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
-    const sol = s.solicitacoes[jogadorId];
+    const sol = s.solicitacoes[idUnico];
     if (!sol) return cb({ ok: false, erro: 'Solicitação não encontrada' });
-    s.solicitacoes[jogadorId].status = 'rejeitado';
-    if (s.jogadores[jogadorId]) {
-      io.to(jogadorId).emit('cartela_rejeitada', { mensagem: motivo || '❌ Pagamento não confirmado.' });
+    s.solicitacoes[idUnico].status = 'rejeitado';
+    
+    const jogador = s.jogadoresPorIdUnico[idUnico];
+    if (jogador && jogador.socketId) {
+      io.to(jogador.socketId).emit('cartela_rejeitada', { mensagem: motivo || '❌ Pagamento não confirmado.' });
     }
     cb({ ok: true });
   });
@@ -786,7 +807,8 @@ io.on('connection', (socket) => {
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
     io.to(codigo).emit('numero_sorteado', res);
-    Object.entries(s.cartelasVendidas).forEach(([jid, carts]) => {
+    
+    Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
       carts.forEach(cartela => {
         let marc = 0, tot = 0;
         for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
@@ -794,7 +816,7 @@ io.on('connection', (socket) => {
           if (v === 'FREE') { marc++; tot++; }
           else { tot++; if (s.sorteados.includes(v)) marc++; }
         }
-        const nome = s.jogadores[jid]?.nome || 'Jogador';
+        const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
         if (marc === tot - 1) io.to(codigo).emit('alerta_jogador', { nome, tipo: 'quase', texto: '🔥 ' + nome + ' está quase!' });
         if (marc === tot) io.to(codigo).emit('alerta_jogador', { nome, tipo: 'bingo', texto: '🎉 ' + nome + ' completou!' });
       });
@@ -805,29 +827,35 @@ io.on('connection', (socket) => {
   socket.on('gritar_bingo', ({ codigo, cartelaId }, cb) => {
     const s = salas[codigo];
     if (!s || !s.ativa || s.vencedor) return cb({ ok: false });
-    const jid = socket.id;
-    const cj = s.cartelasVendidas[jid] || [];
+    const idUnico = socket.data.idUnico;
+    if (!idUnico) return cb({ ok: false, erro: 'Identificador não encontrado' });
+    
+    const cj = s.cartelasVendidasPorIdUnico[idUnico] || [];
     const cartela = cj.find(c => c.id === cartelaId);
     if (!cartela) return cb({ ok: false, erro: 'Cartela não encontrada' });
     if (!validarBingo(cartela, s.sorteados)) return cb({ ok: false, erro: 'Bingo inválido' });
-    s.vencedor = { jogadorId: jid, nome: s.jogadores[jid]?.nome, cartelaId };
+    
+    s.vencedor = { idUnico: idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId };
     s.ativa = false;
     io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
     cb({ ok: true });
   });
 
   socket.on('disconnect', () => {
-    const { sala, papel } = socket.data || {};
+    const { sala, papel, idUnico } = socket.data || {};
     if (!sala || !salas[sala]) return;
+    
     if (papel === 'adm') {
       io.to(sala).emit('adm_desconectado');
       console.log(`[WARN] ADM ${sala} desconectou`);
-    } else {
-      const jog = salas[sala]?.jogadores[socket.id];
-      if (jog) {
-        const nome = jog.nome;
-        delete salas[sala].jogadores[socket.id];
-        io.to(salas[sala].adm.socketId).emit('jogador_saiu', { nome, total: Object.keys(salas[sala].jogadores).length });
+    } else if (idUnico) {
+      const s = salas[sala];
+      if (s && s.jogadoresPorIdUnico[idUnico]) {
+        const nome = s.jogadoresPorIdUnico[idUnico].nome;
+        // Marcar como desconectado mas manter os dados
+        s.jogadoresPorIdUnico[idUnico].socketId = null;
+        delete s.jogadoresPorSocket[socket.id];
+        io.to(s.adm.socketId).emit('jogador_saiu', { nome, total: Object.keys(s.jogadoresPorIdUnico).length });
       }
     }
   });
