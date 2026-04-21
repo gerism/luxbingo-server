@@ -311,6 +311,7 @@ function conectarJogo(nome){
       localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
     }
   }
+  
   if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
   sock.on('connect',function(){
@@ -323,6 +324,24 @@ function conectarJogo(nome){
           cartelas.forEach(function(c){
             if(!marc[c.id]) marc[c.id] = [];
             nums.forEach(function(n){if(marc[c.id].indexOf(n)===-1)marc[c.id].push(n);});
+          });
+          renderCartelas();
+          renderGrid();
+          tela(3);
+          toast('✅ Cartelas carregadas!');
+        } else {
+          // VERIFICAR CARTELA PENDENTE
+          sock.emit('verificar_cartela_pendente', { codigo: COD, idUnico: meuIdUnico }, function(res) {
+            if(res && res.ok && res.cartela) {
+              cartelas.push(res.cartela);
+              if(!marc[res.cartela.id]) marc[res.cartela.id] = [];
+              nums = res.sorteados || [];
+              renderCartelas();
+              renderGrid();
+              tela(3);
+              toast('✅ Cartela recuperada!');
+              salvarLocal(nome);
+            }
           });
         }
         salvarLocal(nome);renderCartelas();renderGrid();verBingo();
@@ -675,34 +694,64 @@ io.on('connection', (socket) => {
   });
 
   socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
-    const s = salas[codigo];
-    if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
-    
-    const sol = s.solicitacoes[idUnico];
-    if (!sol) return cb({ ok: false, erro: `Solicitação não encontrada: ${idUnico}` });
-    
-    const vendidas = Object.values(s.cartelasVendidasPorIdUnico).flat().map(c => c.id);
-    const disp = s.cartelas.filter(c => !vendidas.includes(c.id));
-    if (!disp.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
-    
-    const cartela = disp[0];
-    s.cartelasVendidasPorIdUnico[idUnico] = [...(s.cartelasVendidasPorIdUnico[idUnico] || []), cartela];
-    s.solicitacoes[idUnico].status = 'aprovado';
-    
-    const jogador = s.jogadoresPorIdUnico[idUnico];
-    if (jogador && jogador.socketId) {
-      io.to(jogador.socketId).emit('cartela_aprovada', {
-        cartela,
-        sorteados: s.sorteados,
-        horario: s.horario || '',
-        youtubeLink: s.youtubeLink || '',
-        mensagem: '✅ Cartela liberada!'
-      });
-      console.log(`[SUCESSO] Cartela enviada para ${idUnico}`);
-    }
-    
-    cb({ ok: true });
+  console.log('========== APROVAR CARTELA ==========');
+  console.log('idUnico recebido do Admin:', idUnico);
+  
+  const s = salas[codigo];
+  if (!s || s.adm.socketId !== socket.id) {
+    return cb({ ok: false, erro: 'Não autorizado' });
+  }
+  
+  const sol = s.solicitacoes[idUnico];
+  if (!sol) {
+    return cb({ ok: false, erro: `Solicitação não encontrada: ${idUnico}` });
+  }
+  
+  console.log('Solicitação ENCONTRADA para:', sol.nome);
+  
+  const vendidas = Object.values(s.cartelasVendidasPorIdUnico).flat().map(c => c.id);
+  const disp = s.cartelas.filter(c => !vendidas.includes(c.id));
+  if (!disp.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
+  
+  const cartela = disp[0];
+  s.cartelasVendidasPorIdUnico[idUnico] = [...(s.cartelasVendidasPorIdUnico[idUnico] || []), cartela];
+  s.solicitacoes[idUnico].status = 'aprovado';
+  
+  // SALVAR PARA RECUPERAÇÃO
+  s.cartelasAprovadas = s.cartelasAprovadas || {};
+  s.cartelasAprovadas[idUnico] = {
+    cartelas: s.cartelasVendidasPorIdUnico[idUnico],
+    sorteados: s.sorteados,
+    nome: sol.nome
+  };
+  
+  const jogador = s.jogadoresPorIdUnico[idUnico];
+  
+  // Tenta enviar para o socket específico do jogador
+  if (jogador && jogador.socketId) {
+    console.log('✅ Enviando para socket:', jogador.socketId);
+    io.to(jogador.socketId).emit('cartela_aprovada', {
+      cartela,
+      sorteados: s.sorteados,
+      horario: s.horario || '',
+      youtubeLink: s.youtubeLink || '',
+      mensagem: '✅ Cartela liberada!'
+    });
+  }
+  
+  // FALBACK: Emite para TODOS os jogadores na sala (para garantir)
+  console.log('✅ Enviando para TODOS na sala como fallback');
+  io.to(codigo).emit('cartela_aprovada', {
+    cartela,
+    sorteados: s.sorteados,
+    horario: s.horario || '',
+    youtubeLink: s.youtubeLink || '',
+    mensagem: '✅ Cartela liberada!'
   });
+  
+  console.log('✅ Cartela enviada com sucesso!');
+  cb({ ok: true });
+});
 
   socket.on('rejeitar_cartela', ({ codigo, idUnico, motivo }, cb) => {
     const s = salas[codigo];
