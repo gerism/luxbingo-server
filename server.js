@@ -32,13 +32,17 @@ app.get('/jogo/:codigo', (req, res) => {
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);overflow:hidden;width:100vw;height:100vh}
 
-/* TELA FORMULÁRIO / AGUARDANDO / REJEITADO — PORTRAIT */
-.tela-form{display:none;flex-direction:column;align-items:center;justify-content:center;width:100vw;height:100vh;overflow-y:auto;padding:20px 16px 40px}
-.tela-form.ativo{display:flex}
-.logo-img{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 20px rgba(201,162,39,.4);margin-bottom:8px}
+/* ── TELAS GERAIS ── */
+.tela{display:none;flex-direction:column;align-items:center;width:100vw;height:100vh;overflow-y:auto;padding:20px 16px 40px}
+.tela.ativo{display:flex}
+
+/* ── HEADER ── */
+.logo-img{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 20px rgba(201,162,39,.4);margin-bottom:6px}
 .logo-title{font-size:22px;font-weight:900;color:var(--gold2);letter-spacing:4px;margin-bottom:2px}
-.logo-sub{font-size:10px;color:var(--textl);letter-spacing:2px;margin-bottom:20px}
-.card{background:var(--card);border:1px solid rgba(201,162,39,.2);border-radius:14px;padding:16px;width:100%;max-width:380px;margin-bottom:10px}
+.logo-sub{font-size:10px;color:var(--textl);letter-spacing:2px;margin-bottom:16px}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid rgba(201,162,39,.2);border-radius:14px;padding:16px;width:100%;max-width:400px;margin-bottom:10px}
 .ct{font-size:10px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
 .lbl{font-size:10px;color:var(--textl);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;display:block}
 .inp{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.3);border-radius:10px;padding:11px;color:var(--gold2);font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
@@ -46,86 +50,98 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .inp:focus{border-color:var(--gold2)}
 .btn-g{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;font-size:14px;font-weight:900;color:var(--navy);letter-spacing:2px;cursor:pointer;margin-bottom:8px}
 .btn-b{width:100%;padding:11px;background:transparent;border:2px solid rgba(201,162,39,.4);border-radius:12px;font-size:13px;font-weight:900;color:var(--gold2);cursor:pointer;margin-bottom:8px}
-.info-box{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:10px;padding:10px;margin-bottom:10px;text-align:center;width:100%;max-width:380px}
+.info-box{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:10px;padding:8px 14px;margin-bottom:12px;text-align:center;width:100%;max-width:400px}
 .info-cod{font-size:11px;color:var(--textl);letter-spacing:2px}
-.aguard{text-align:center;padding:24px 16px;background:rgba(201,162,39,.08);border:2px solid rgba(201,162,39,.3);border-radius:14px;margin-bottom:10px;width:100%;max-width:380px}
+
+/* ── AGUARDANDO ── */
+.aguard{text-align:center;padding:20px 16px;background:rgba(201,162,39,.08);border:2px solid rgba(201,162,39,.3);border-radius:14px;margin-bottom:10px;width:100%;max-width:400px}
 .aguard-icon{font-size:36px;display:block;margin-bottom:8px}
 .aguard-title{font-size:16px;font-weight:900;color:var(--gold2)}
 .aguard-sub{font-size:11px;color:var(--textl);margin-top:5px;line-height:1.5}
-
-/* TELA DO JOGO — LANDSCAPE FORÇADO */
-.tela-jogo{display:none;flex-direction:row;width:100vw;height:100vh;overflow:hidden}
-.tela-jogo.ativo{display:flex}
-/* Coluna esquerda */
-.jogo-esq{width:45%;background:rgba(0,0,0,.35);border-right:1px solid rgba(201,162,39,.2);display:flex;flex-direction:column;padding:8px;gap:6px;overflow-y:auto}
-/* Coluna direita */
-.jogo-dir{flex:1;display:flex;flex-direction:column;padding:8px;gap:6px;overflow-y:auto}
-
-/* Header topo jogo */
-.jogo-header{display:flex;align-items:center;gap:8px;padding:2px 0 4px;border-bottom:1px solid rgba(201,162,39,.15);margin-bottom:4px}
-.jogo-logo{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold)}
-.jogo-titulo{font-size:11px;font-weight:900;color:var(--gold2);letter-spacing:2px;flex:1}
-.jogo-sala{font-size:9px;color:var(--textl)}
-
-/* Número atual */
-.num-box{text-align:center;padding:10px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(201,162,39,.2);border-radius:10px}
-.num-label{font-size:8px;color:var(--textl);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
-.num-grande{font-size:60px;font-weight:900;color:var(--gold2);line-height:1;text-shadow:0 0 15px rgba(201,162,39,.5)}
-
-/* Grid números */
-.nums-box{background:var(--card);border:1px solid rgba(201,162,39,.15);border-radius:10px;padding:8px}
-.nums-titulo{font-size:8px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px}
-.ng{display:grid;grid-template-columns:repeat(10,1fr);gap:2px}
-.nm{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;background:rgba(255,255,255,.04);font-size:8px;font-weight:700;color:rgba(232,213,163,.3)}
-.nm.s{background:rgba(201,162,39,.2);color:var(--gold)}
-.nm.u{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy)}
-
-/* Botões */
-.btn-bingo{width:100%;padding:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;font-size:14px;font-weight:900;color:var(--navy);letter-spacing:2px;cursor:pointer;display:none}
-.btn-audio{width:100%;padding:9px;background:transparent;border:1.5px solid rgba(201,162,39,.4);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer}
-
-/* Cartela */
-.cartela-wrap{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;flex:1}
-.cartela-header{background:linear-gradient(135deg,#0a1628,var(--navy2));border-bottom:2px solid var(--gold);padding:8px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px}
-.cartela-logo{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold)}
-.cartela-titulo{font-size:12px;font-weight:900;color:var(--gold2);letter-spacing:1px}
-.cartela-sub{font-size:8px;color:var(--textl);margin-top:1px;text-align:center;padding:2px 8px}
-.letras{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:5px 6px 0}
-.letra{text-align:center;font-size:15px;font-weight:900;color:var(--gold);padding:2px 0}
-.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px 6px 6px}
-.cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:15px;font-weight:900;color:var(--text);cursor:pointer;user-select:none}
-.cel.marc{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy)}
-.cel.free{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy);cursor:default}
-
-/* Alerta */
-.alerta-quase{background:rgba(201,162,39,.15);border:2px solid var(--gold);color:var(--gold2);border-radius:10px;padding:8px;text-align:center;font-weight:900;font-size:11px}
-.alerta-bingo{background:rgba(46,204,113,.15);border:2px solid #2ecc71;color:#2ecc71;border-radius:10px;padding:8px;text-align:center;font-weight:900;font-size:11px}
-
-/* Bingo banner */
-.bingo-banner{background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:12px;text-align:center}
-.bb-icon{font-size:32px;display:block;margin-bottom:4px}
-.bb-title{font-size:16px;font-weight:900;color:var(--navy);letter-spacing:2px}
-.bb-sub{font-size:11px;color:rgba(13,27,46,.7);margin-top:2px}
-
-/* Pix info */
 .pix-val{font-size:28px;font-weight:900;color:var(--gold2);text-align:center;margin:6px 0}
 .pix-chave{font-size:13px;font-weight:900;color:var(--gold2);padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);border-radius:8px;word-break:break-all;text-align:center}
+
+/* ── TELA JOGO (portrait) ── */
+.tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
+.tela-jogo.ativo{display:flex}
+
+/* YouTube */
+.yt-wrap{width:100%;background:#000;flex-shrink:0;position:relative}
+.yt-wrap iframe{width:100%;display:block;border:none}
+
+/* Número atual + grid 90 — barra compacta */
+.info-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(201,162,39,.2);flex-shrink:0}
+.num-atual{font-size:32px;font-weight:900;color:var(--gold2);min-width:44px;text-align:center;line-height:1}
+.num-lbl{font-size:7px;color:var(--textl);text-transform:uppercase;letter-spacing:1px;display:block}
+.ng90{display:grid;grid-template-columns:repeat(15,1fr);flex:1;gap:1px}
+.nm90{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:2px;background:rgba(255,255,255,.04);font-size:6px;font-weight:700;color:rgba(232,213,163,.3)}
+.nm90.s{background:rgba(201,162,39,.25);color:var(--gold)}
+.nm90.u{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy)}
+
+/* Cartelas scroll */
+.cartelas-area{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.cartelas-tabs{display:flex;gap:4px;padding:6px 10px 0;flex-shrink:0}
+.tab-btn{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:900;cursor:pointer;border:1.5px solid rgba(201,162,39,.3);background:transparent;color:var(--textl);font-family:inherit}
+.tab-btn.ok{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:transparent;color:var(--navy)}
+.cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 10px}
+
+/* Cartela 5x5 */
+.cartela-card{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;margin-bottom:8px}
+.cartela-header{background:linear-gradient(135deg,#0a1628,var(--navy2));border-bottom:2px solid var(--gold);padding:6px 10px;display:flex;align-items:center;justify-content:space-between}
+.cartela-titulo{font-size:11px;font-weight:900;color:var(--gold2);letter-spacing:1px}
+.cartela-num{font-size:10px;color:var(--textl)}
+.letras-row{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:4px 6px 0}
+.letra{text-align:center;font-size:14px;font-weight:900;color:var(--gold);padding:2px 0}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px 6px 6px}
+.cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:14px;font-weight:900;color:var(--text);cursor:pointer;user-select:none}
+.cel.marc{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy)}
+.cel.free{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy);cursor:default}
+.bingo-btn{width:100%;padding:10px;background:linear-gradient(135deg,#2ecc71,#27ae60);border:none;border-radius:0 0 10px 10px;font-size:14px;font-weight:900;color:#fff;letter-spacing:2px;cursor:pointer;display:none}
+
+/* Alertas */
+.alerta-quase{background:rgba(201,162,39,.15);border:2px solid var(--gold);color:var(--gold2);border-radius:10px;padding:8px 10px;text-align:center;font-weight:900;font-size:11px;margin:4px 10px}
+.alerta-bingo{background:rgba(46,204,113,.15);border:2px solid #2ecc71;color:#2ecc71;border-radius:10px;padding:8px 10px;text-align:center;font-weight:900;font-size:11px;margin:4px 10px}
+.bingo-banner{background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:12px;text-align:center;margin:4px 10px}
+.bb-icon{font-size:28px;display:block;margin-bottom:2px}
+.bb-title{font-size:15px;font-weight:900;color:var(--navy);letter-spacing:2px}
+.bb-sub{font-size:10px;color:rgba(13,27,46,.7);margin-top:2px}
+
+/* Barra inferior */
+.bottom-bar{display:flex;gap:6px;padding:6px 10px 10px;flex-shrink:0;border-top:1px solid rgba(201,162,39,.15)}
+.btn-audio{flex:1;padding:9px;background:transparent;border:1.5px solid rgba(201,162,39,.4);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit}
+.btn-mais{flex:1;padding:9px;background:rgba(201,162,39,.1);border:1.5px solid rgba(201,162,39,.3);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit}
 
 /* Toast */
 .toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);padding:8px 18px;border-radius:50px;font-weight:900;font-size:11px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
 .toast.err{background:#e74c3c;color:#fff}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:8px;margin:4px 0 10px;width:100%;max-width:400px}
+.divider-line{flex:1;height:1px;background:rgba(201,162,39,.2)}
+.divider-txt{font-size:10px;color:var(--textl);font-weight:700;letter-spacing:1px}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 
 <!-- TELA 1: DADOS -->
-<div class="tela-form ativo" id="t1">
-  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
+<div class="tela ativo" id="t1">
+  <img src="${LOGO}" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="info-box"><div class="info-cod">SALA: ${codigo}</div></div>
+
+  <!-- Recuperar cartela de outro dia -->
+  <div class="card">
+    <div class="ct">🔑 Já tem cartela?</div>
+    <label class="lbl">Código da sua cartela</label>
+    <input class="inp" id="iCodCart" type="text" placeholder="Ex: ABC123-1" style="text-transform:uppercase">
+    <button class="btn-b" id="btnRecuperar">RECUPERAR CARTELA →</button>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-txt">OU SOLICITAR NOVA</div><div class="divider-line"></div></div>
+
   <div class="card">
     <div class="ct">📝 Seus Dados</div>
     <label class="lbl">Nome completo *</label>
@@ -143,8 +159,8 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 </div>
 
 <!-- TELA 2: AGUARDANDO -->
-<div class="tela-form" id="t2">
-  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
+<div class="tela" id="t2">
+  <img src="${LOGO}" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="aguard">
@@ -152,7 +168,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
     <div class="aguard-title">AGUARDANDO APROVAÇÃO</div>
     <div class="aguard-sub">O sorteador está verificando seu pagamento.<br>Sua cartela será liberada em breve!</div>
   </div>
-  <div class="card" style="max-width:380px">
+  <div class="card" style="max-width:400px">
     <div class="ct" style="text-align:center">💳 REALIZE O PAGAMENTO</div>
     <div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:4px">Valor da cartela:</div>
     <div class="pix-val" id="pValor">R$ --</div>
@@ -164,9 +180,9 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 </div>
 
 <!-- TELA 4: REJEITADO -->
-<div class="tela-form" id="t4">
-  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
-  <div class="card" style="max-width:380px;text-align:center;padding:24px">
+<div class="tela" id="t4">
+  <img src="${LOGO}" class="logo-img">
+  <div class="card" style="max-width:400px;text-align:center;padding:24px">
     <div style="font-size:44px;margin-bottom:10px">❌</div>
     <div style="font-size:16px;font-weight:900;color:#e74c3c;margin-bottom:8px">Solicitação Rejeitada</div>
     <div style="font-size:12px;color:var(--textl);margin-bottom:16px" id="motivo">Pagamento não confirmado.</div>
@@ -174,59 +190,59 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
 </div>
 
-<!-- TELA 3: JOGO (2 colunas) -->
+<!-- TELA 3: JOGO (portrait) -->
 <div class="tela-jogo" id="t3">
-  <!-- ESQUERDA: número + grid -->
-  <div class="jogo-esq">
-    <div class="jogo-header">
-      <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="jogo-logo">
-      <div class="jogo-titulo">LUX BINGO</div>
-      <div class="jogo-sala">${codigo}</div>
+
+  <!-- YouTube (aparece só se tiver link) -->
+  <div class="yt-wrap" id="ytWrap" style="display:none">
+    <iframe id="ytFrame" allowfullscreen allow="autoplay"></iframe>
+  </div>
+
+  <!-- Barra número atual + grid 90 -->
+  <div class="info-bar">
+    <div>
+      <span class="num-lbl">Último</span>
+      <div class="num-atual" id="nAtual">--</div>
     </div>
-    <div id="alertaBox" style="display:none"></div>
-    <div class="num-box">
-      <div class="num-label">Número Atual</div>
-      <div class="num-grande" id="nAtual">--</div>
+    <div class="ng90" id="nGrid"></div>
+  </div>
+
+  <!-- Alertas -->
+  <div id="alertaBox" style="display:none"></div>
+  <div id="bingoBox"></div>
+
+  <!-- Área cartelas -->
+  <div class="cartelas-area">
+    <div class="cartelas-tabs" id="cartTabs"></div>
+    <div class="cartelas-scroll" id="cartScroll">
+      <div style="text-align:center;padding:30px 16px;color:var(--textl);font-size:12px" id="semCartela">
+        ⏳ Aguardando cartela ser liberada...
+      </div>
     </div>
-    <div class="nums-box">
-      <div class="nums-titulo">Números Sorteados</div>
-      <div class="ng" id="nGrid"></div>
-    </div>
-    <button class="btn-bingo" id="btnBingo">🎉 GRITAR BINGO!</button>
+  </div>
+
+  <!-- Barra inferior -->
+  <div class="bottom-bar">
     <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
+    <button class="btn-mais" id="btnMais" style="display:none">＋ Mais Cartelas</button>
   </div>
-  <!-- DIREITA: cartela -->
-  <div class="jogo-dir">
-    <div class="cartela-wrap" id="cWrap" style="display:none">
-      <div class="cartela-header">
-        <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="cartela-logo">
-        <div>
-          <div class="cartela-titulo">🎟️ SUA CARTELA</div>
-        </div>
-      </div>
-      <div class="cartela-sub" id="cHorario">SALA: ${codigo}</div>
-      <div class="letras">
-        <div class="letra">B</div><div class="letra">I</div><div class="letra">N</div><div class="letra">G</div><div class="letra">O</div>
-      </div>
-      <div class="grid" id="cGrid"></div>
-    </div>
-    <div id="semCartela" style="text-align:center;padding:40px 20px;color:var(--textl);font-size:12px">
-      ⏳ Aguardando cartela ser liberada...
-    </div>
-    <div id="bingoBox"></div>
-  </div>
+
 </div>
 
 <script>
-var COD='${codigo}',SERVER=window.location.origin,sock=null,cart=null,marc=[],nums=[],cId=null,audioOn=true;
+var COD='${codigo}',SERVER=window.location.origin,sock=null;
+var cartelas=[],marc={},nums=[],audioOn=true,tabAtiva=0;
 
 function tela(n){
-  document.querySelectorAll('.tela-form,.tela-jogo').forEach(function(el){el.classList.remove('ativo');});
+  document.querySelectorAll('.tela,.tela-jogo').forEach(function(el){el.classList.remove('ativo');});
   document.getElementById('t'+n).classList.add('ativo');
 }
+function toast(m,e){
+  var t=document.getElementById('toast');t.textContent=m;t.className='toast on'+(e?' err':'');
+  setTimeout(function(){t.className='toast';},3000);
+}
 
-function toast(m,e){var t=document.getElementById('toast');t.textContent=m;t.className='toast on'+(e?' err':'');setTimeout(function(){t.className='toast';},3000);}
-
+// Máscaras
 document.getElementById('iCpf').oninput=function(){
   var v=this.value.replace(/\\D/g,'');
   v=v.replace(/(\\d{3})(\\d)/,'$1.$2').replace(/(\\d{3})(\\d)/,'$1.$2').replace(/(\\d{3})(\\d{1,2})$/,'$1-$2');
@@ -237,7 +253,25 @@ document.getElementById('iCel').oninput=function(){
   v=v.replace(/^(\\d{2})(\\d)/,'($1) $2').replace(/(\\d{5})(\\d{1,4})$/,'$1-$2');
   this.value=v;
 };
+document.getElementById('iCodCart').oninput=function(){
+  this.value=this.value.toUpperCase();
+};
 
+// ─── RECUPERAR CARTELA ───
+document.getElementById('btnRecuperar').onclick=function(){
+  var cod=document.getElementById('iCodCart').value.trim().toUpperCase();
+  if(!cod){toast('❌ Digite o código da cartela!',true);return;}
+  var salvo=localStorage.getItem('luxbingo_cart_'+COD+'_'+cod);
+  if(!salvo){toast('❌ Cartela não encontrada!',true);return;}
+  try{
+    var d=JSON.parse(salvo);
+    cartelas=d.cartelas;marc=d.marc;nums=d.nums||[];
+    conectarJogo(d.nome);
+    tela(3);toast('✅ Cartela recuperada!');
+  }catch(e){toast('❌ Erro ao recuperar!',true);}
+};
+
+// ─── SOLICITAR NOVA ───
 document.getElementById('btnConectar').onclick=function(){
   var nome=document.getElementById('iNome').value.trim();
   var cpf=document.getElementById('iCpf').value.trim();
@@ -245,85 +279,218 @@ document.getElementById('btnConectar').onclick=function(){
   var pix=document.getElementById('iPix').value.trim();
   var email=document.getElementById('iEmail').value.trim();
   if(!nome||!cpf||!cel||!pix){toast('❌ Preencha todos os campos!',true);return;}
+  if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
   sock.on('connect',function(){
+    meuIdSock=sock.id;
     localStorage.setItem('luxbingo_nome_'+COD,nome);
     sock.emit('entrar_sala',{codigo:COD,nomeJogador:nome},function(r){
-      if(!r.ok){toast('❌ '+r.erro,true);sock.disconnect();return;}
+      if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);sock.disconnect();return;}
       document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
       document.getElementById('pChave').textContent=r.chavePix||'--';
       if(r.horario){document.getElementById('pHorario').textContent='🕐 '+r.horario;document.getElementById('pHorario').style.display='block';}
+      // Configurar YouTube se tiver link
+      if(r.youtubeLink){setYoutube(r.youtubeLink);}
       sock.emit('solicitar_cartela',{codigo:COD,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
-        if(!r2.ok){toast('❌ '+r2.erro,true);return;}
+        if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
         tela(2);toast('✅ Solicitação enviada!');
       });
     });
   });
   sock.on('connect_error',function(){toast('❌ Erro de conexão!',true);});
+  registrarEventos(nome);
+};
+
+var meuIdSock=null;
+
+function registrarEventos(nome){
   sock.on('cartela_aprovada',function(d){
-    cart=d.cartela;cId=cart.id;nums=d.sorteados||[];marc=nums.slice();
-    if(d.horario){var h=document.getElementById('cHorario');if(h)h.textContent='SALA: ${codigo} · 🕐 '+d.horario;}
+    var cart=d.cartela;
+    cartelas.push(cart);
+    if(!marc[cart.id])marc[cart.id]=[];
+    // marcar números já sorteados
+    nums=d.sorteados||nums;
+    nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
+    if(d.youtubeLink)setYoutube(d.youtubeLink);
     document.getElementById('semCartela').style.display='none';
-    salvarLocal();renderCart();renderGrid();tela(3);toast('🎉 Cartela liberada! Boa sorte!');
+    salvarLocal(nome);renderCartelas();renderGrid();
+    // Mostrar botão mais cartelas se permitido
+    if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
+    else document.getElementById('btnMais').style.display='none';
+    tela(3);toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
   });
-  sock.on('cartela_rejeitada',function(d){document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);});
+  sock.on('cartela_rejeitada',function(d){
+    document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
+  });
   sock.on('numero_sorteado',function(d){
-    nums=d.sorteados||nums;document.getElementById('nAtual').textContent=d.numero||d;
-    if(marc.indexOf(d.numero)===-1)marc.push(d.numero);
-    salvarLocal();renderCart();renderGrid();verBingo();falarNumero(d.numero);
+    nums=d.sorteados||nums;
+    document.getElementById('nAtual').textContent=d.numero;
+    // Marcar em todas as cartelas
+    cartelas.forEach(function(c){
+      if(marc[c.id].indexOf(d.numero)===-1)marc[c.id].push(d.numero);
+    });
+    salvarLocal(localStorage.getItem('luxbingo_nome_'+COD)||'Jogador');
+    renderCartelas();renderGrid();verBingo();falarNumero(d.numero);
   });
   sock.on('bingo_confirmado',function(d){
     var b=document.createElement('div');b.className='bingo-banner';
     b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>';
-    document.getElementById('bingoBox').appendChild(b);
+    document.getElementById('bingoBox').innerHTML='';document.getElementById('bingoBox').appendChild(b);
   });
-  sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
   sock.on('alerta_jogador',function(d){
     var box=document.getElementById('alertaBox');
     box.textContent=d.texto;box.className=d.tipo==='bingo'?'alerta-bingo':'alerta-quase';box.style.display='block';
     if(d.tipo!=='bingo')setTimeout(function(){box.style.display='none';},5000);
   });
+  sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
+  // Reconexão: verificar cartela pendente
+  sock.on('connect',function(){
+    if(!meuIdSock)return;
+    var nomeSalvo=localStorage.getItem('luxbingo_nome_'+COD)||nome;
+    sock.emit('entrar_sala',{codigo:COD,nomeJogador:nomeSalvo},function(r){
+      if(r&&r.ok){
+        // verificar pendente pelo nome (servidor já entrega via timeout)
+      }
+    });
+  });
+}
+
+function conectarJogo(nome){
+  if(sock)sock.disconnect();
+  sock=io(SERVER,{transports:['websocket']});
+  sock.on('connect',function(){
+    sock.emit('entrar_sala',{codigo:COD,nomeJogador:nome},function(r){
+      if(r&&r.ok){
+        nums=r.sorteados||nums;
+        if(r.youtubeLink)setYoutube(r.youtubeLink);
+        cartelas.forEach(function(c){
+          nums.forEach(function(n){if(marc[c.id].indexOf(n)===-1)marc[c.id].push(n);});
+        });
+        salvarLocal(nome);renderCartelas();renderGrid();verBingo();
+      }
+    });
+  });
+  registrarEventos(nome);
+}
+
+// ─── SOLICITAR MAIS CARTELAS ───
+document.getElementById('btnMais').onclick=function(){
+  if(!sock||cartelas.length>=5){toast('❌ Máximo de 5 cartelas!',true);return;}
+  var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+  // Voltar pra tela de dados pra preencher pagamento de nova cartela
+  // Mas manter conexão - só emitir nova solicitação
+  sock.emit('solicitar_cartela',{codigo:COD,dados:{nome:nome,cpf:'',celular:'',chavePix:'',email:''}},function(r){
+    if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);return;}
+    toast('✅ Solicitação de cartela '+(cartelas.length+1)+' enviada!');
+  });
 };
 
+// ─── REJEITAR → VOLTAR ───
 document.getElementById('btnVoltar').onclick=function(){tela(1);};
+
+// ─── ÁUDIO ───
 document.getElementById('btnAudio').onclick=function(){
   audioOn=!audioOn;this.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';
   this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
   this.style.color=audioOn?'var(--gold2)':'#e74c3c';
 };
-document.getElementById('btnBingo').onclick=function(){
-  if(!sock||!cId)return;
-  sock.emit('gritar_bingo',{codigo:COD,cartelaId:cId},function(r){
-    if(r.ok)toast('🎉 BINGO confirmado!');else toast('❌ '+r.erro,true);
-  });
-};
 
-function renderCart(){
-  if(!cart)return;
-  document.getElementById('cWrap').style.display='block';
-  var g=document.getElementById('cGrid');g.innerHTML='';
-  for(var r=0;r<5;r++)for(var c=0;c<5;c++){
-    var v=cart.grid[r][c];var el=document.createElement('div');
-    if(v==='FREE'){el.className='cel free';el.innerHTML='⭐';}
-    else{
-      el.className='cel'+(marc.indexOf(v)!==-1?' marc':'');el.textContent=v;
-      (function(val,e){e.onclick=function(){
-        var i=marc.indexOf(val);if(i===-1)marc.push(val);else marc.splice(i,1);
-        salvarLocal();renderCart();verBingo();
-      };})(v,el);
-    }
-    g.appendChild(el);
-  }
+// ─── YOUTUBE ───
+function setYoutube(link){
+  if(!link)return;
+  var vid='';
+  var m=link.match(/(?:youtu\.be\\/|v=)([\\w-]{11})/);
+  if(m)vid=m[1];
+  if(!vid)return;
+  var wrap=document.getElementById('ytWrap');
+  var frame=document.getElementById('ytFrame');
+  var h=Math.round(window.innerWidth*9/16);
+  wrap.style.display='block';
+  frame.style.height=h+'px';
+  frame.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=0';
 }
+
+// ─── RENDER GRID 90 ───
 function renderGrid(){
   var g=document.getElementById('nGrid');g.innerHTML='';var u=nums[nums.length-1];
-  for(var i=1;i<=75;i++){var d=document.createElement('div');d.className='nm'+(nums.indexOf(i)!==-1?(i===u?' u':' s'):'');d.textContent=i;g.appendChild(d);}
+  for(var i=1;i<=90;i++){
+    var d=document.createElement('div');
+    d.className='nm90'+(nums.indexOf(i)!==-1?(i===u?' u':' s'):'');
+    d.textContent=i;g.appendChild(d);
+  }
 }
+
+// ─── RENDER CARTELAS ───
+function renderCartelas(){
+  if(!cartelas.length)return;
+  // Tabs
+  var tabs=document.getElementById('cartTabs');tabs.innerHTML='';
+  cartelas.forEach(function(c,i){
+    var b=document.createElement('button');b.className='tab-btn'+(i===tabAtiva?' ok':'');
+    b.textContent='Cartela '+(i+1);
+    (function(idx){b.onclick=function(){tabAtiva=idx;renderCartelas();};})(i);
+    tabs.appendChild(b);
+  });
+  // Scroll — mostrar cartela ativa
+  var scroll=document.getElementById('cartScroll');scroll.innerHTML='';
+  var c=cartelas[tabAtiva];
+  var m=marc[c.id]||[];
+  var div=document.createElement('div');div.className='cartela-card';
+  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div></div>';
+  // Letras
+  var letRow=document.createElement('div');letRow.className='letras-row';
+  ['B','I','N','G','O'].forEach(function(l){var s=document.createElement('div');s.className='letra';s.textContent=l;letRow.appendChild(s);});
+  div.appendChild(letRow);
+  // Grid 5x5
+  var grid=document.createElement('div');grid.className='grid5';
+  for(var r=0;r<5;r++)for(var col=0;col<5;col++){
+    var v=c.grid[r][col];var el=document.createElement('div');
+    if(v==='FREE'){el.className='cel free';el.innerHTML='⭐';}
+    else{
+      el.className='cel'+(m.indexOf(v)!==-1?' marc':'');
+      el.textContent=v;
+      (function(val,cid,e){e.onclick=function(){
+        var arr=marc[cid]||[];var i=arr.indexOf(val);
+        if(i===-1)arr.push(val);else arr.splice(i,1);
+        marc[cid]=arr;renderCartelas();verBingo();
+        salvarLocal(localStorage.getItem('luxbingo_nome_'+COD)||'Jogador');
+      };})(v,c.id,el);
+    }
+    grid.appendChild(el);
+  }
+  div.appendChild(grid);
+  // Botão bingo
+  var btnB=document.createElement('button');btnB.className='bingo-btn';btnB.textContent='🎉 GRITAR BINGO!';
+  btnB.id='bBtn_'+tabAtiva;
+  (function(cid){btnB.onclick=function(){
+    if(!sock)return;
+    sock.emit('gritar_bingo',{codigo:COD,cartelaId:cid},function(r){
+      if(r.ok)toast('🎉 BINGO confirmado!');else toast('❌ '+r.erro,true);
+    });
+  };})(c.id);
+  div.appendChild(btnB);
+  scroll.appendChild(div);
+  // Verificar bingo nessa cartela
+  verBingoCartela(c,m,btnB);
+  document.getElementById('semCartela').style.display='none';
+}
+
+function verBingoCartela(c,m,btn){
+  var ok=true;
+  for(var r=0;r<5;r++)for(var col=0;col<5;col++){
+    var v=c.grid[r][col];if(v!=='FREE'&&m.indexOf(v)===-1){ok=false;break;}
+  }
+  if(btn)btn.style.display=ok?'block':'none';
+}
+
 function verBingo(){
-  if(!cart)return;var ok=true;
-  for(var r=0;r<5;r++)for(var c=0;c<5;c++){var v=cart.grid[r][c];if(v!=='FREE'&&marc.indexOf(v)===-1){ok=false;break;}}
-  document.getElementById('btnBingo').style.display=ok?'block':'none';
+  cartelas.forEach(function(c,i){
+    var m=marc[c.id]||[];
+    var btn=document.getElementById('bBtn_'+i);
+    if(btn)verBingoCartela(c,m,btn);
+  });
 }
+
 function falarNumero(num){
   if(!audioOn||!window.speechSynthesis)return;
   window.speechSynthesis.cancel();
@@ -331,45 +498,38 @@ function falarNumero(num){
   var m2=new SpeechSynthesisUtterance('Número '+num);m2.lang='pt-BR';m2.rate=0.9;m2.volume=1;
   window.speechSynthesis.speak(m1);m1.onend=function(){setTimeout(function(){window.speechSynthesis.speak(m2);},800);};
 }
-function salvarLocal(){
-  if(!cart)return;localStorage.setItem('luxbingo_'+COD,JSON.stringify({cart:cart,cId:cId,marc:marc,nums:nums}));
+
+function salvarLocal(nome){
+  if(!cartelas.length)return;
+  var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
+  localStorage.setItem(chave,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
+  // Salvar código de cada cartela individualmente para recuperação
+  cartelas.forEach(function(c){
+    localStorage.setItem('luxbingo_cart_'+COD+'_'+c.id,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
+  });
 }
-function restaurarLocal(){
-  try{
-    var s=localStorage.getItem('luxbingo_'+COD);if(!s)return false;
-    var d=JSON.parse(s);cart=d.cart;cId=d.cId;marc=d.marc;nums=d.nums;
-    document.getElementById('semCartela').style.display='none';
-    renderCart();renderGrid();verBingo();tela(3);toast('✅ Cartela restaurada!');return true;
-  }catch(e){return false;}
-}
+
+// ─── RESTAURAR AO CARREGAR ───
 window.onload=function(){
-  var ok=restaurarLocal();
-  if(ok){
-    sock=io(SERVER,{transports:['websocket']});
-    sock.on('connect',function(){
-      var n=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
-      sock.emit('entrar_sala',{codigo:COD,nomeJogador:n},function(r){
-        if(r&&r.ok){nums=r.sorteados||nums;r.sorteados.forEach(function(x){if(marc.indexOf(x)===-1)marc.push(x);});salvarLocal();renderCart();renderGrid();verBingo();}
-      });
-    });
-    sock.on('numero_sorteado',function(d){
-      nums=d.sorteados||nums;document.getElementById('nAtual').textContent=d.numero||d;
-      if(marc.indexOf(d.numero)===-1)marc.push(d.numero);
-      salvarLocal();renderCart();renderGrid();verBingo();falarNumero(d.numero);
-    });
-    sock.on('alerta_jogador',function(d){
-      var box=document.getElementById('alertaBox');
-      box.textContent=d.texto;box.className=d.tipo==='bingo'?'alerta-bingo':'alerta-quase';box.style.display='block';
-      if(d.tipo!=='bingo')setTimeout(function(){box.style.display='none';},5000);
-    });
-    sock.on('bingo_confirmado',function(d){
-      var b=document.createElement('div');b.className='bingo-banner';
-      b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>';
-      document.getElementById('bingoBox').appendChild(b);
-    });
+  renderGrid();
+  // Tentar restaurar sessão anterior
+  var nome=localStorage.getItem('luxbingo_nome_'+COD);
+  if(nome){
+    var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
+    var salvo=localStorage.getItem(chave);
+    if(salvo){
+      try{
+        var d=JSON.parse(salvo);
+        cartelas=d.cartelas||[];marc=d.marc||{};nums=d.nums||[];
+        if(cartelas.length){
+          conectarJogo(nome);
+          renderCartelas();renderGrid();tela(3);
+          toast('✅ Sessão restaurada!');return;
+        }
+      }catch(e){}
+    }
   }
 };
-renderGrid();
 <\/script>
 </body>
 </html>`);
@@ -383,147 +543,225 @@ function gerarCodigo(){
   for(let i=0;i<3;i++)c+=n[Math.floor(Math.random()*n.length)];
   return c;
 }
-function gerarCartela75(){
-  const faixas=[[1,15],[16,30],[31,45],[46,60],[61,75]];const cartela=[];
-  for(let col=0;col<5;col++){
-    const[min,max]=faixas[col];const pool=Array.from({length:max-min+1},(_,i)=>i+min);const e=[];
-    for(let row=0;row<5;row++){const idx=Math.floor(Math.random()*pool.length);e.push(pool.splice(idx,1)[0]);}
-    cartela.push(e);
+
+// Gerar cartela 5x5 com 90 números, sem repetição entre cartelas da sala
+function gerarCartela90(usados){
+  const grid=[];
+  const numeros=[];
+  // Gerar 24 números únicos de 1-90 não usados ainda globalmente
+  let tentativas=0;
+  while(numeros.length<24&&tentativas<1000){
+    const n=Math.floor(Math.random()*90)+1;
+    if(numeros.indexOf(n)===-1&&usados.indexOf(n)===-1)numeros.push(n);
+    tentativas++;
   }
-  return Array.from({length:5},(_,row)=>Array.from({length:5},(_,col)=>(row===2&&col===2?'FREE':cartela[col][row])));
+  // Se não conseguiu 24 únicos globais, pegar qualquer único na cartela
+  while(numeros.length<24){
+    const n=Math.floor(Math.random()*90)+1;
+    if(numeros.indexOf(n)===-1)numeros.push(n);
+  }
+  // Embaralhar
+  for(let i=numeros.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[numeros[i],numeros[j]]=[numeros[j],numeros[i]];}
+  let idx=0;
+  for(let r=0;r<5;r++){
+    const row=[];
+    for(let c=0;c<5;c++){
+      if(r===2&&c===2)row.push('FREE');
+      else row.push(numeros[idx++]);
+    }
+    grid.push(row);
+  }
+  return grid;
 }
+
 function gerarBolao(sala,qtd){
-  return Array.from({length:qtd},(_,i)=>({
-    id:`${sala}-${i+1}`,numero:i+1,grid:gerarCartela75(),
-    marcados:[[false,false,false,false,false],[false,false,false,false,false],[false,false,true,false,false],[false,false,false,false,false],[false,false,false,false,false]],
-  }));
+  const cartelas=[];
+  const usados=[];
+  for(let i=0;i<qtd;i++){
+    const grid=gerarCartela90(usados);
+    // Adicionar números dessa cartela ao usados (para minimizar repetição)
+    grid.forEach(row=>row.forEach(v=>{if(v!=='FREE'&&usados.indexOf(v)===-1)usados.push(v);}));
+    cartelas.push({id:`${sala}-${i+1}`,numero:i+1,grid});
+  }
+  return cartelas;
 }
+
 function validarBingo(cartela,sorteados){
-  const g=cartela.grid,m=cartela.marcados;
-  for(let r=0;r<5;r++)for(let c=0;c<5;c++)if(sorteados.includes(g[r][c])||(r===2&&c===2))m[r][c]=true;
-  for(let i=0;i<5;i++){if(m[i].every(Boolean))return true;if(m.every(row=>row[i]))return true;}
+  const g=cartela.grid;
+  const m=g.map(row=>row.map(v=>v==='FREE'||sorteados.includes(v)));
+  for(let i=0;i<5;i++){
+    if(m[i].every(Boolean))return true;
+    if(m.every(row=>row[i]))return true;
+  }
   if([0,1,2,3,4].every(i=>m[i][i]))return true;
   if([0,1,2,3,4].every(i=>m[i][4-i]))return true;
   return false;
 }
+
 function sorteiarNumero(sala){
   const s=salas[sala];if(!s||!s.ativa)return null;
   const rest=s.numeros.filter(n=>!s.sorteados.includes(n));if(!rest.length)return null;
   const num=rest[Math.floor(Math.random()*rest.length)];s.sorteados.push(num);
-  return{numero:num,coluna:'BINGO'[Math.floor((num-1)/15)],sorteados:s.sorteados};
+  return{numero:num,sorteados:s.sorteados};
 }
 
 io.on('connection',(socket)=>{
   console.log(`[+] ${socket.id}`);
 
   socket.on('reconectar_adm',({codigo},cb)=>{
-    const s=salas[codigo];if(!s)return cb({ok:false});
+    const s=salas[codigo];if(!s)return cb&&cb({ok:false});
     s.adm.socketId=socket.id;socket.join(codigo);socket.data.sala=codigo;socket.data.papel='adm';
-    console.log(`[RECONEXAO] ADM ${codigo}`);cb({ok:true});
+    console.log(`[RECONEXAO] ADM ${codigo}`);cb&&cb({ok:true});
   });
 
-  socket.on('criar_sala',({nomeAdm,valorCartela,chavePix,quantidadeCartelas,horario},cb)=>{
+  socket.on('criar_sala',({nomeAdm,valorCartela,chavePix,quantidadeCartelas,horario,youtubeLink},cb)=>{
     let codigo;do{codigo=gerarCodigo();}while(salas[codigo]);
     const cartelas=gerarBolao(codigo,quantidadeCartelas||100);
-    salas[codigo]={codigo,adm:{socketId:socket.id,nome:nomeAdm},jogadores:{},cartelas,cartelasVendidas:{},solicitacoes:{},
-      numeros:Array.from({length:75},(_,i)=>i+1),sorteados:[],ativa:false,
-      valorCartela:valorCartela||0,chavePix:chavePix||'',horario:horario||'',vencedor:null};
+    salas[codigo]={
+      codigo,adm:{socketId:socket.id,nome:nomeAdm},
+      jogadores:{},cartelas,cartelasVendidas:{},solicitacoes:{},
+      numeros:Array.from({length:90},(_,i)=>i+1),
+      sorteados:[],ativa:false,
+      valorCartela:valorCartela||0,chavePix:chavePix||'',
+      horario:horario||'',youtubeLink:youtubeLink||'',
+      vencedor:null
+    };
     socket.join(codigo);socket.data.sala=codigo;socket.data.papel='adm';
-    console.log(`[SALA] ${codigo} por ${nomeAdm}`);cb({ok:true,codigo,cartelas:cartelas.length});
+    console.log(`[SALA] ${codigo} por ${nomeAdm}`);
+    cb({ok:true,codigo,cartelas:cartelas.length});
   });
 
   socket.on('entrar_sala',({codigo,nomeJogador},cb)=>{
     const s=salas[codigo?.toUpperCase()];
     if(!s)return cb({ok:false,erro:'Sala não encontrada'});
     if(s.vencedor)return cb({ok:false,erro:'Jogo já encerrado'});
-    const jid=socket.id;s.jogadores[jid]={nome:nomeJogador,socketId:socket.id};
+    const socketId=socket.id;
+    // Se já existe jogador com esse nome, remove o antigo
+    for(const [id,jog] of Object.entries(s.jogadores)){
+      if(jog.nome===nomeJogador){delete s.jogadores[id];break;}
+    }
+    s.jogadores[socketId]={id:socketId,nome:nomeJogador,socketId};
     socket.join(codigo.toUpperCase());socket.data.sala=codigo.toUpperCase();socket.data.papel='jogador';
-    io.to(s.adm.socketId).emit('jogador_entrou',{jogadorId:jid,nome:nomeJogador,total:Object.keys(s.jogadores).length});
-    cb({ok:true,sorteados:s.sorteados,ativa:s.ativa,valorCartela:s.valorCartela,chavePix:s.chavePix,horario:s.horario});
+    io.to(s.adm.socketId).emit('jogador_entrou',{jogadorId:socketId,nome:nomeJogador,total:Object.keys(s.jogadores).length});
+    // Entregar cartela pendente se existir (pelo nome)
+    if(s.pendingCartelas&&s.pendingCartelas[nomeJogador]){
+      const payload=s.pendingCartelas[nomeJogador];
+      delete s.pendingCartelas[nomeJogador];
+      console.log('[ENTRAR] entregando cartela pendente para:',nomeJogador);
+      setTimeout(()=>socket.emit('cartela_aprovada',payload),500);
+    }
+    cb({ok:true,sorteados:s.sorteados,ativa:s.ativa,valorCartela:s.valorCartela,chavePix:s.chavePix,horario:s.horario,youtubeLink:s.youtubeLink,jogadorId:socketId});
   });
 
   socket.on('solicitar_cartela',({codigo,dados},cb)=>{
     const s=salas[codigo];if(!s)return cb({ok:false,erro:'Sala não encontrada'});
-    if(s.ativa)return cb({ok:false,erro:'Jogo já em andamento'});
-    const jid=socket.id,cj=s.cartelasVendidas[jid]||[];
-    if(cj.length>=3)return cb({ok:false,erro:'Máximo de 3 cartelas!'});
+    const jid=socket.id;
+    const cj=s.cartelasVendidas[jid]||[];
+    if(cj.length>=5)return cb({ok:false,erro:'Máximo de 5 cartelas!'});
     const sol=s.solicitacoes[jid];
     if(sol&&sol.status==='pendente')return cb({ok:false,erro:'Você já tem uma solicitação pendente.'});
-    s.solicitacoes[jid]={jogadorId:jid,nome:dados.nome||s.jogadores[jid]?.nome||'Jogador',
-      cpf:dados.cpf,celular:dados.celular,chavePix:dados.chavePix,email:dados.email||'',
-      status:'pendente',timestamp:Date.now(),cartelasJaTem:cj.length};
-    io.to(s.adm.socketId).emit('nova_solicitacao',{jogadorId:jid,nome:s.solicitacoes[jid].nome,
-      cpf:dados.cpf,celular:dados.celular,chavePix:dados.chavePix,email:dados.email||'',
-      cartelasJaTem:cj.length,timestamp:Date.now()});
+    s.solicitacoes[jid]={
+      jogadorId:jid,
+      nome:dados.nome||s.jogadores[jid]?.nome||'Jogador',
+      cpf:dados.cpf||'',celular:dados.celular||'',
+      chavePix:dados.chavePix||'',email:dados.email||'',
+      status:'pendente',timestamp:Date.now(),
+      cartelasJaTem:cj.length
+    };
+    io.to(s.adm.socketId).emit('nova_solicitacao',{
+      jogadorId:jid,nome:s.solicitacoes[jid].nome,
+      cpf:dados.cpf||'',celular:dados.celular||'',
+      chavePix:dados.chavePix||'',email:dados.email||'',
+      cartelasJaTem:cj.length,timestamp:Date.now()
+    });
     cb({ok:true,mensagem:'Solicitação enviada!'});
   });
 
   socket.on('aprovar_cartela',({codigo,jogadorId},cb)=>{
-    const s=salas[codigo];if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
-    const sol=s.solicitacoes[jogadorId];if(!sol)return cb({ok:false,erro:'Solicitação não encontrada'});
-    const disp=s.cartelas.filter(c=>!Object.values(s.cartelasVendidas).flat().find(v=>v.id===c.id));
+    const s=salas[codigo];
+    if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
+    const sol=s.solicitacoes[jogadorId];
+    if(!sol)return cb({ok:false,erro:'Solicitação não encontrada'});
+    const vendidas=Object.values(s.cartelasVendidas).flat().map(c=>c.id);
+    const disp=s.cartelas.filter(c=>!vendidas.includes(c.id));
     if(!disp.length)return cb({ok:false,erro:'Sem cartelas disponíveis'});
     const cartela=disp[0];
     s.cartelasVendidas[jogadorId]=[...(s.cartelasVendidas[jogadorId]||[]),cartela];
     s.solicitacoes[jogadorId].status='aprovado';
-    io.to(jogadorId).emit('cartela_aprovada',{cartela,sorteados:s.sorteados,horario:s.horario||'',mensagem:'✅ Cartela liberada!'});
+    const payload={cartela,sorteados:s.sorteados,horario:s.horario||'',youtubeLink:s.youtubeLink||'',mensagem:'✅ Cartela liberada!'};
+    // Tentar socket atual do jogador
+    const socketAtual=s.jogadores[jogadorId]?.socketId||jogadorId;
+    const entregue=io.sockets.sockets.has(socketAtual);
+    if(entregue){
+      io.to(socketAtual).emit('cartela_aprovada',payload);
+    } else {
+      // Guardar pendente para quando reconectar
+      s.pendingCartelas=s.pendingCartelas||{};
+      s.pendingCartelas[sol.nome]=payload;
+      console.log('[APROVAR] jogador offline, guardando pendente para:',sol.nome);
+    }
     cb({ok:true});
   });
 
   socket.on('rejeitar_cartela',({codigo,jogadorId,motivo},cb)=>{
-    const s=salas[codigo];if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
-    const sol=s.solicitacoes[jogadorId];if(!sol)return cb({ok:false,erro:'Solicitação não encontrada'});
+    const s=salas[codigo];
+    if(!s||s.adm.socketId!==socket.id)return cb({ok:false,erro:'Não autorizado'});
+    const sol=s.solicitacoes[jogadorId];
+    if(!sol)return cb({ok:false,erro:'Solicitação não encontrada'});
     s.solicitacoes[jogadorId].status='rejeitado';
     io.to(jogadorId).emit('cartela_rejeitada',{mensagem:motivo||'❌ Pagamento não confirmado.'});
     cb({ok:true});
   });
 
   socket.on('sortear',({codigo},cb)=>{
-    const s=salas[codigo];if(!s||s.adm.socketId!==socket.id)return cb({ok:false});
+    const s=salas[codigo];
+    if(!s||s.adm.socketId!==socket.id)return cb({ok:false});
     if(!s.ativa)s.ativa=true;
-    const res=sorteiarNumero(codigo);if(!res)return cb({ok:false,erro:'Sem números restantes'});
+    const res=sorteiarNumero(codigo);
+    if(!res)return cb({ok:false,erro:'Sem números restantes'});
     io.to(codigo).emit('numero_sorteado',res);
-    Object.entries(s.cartelasVendidas).forEach(([jid,cartelas])=>{
-      cartelas.forEach(cartela=>{
+    // Alertas
+    Object.entries(s.cartelasVendidas).forEach(([jid,carts])=>{
+      carts.forEach(cartela=>{
         let marc=0,tot=0;
-        for(let r=0;r<5;r++)for(let c=0;c<5;c++){const v=cartela.grid[r][c];if(v==='FREE'){marc++;tot++;}else{tot++;if(s.sorteados.includes(v))marc++;}}
+        for(let r=0;r<5;r++)for(let c=0;c<5;c++){
+          const v=cartela.grid[r][c];
+          if(v==='FREE'){marc++;tot++;}
+          else{tot++;if(s.sorteados.includes(v))marc++;}
+        }
         const nome=s.jogadores[jid]?.nome||'Jogador';
-        if(marc===tot-1)io.to(codigo).emit('alerta_jogador',{nome,tipo:'quase',texto:'🔥 '+nome+' está quase ganhando!'});
-        if(marc===tot)io.to(codigo).emit('alerta_jogador',{nome,tipo:'bingo',texto:'🎉 '+nome+' completou a cartela!'});
+        if(marc===tot-1)io.to(codigo).emit('alerta_jogador',{nome,tipo:'quase',texto:'🔥 '+nome+' está quase!'});
+        if(marc===tot)io.to(codigo).emit('alerta_jogador',{nome,tipo:'bingo',texto:'🎉 '+nome+' completou!'});
       });
     });
     cb({ok:true,...res});
   });
 
   socket.on('gritar_bingo',({codigo,cartelaId},cb)=>{
-    const s=salas[codigo];if(!s||!s.ativa||s.vencedor)return cb({ok:false});
-    const jid=socket.id,cj=s.cartelasVendidas[jid]||[];
-    const cartela=cj.find(c=>c.id===cartelaId);if(!cartela)return cb({ok:false,erro:'Cartela não encontrada'});
+    const s=salas[codigo];
+    if(!s||!s.ativa||s.vencedor)return cb({ok:false});
+    const jid=socket.id;
+    const cj=s.cartelasVendidas[jid]||[];
+    const cartela=cj.find(c=>c.id===cartelaId);
+    if(!cartela)return cb({ok:false,erro:'Cartela não encontrada'});
     if(!validarBingo(cartela,s.sorteados))return cb({ok:false,erro:'Bingo inválido'});
-    s.vencedor={jogadorId:jid,nome:s.jogadores[jid]?.nome,cartelaId};s.ativa=false;
+    s.vencedor={jogadorId:jid,nome:s.jogadores[jid]?.nome,cartelaId};
+    s.ativa=false;
     io.to(codigo).emit('bingo_confirmado',{vencedor:s.vencedor,sorteados:s.sorteados});
     cb({ok:true});
   });
 
-  socket.on('iniciar_jogo',({codigo},cb)=>{
-    const s=salas[codigo];if(!s||s.adm.socketId!==socket.id)return cb({ok:false});
-    s.ativa=true;io.to(codigo).emit('jogo_iniciado',{valorCartela:s.valorCartela});cb({ok:true});
-  });
-
-  socket.on('status_sala',({codigo},cb)=>{
-    const s=salas[codigo];if(!s)return cb({ok:false});
-    cb({ok:true,jogadores:Object.values(s.jogadores).map(j=>j.nome),sorteados:s.sorteados,
-      ativa:s.ativa,vencedor:s.vencedor,
-      solicitacoesPendentes:Object.values(s.solicitacoes).filter(x=>x.status==='pendente').length});
-  });
-
   socket.on('disconnect',()=>{
-    const{sala,papel}=socket.data||{};if(!sala||!salas[sala])return;
-    if(papel==='adm'){io.to(sala).emit('adm_desconectado');console.log(`[WARN] ADM ${sala} desconectou`);}
-    else{
+    const{sala,papel}=socket.data||{};
+    if(!sala||!salas[sala])return;
+    if(papel==='adm'){
+      io.to(sala).emit('adm_desconectado');
+      console.log(`[WARN] ADM ${sala} desconectou`);
+    }else{
       const jog=salas[sala]?.jogadores[socket.id];
       if(jog){
-        const nome=jog.nome;delete salas[sala].jogadores[socket.id];
+        const nome=jog.nome;
+        delete salas[sala].jogadores[socket.id];
         io.to(salas[sala].adm.socketId).emit('jogador_saiu',{nome,total:Object.keys(salas[sala].jogadores).length});
       }
     }
