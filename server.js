@@ -122,14 +122,6 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
     <input class="inp" id="iPix" type="text" placeholder="CPF, email ou celular...">
     <label class="lbl">Email (opcional)</label>
     <input class="inp" id="iEmail" type="email" placeholder="seu@email.com">
-    <label class="lbl">Quantidade de cartelas</label>
-    <div style="display:flex;gap:6px;margin-bottom:10px">
-      <button class="qt-btn ok" data-q="1">1</button>
-      <button class="qt-btn" data-q="2">2</button>
-      <button class="qt-btn" data-q="3">3</button>
-      <button class="qt-btn" data-q="4">4</button>
-      <button class="qt-btn" data-q="5">5</button>
-    </div>
     <button class="btn-g" id="btnConectar">SOLICITAR CARTELA →</button>
   </div>
 </div>
@@ -275,9 +267,10 @@ function registrarEventos(nome){
   sock.on('connect',function(){
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
   });
- sock.on('cartela_aprovada',function(d){
-    var novas=d.cartelas||[d.cartela];
-    novas.forEach(function(cart){cartelas.push(cart);if(!marc[cart.id])marc[cart.id]=[];});
+  sock.on('cartela_aprovada',function(d){
+    console.log('📢 CARTELA APROVADA RECEBIDA:', d);
+    var cart=d.cartela;
+    cartelas.push(cart);
     if(!marc[cart.id])marc[cart.id]=[];
     nums=d.sorteados||nums;
     nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
@@ -345,10 +338,10 @@ function conectarJogo(nome){
 document.getElementById('btnMais').onclick=function(){
   if(!sock||cartelas.length>=5){toast('❌ Máximo de 5 cartelas!',true);return;}
   var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
-  sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
-        if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
-        tela(2);toast('✅ Solicitação de '+qtdCartelas+' cartela(s) enviada!');
-      });
+  sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:'',celular:'',chavePix:'',email:''}},function(r){
+    if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);return;}
+    toast('✅ Solicitação de cartela '+(cartelas.length+1)+' enviada!');
+  });
 };
 document.getElementById('btnVoltar').onclick=function(){tela(1);};
 document.getElementById('btnAudio').onclick=function(){
@@ -370,7 +363,7 @@ function setYoutube(link){
   frame.src='https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=0';
 }
 function renderGrid(){
-  var g=document.getElementById('nGrid');if(!g)return;var u=nums[nums.length-1];
+  var g=document.getElementById('nGrid');g.innerHTML='';var u=nums[nums.length-1];
   for(var i=1;i<=90;i++){
     var d=document.createElement('div');
     d.className='nm90'+(nums.indexOf(i)!==-1?(i===u?' u':' s'):'');
@@ -675,8 +668,7 @@ io.on('connection', (socket) => {
       email: dados.email || '',
       status: 'pendente',
       timestamp: Date.now(),
-      cartelasJaTem: cj.length,
-      qtdSolicitada: dados.qtd || 1
+      cartelasJaTem: cj.length
     };
     
     console.log('[SOLICITACAO] emitindo para adm socketId:',s.adm.socketId);
@@ -713,9 +705,8 @@ socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     const disp = s.cartelas.filter(c => !vendidas.includes(c.id));
     if (!disp.length) return cb({ ok: false, erro: 'Sem cartelas disponíveis' });
     
-   const qtd = s.solicitacoes[solKey].qtdSolicitada || 1;
-    const cartelas = disp.slice(0, qtd);
-    s.cartelasVendidasPorIdUnico[solKey] = [...(s.cartelasVendidasPorIdUnico[solKey] || []), ...cartelas];
+    const cartela = disp[0];
+    s.cartelasVendidasPorIdUnico[solKey] = [...(s.cartelasVendidasPorIdUnico[solKey] || []), cartela];
     s.solicitacoes[solKey].status = 'aprovado';
     
    const jogador = s.jogadoresPorIdUnico[solKey];
@@ -724,8 +715,7 @@ console.log('[APROVAR] solKey:',solKey,'socketDestino:',socketDestino,'socketExi
     if (socketDestino && io.sockets.sockets.has(socketDestino)) {
 setTimeout(()=>{
         io.to(socketDestino).emit('cartela_aprovada', {
-          cartelas: cartelas,
-          cartela: cartelas[0],
+          cartela,
           sorteados: s.sorteados,
           horario: s.horario || '',
           youtubeLink: s.youtubeLink || '',
