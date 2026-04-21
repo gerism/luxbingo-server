@@ -675,9 +675,8 @@ io.on('connection', (socket) => {
       email: dados.email || '',
       status: 'pendente',
       timestamp: Date.now(),
-       cartelasJaTem: cj.length,
+      cartelasJaTem: cj.length,
       qtdSolicitada: dados.qtd || 1
-    };
     };
     
     console.log('[SOLICITACAO] emitindo para adm socketId:',s.adm.socketId);
