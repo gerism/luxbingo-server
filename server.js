@@ -232,7 +232,7 @@ document.getElementById('btnConectar').onclick=function(){
   }
   if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
-  sock.on('connect',function(){
+sock.on('connect',function(){
     localStorage.setItem('luxbingo_nome_'+COD,nome);
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);sock.disconnect();return;}
@@ -709,14 +709,16 @@ socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     const socketDestino = jogador?.socketId;
     console.log('[APROVAR] solKey:',solKey,'socketDestino:',socketDestino);
     if (socketDestino && io.sockets.sockets.has(socketDestino)) {
-      io.to(socketDestino).emit('cartela_aprovada', {
-        cartela,
-        sorteados: s.sorteados,
-        horario: s.horario || '',
-        youtubeLink: s.youtubeLink || '',
-        mensagem: '✅ Cartela liberada!'
-      });
-      console.log('[SUCESSO] Cartela enviada para socket:',socketDestino);
+setTimeout(()=>{
+        io.to(socketDestino).emit('cartela_aprovada', {
+          cartela,
+          sorteados: s.sorteados,
+          horario: s.horario || '',
+          youtubeLink: s.youtubeLink || '',
+          mensagem: '✅ Cartela liberada!'
+        });
+        console.log('[SUCESSO] Cartela enviada para socket:',socketDestino);
+      }, 1000);
     } else {
       // Socket offline — guardar pendente pelo idUnico
       s.pendingCartelas = s.pendingCartelas || {};
