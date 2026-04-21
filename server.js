@@ -673,15 +673,16 @@ io.on('connection', (socket) => {
     
     console.log('[SOLICITACAO] emitindo para adm socketId:',s.adm.socketId);
     io.to(s.adm.socketId).emit('nova_solicitacao', {
-      idUnico: idUnico,
-      nome: s.solicitacoes[idUnico].nome,
-      cpf: dados.cpf || '',
-      celular: dados.celular || '',
-      chavePix: dados.chavePix || '',
-      email: dados.email || '',
-      cartelasJaTem: cj.length,
-      timestamp: Date.now()
-    });
+  idUnico: idUnico,
+  nome: s.solicitacoes[idUnico].nome,
+  cpf: dados.cpf || '',
+  celular: dados.celular || '',
+  chavePix: dados.chavePix || '',
+  email: dados.email || '',
+  cartelasJaTem: cj.length,
+  qtdSolicitada: s.solicitacoes[idUnico].qtdSolicitada || 1,
+  timestamp: Date.now()
+});
     
     cb({ ok: true, mensagem: 'Solicitação enviada!' });
   });
