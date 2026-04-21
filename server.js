@@ -637,8 +637,23 @@ io.on('connection',(socket)=>{
     if(s.vencedor)return cb({ok:false,erro:'Jogo já encerrado'});
     const socketId=socket.id;
     // Se já existe jogador com esse nome, remove o antigo
+    // Se já existe jogador com esse nome, migra solicitação para novo socketId
     for(const [id,jog] of Object.entries(s.jogadores)){
-      if(jog.nome===nomeJogador){delete s.jogadores[id];break;}
+      if(jog.nome===nomeJogador){
+        delete s.jogadores[id];
+        // Migrar solicitação pendente para novo ID
+        if(s.solicitacoes[id]){
+          s.solicitacoes[socketId]=s.solicitacoes[id];
+          s.solicitacoes[socketId].jogadorId=socketId;
+          delete s.solicitacoes[id];
+        }
+        // Migrar cartelas vendidas
+        if(s.cartelasVendidas[id]){
+          s.cartelasVendidas[socketId]=s.cartelasVendidas[id];
+          delete s.cartelasVendidas[id];
+        }
+        break;
+      }
     }
     s.jogadores[socketId]={id:socketId,nome:nomeJogador,socketId};
     socket.join(codigo.toUpperCase());socket.data.sala=codigo.toUpperCase();socket.data.papel='jogador';
