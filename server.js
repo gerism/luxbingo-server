@@ -162,7 +162,6 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
       <span class="num-lbl">Último</span>
       <div class="num-atual" id="nAtual">--</div>
     </div>
-    <div class="ng90" id="nGrid"></div>
   </div>
   <div id="alertaBox" style="display:none"></div>
   <div id="bingoBox"></div>
@@ -176,7 +175,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
   <div class="bottom-bar">
     <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
-    <button class="btn-mais" id="btnMais" style="display:none">＋ Mais Cartelas</button>
+    <button class="btn-mais" id="btnMais" style="display:none"></button>
   </div>
 </div>
 <script>
@@ -275,6 +274,7 @@ function registrarEventos(nome){
     if(!marc[cart.id])marc[cart.id]=[];
     nums=d.sorteados||nums;
     nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
+  console.log('youtubeLink recebido:', d.youtubeLink);
     if(d.youtubeLink)setYoutube(d.youtubeLink);
    tela(3);
     document.getElementById('semCartela').style.display='none';
