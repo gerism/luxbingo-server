@@ -276,11 +276,12 @@ function registrarEventos(nome){
     nums=d.sorteados||nums;
     nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
     if(d.youtubeLink)setYoutube(d.youtubeLink);
+   tela(3);
     document.getElementById('semCartela').style.display='none';
     salvarLocal(nome);renderCartelas();renderGrid();
     if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
     else document.getElementById('btnMais').style.display='none';
-    tela(3);toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
+    toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
   });
   sock.on('cartela_rejeitada',function(d){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
