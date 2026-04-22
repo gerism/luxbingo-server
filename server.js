@@ -342,8 +342,25 @@ if(d.youtubeLink)setYoutube(d.youtubeLink);
     nums=[];marc={};
     cartelas.forEach(function(c){marc[c.id]=[];});
     document.getElementById('nAtual').textContent='--';
+    var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+    salvarLocal(nome);
     renderCartelas();renderGrid();
     toast('🔄 Sorteio zerado pelo ADM!');
+  });
+  sock.on('cartelas_limpas',function(){
+    var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+    var chave='luxbingo_'+COD+'_'+nome.replace(/\s/g,'_');
+    cartelas.forEach(function(c){
+      localStorage.removeItem('luxbingo_cart_'+COD+'_'+c.id);
+    });
+    localStorage.removeItem(chave);
+    cartelas=[];marc={};nums=[];
+    document.getElementById('nAtual').textContent='--';
+    document.getElementById('semCartela').style.display='block';
+    document.getElementById('cartTabs').innerHTML='';
+    document.getElementById('cartScroll').innerHTML='';
+    tela(1);
+    toast('⚠️ Cartelas resetadas pelo ADM!');
   });
 }
 function conectarJogo(nome){
@@ -830,17 +847,6 @@ setTimeout(()=>{
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
     io.to(codigo).emit('numero_sorteado', res);
-	
-	socket.on('zerar_sorteio', ({ codigo }, cb) => {
-    const s = salas[codigo];
-    if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
-    s.sorteados = [];
-    s.ativa = false;
-    s.vencedor = null;
-    io.to(codigo).emit('sorteio_zerado');
-    cb && cb({ ok: true });
-  });
-    
     Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
       carts.forEach(cartela => {
         let marc = 0, tot = 0;
