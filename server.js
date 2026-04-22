@@ -337,7 +337,14 @@ if(d.youtubeLink)setYoutube(d.youtubeLink);
     box.textContent=d.texto;box.className=d.tipo==='bingo'?'alerta-bingo':'alerta-quase';box.style.display='block';
     if(d.tipo!=='bingo')setTimeout(function(){box.style.display='none';},5000);
   });
-  sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
+ sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
+  sock.on('sorteio_zerado',function(){
+    nums=[];marc={};
+    cartelas.forEach(function(c){marc[c.id]=[];});
+    document.getElementById('nAtual').textContent='--';
+    renderCartelas();renderGrid();
+    toast('🔄 Sorteio zerado pelo ADM!');
+  });
 }
 function conectarJogo(nome){
   if(!meuIdUnico) {
@@ -823,6 +830,16 @@ setTimeout(()=>{
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
     io.to(codigo).emit('numero_sorteado', res);
+	
+	socket.on('zerar_sorteio', ({ codigo }, cb) => {
+    const s = salas[codigo];
+    if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
+    s.sorteados = [];
+    s.ativa = false;
+    s.vencedor = null;
+    io.to(codigo).emit('sorteio_zerado');
+    cb && cb({ ok: true });
+  });
     
     Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
       carts.forEach(cartela => {
