@@ -591,7 +591,7 @@ io.on('connection', (socket) => {
     cb && cb({ ok: true });
   });
 
-  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink }, cb) => {
+  socket.on('criar_sala', ({ nomeAdm, admId, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink }, cb) => {
     console.log('[DEBUG] criar_sala recebido:', { nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink });
     
     if (!nomeAdm) {
@@ -604,8 +604,23 @@ io.on('connection', (socket) => {
       return cb({ ok: false, erro: 'Chave Pix é obrigatória' });
     }
     
-    let codigo;
-    do { codigo = gerarCodigo(); } while (salas[codigo]);
+    // usa admId como código fixo, ou gera novo se não tiver
+    let codigo = admId || gerarCodigo();
+    // se sala já existe, atualiza configurações mantendo cartelas vendidas
+    if (salas[codigo]) {
+      salas[codigo].valorCartela = parseFloat(valorCartela) || 0;
+      salas[codigo].chavePix = chavePix || '';
+      salas[codigo].horario = horario || '';
+      salas[codigo].youtubeLink = youtubeLink || '';
+      salas[codigo].adm.socketId = socket.id;
+      salas[codigo].adm.nome = nomeAdm;
+      socket.join(codigo);
+      socket.data.sala = codigo;
+      socket.data.papel = 'adm';
+      salvarSalas();
+      cb({ ok: true, codigo, cartelas: salas[codigo].cartelas.length });
+      return;
+    }
     
     const cartelas = gerarBolao(codigo, quantidadeCartelas || 100);
     
