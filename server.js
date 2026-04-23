@@ -717,6 +717,7 @@ io.on('connection', (socket) => {
     socket.data.papel = 'adm';
     
     console.log(`✅ SALA CRIADA: ${codigo} por ${nomeAdm}`);
+    salvarSalas();
     cb({ ok: true, codigo, cartelas: cartelas.length });
   });
 
@@ -857,6 +858,7 @@ setTimeout(()=>{
       console.log('[APROVAR] socket offline, pendente para idUnico:',solKey);
     }
     
+   salvarSalas();
     cb({ ok: true });
   });
 
@@ -958,4 +960,6 @@ socket.on('zerar_sorteio', ({ codigo }, cb) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`));
+server.listen(PORT, async () => {
+  console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`);
+});
