@@ -317,11 +317,10 @@ function registrarEventos(nome){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
   });
   sock.on('numero_sorteado',function(d){
-    nums=(d.sorteados||nums).map(Number);
+    nums=d.sorteados||nums;
     document.getElementById('nAtual').textContent=d.numero;
     cartelas.forEach(function(c){
-      if(!marc[c.id])marc[c.id]=[];
-      if(marc[c.id].indexOf(Number(d.numero))===-1)marc[c.id].push(Number(d.numero));
+      if(marc[c.id].indexOf(d.numero)===-1)marc[c.id].push(d.numero);
     });
     salvarLocal(localStorage.getItem('luxbingo_nome_'+COD)||'Jogador');
     renderCartelas();renderGrid();verBingo();falarNumero(d.numero);
