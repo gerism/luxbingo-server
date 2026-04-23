@@ -873,28 +873,6 @@ setTimeout(()=>{
     cb({ ok: true, ...res });
   });
 
-  socket.on('zerar_sorteio', ({ codigo }, cb) => {
-    const s = salas[codigo];
-    if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
-    s.sorteados = [];
-    s.ativa = false;
-    s.vencedor = null;
-    io.to(codigo).emit('sorteio_zerado');
-    cb && cb({ ok: true });
-  });
-
-  socket.on('limpar_cartelas', ({ codigo }, cb) => {
-    const s = salas[codigo];
-    if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
-    s.cartelasVendidasPorIdUnico = {};
-    s.solicitacoes = {};
-    s.jogadoresPorIdUnico = {};
-    s.jogadoresPorSocket = {};
-    salvarSalas();
-    io.to(codigo).emit('cartelas_limpas');
-    cb && cb({ ok: true });
-  });
-
   socket.on('gritar_bingo', ({ codigo, cartelaId }, cb) => {
     const s = salas[codigo];
     if (!s || !s.ativa || s.vencedor) return cb({ ok: false });
