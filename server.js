@@ -506,7 +506,18 @@ window.onload=function(){
 });
 
 const salas = {};
-
+const fs = require('fs');
+const SALAS_FILE = '/tmp/salas.json';
+function salvarSalas(){
+  try{fs.writeFileSync(SALAS_FILE,JSON.stringify(salas));}catch(e){console.log('[SAVE ERROR]',e.message);}
+}
+try{
+  if(fs.existsSync(SALAS_FILE)){
+    const d=JSON.parse(fs.readFileSync(SALAS_FILE,'utf8'));
+    Object.assign(salas,d);
+    console.log('[RESTORE] Salas:',Object.keys(salas));
+  }
+}catch(e){console.log('[LOAD ERROR]',e.message);}
 
 function gerarCodigo() {
   const l = 'ABCDEFGHJKLMNPQRSTUVWXYZ', n = '23456789';
