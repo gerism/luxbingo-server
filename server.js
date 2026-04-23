@@ -854,40 +854,15 @@ setTimeout(()=>{
     cb({ ok: true });
   });
 
-  socket.on('sortear', ({ codigo }, cb) => {
+ socket.on('sortear', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false });
     if (!s.ativa) s.ativa = true;
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
     io.to(codigo).emit('numero_sorteado', res);
-    
-	socket.on('zerar_sorteio', ({ codigo }, cb) => {
-  const s = salas[codigo];
-  if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
-  s.sorteados = [];
-  s.ativa = false;
-  s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
-  salvarSalas();
-  io.to(codigo).emit('sorteio_zerado');
-  cb && cb({ ok: true });
-});
-
-socket.on('limpar_cartelas', ({ codigo }, cb) => {
-  const s = salas[codigo];
-  if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
-  s.cartelasVendidasPorIdUnico = {};
-  s.solicitacoes = {};
-  s.pendingCartelas = {};
-  s.sorteados = [];
-  s.ativa = false;
-  s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
-  salvarSalas();
-  io.to(codigo).emit('cartelas_limpas');
-  cb && cb({ ok: true });
-});
-	
     Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
+		
       carts.forEach(cartela => {
         let marc = 0, tot = 0;
         for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
@@ -902,7 +877,30 @@ socket.on('limpar_cartelas', ({ codigo }, cb) => {
     });
     cb({ ok: true, ...res });
   });
+socket.on('zerar_sorteio', ({ codigo }, cb) => {
+    const s = salas[codigo];
+    if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
+    s.sorteados = [];
+    s.ativa = false;
+    s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
+    salvarSalas();
+    io.to(codigo).emit('sorteio_zerado');
+    cb && cb({ ok: true });
+  });
 
+  socket.on('limpar_cartelas', ({ codigo }, cb) => {
+    const s = salas[codigo];
+    if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
+    s.cartelasVendidasPorIdUnico = {};
+    s.solicitacoes = {};
+    s.pendingCartelas = {};
+    s.sorteados = [];
+    s.ativa = false;
+    s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
+    salvarSalas();
+    io.to(codigo).emit('cartelas_limpas');
+    cb && cb({ ok: true });
+  });
   socket.on('gritar_bingo', ({ codigo, cartelaId }, cb) => {
     const s = salas[codigo];
     if (!s || !s.ativa || s.vencedor) return cb({ ok: false });
