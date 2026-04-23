@@ -551,18 +551,38 @@ window.onload=function(){
 });
 
 const salas = {};
-const fs = require('fs');
-const SALAS_FILE = '/tmp/salas.json';
-function salvarSalas(){
-  try{fs.writeFileSync(SALAS_FILE,JSON.stringify(salas));}catch(e){console.log('[SAVE ERROR]',e.message);}
+
+const UPSTASH_URL = process.env.UPSTASH_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
+
+async function salvarSalas() {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
+  try {
+    const valor = JSON.stringify(salas);
+    await fetch(`${UPSTASH_URL}/set/luxbingo_salas`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([valor])
+    });
+  } catch(e) { console.log('[REDIS SAVE ERROR]', e.message); }
 }
-try{
-  if(fs.existsSync(SALAS_FILE)){
-    const d=JSON.parse(fs.readFileSync(SALAS_FILE,'utf8'));
-    Object.assign(salas,d);
-    console.log('[RESTORE] Salas:',Object.keys(salas));
-  }
-}catch(e){console.log('[LOAD ERROR]',e.message);}
+
+async function carregarSalas() {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
+  try {
+    const r = await fetch(`${UPSTASH_URL}/get/luxbingo_salas`, {
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+    });
+    const d = await r.json();
+    if (d.result) {
+      const salvas = JSON.parse(d.result);
+      Object.assign(salas, salvas);
+      console.log('[REDIS RESTORE] Salas:', Object.keys(salas));
+    }
+  } catch(e) { console.log('[REDIS LOAD ERROR]', e.message); }
+}
+
+carregarSalas();
 
 function gerarCodigo() {
   const l = 'ABCDEFGHJKLMNPQRSTUVWXYZ', n = '23456789';
