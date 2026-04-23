@@ -297,7 +297,7 @@ function registrarEventos(nome){
   sock.on('connect',function(){
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
   });
-  sock.on('cartela_aprovada',function(d){
+sock.on('cartela_aprovada',function(d){
     var novas=d.cartelas||[d.cartela];
     novas.forEach(function(cart){
       cartelas.push(cart);
@@ -305,8 +305,13 @@ function registrarEventos(nome){
       nums=d.sorteados||nums;
       nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
     });
-  console.log('youtubeLink recebido:', d.youtubeLink);
-if(d.youtubeLink)setYoutube(d.youtubeLink);
+    // mostra códigos antes de abrir
+    var codigos=novas.map(function(c){return c.id;}).join(', ');
+    var msg='🎟️ Sua(s) cartela(s) foi liberada!\n\n';
+    msg+='📋 CÓDIGO(S): '+codigos+'\n\n';
+    msg+='⚠️ SALVE ESSE CÓDIGO! Você precisará dele para recuperar sua cartela caso saia do jogo.\n\nToque OK para abrir sua cartela.';
+    alert(msg);
+    if(d.youtubeLink)setYoutube(d.youtubeLink);
     mostrarYoutube();
     tela(3);
     document.getElementById('semCartela').style.display='none';
