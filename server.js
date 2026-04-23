@@ -191,17 +191,18 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 <script>
 var COD='${codigo}',SERVER=window.location.origin,sock=null;
 var cartelas=[],marc={},nums=[],audioOn=true,tabAtiva=0;
-var meuIdUnico = localStorage.getItem('luxbingo_id_'+COD) || null;
+var meuIdUnico = null;
+try{meuIdUnico=localStorage.getItem('luxbingo_id_'+COD);}catch(e){}
 function gerarIdUnico() {
   return 'jog_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 var qtdCartelas=1;
-document.querySelectorAll('.qt-btn').forEach(function(b){
-  b.onclick=function(){
-    qtdCartelas=parseInt(this.dataset.q);
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('qt-btn')){
+    qtdCartelas=parseInt(e.target.dataset.q);
     document.querySelectorAll('.qt-btn').forEach(function(x){x.classList.remove('ok');});
-    this.classList.add('ok');
-  };
+    e.target.classList.add('ok');
+  }
 });
 function tela(n){
   document.querySelectorAll('.tela,.tela-jogo').forEach(function(el){el.classList.remove('ativo');});
@@ -456,7 +457,7 @@ function renderCartelas(){
     var v=c.grid[r][col];var el=document.createElement('div');
     if(v==='FREE'){el.className='cel free';el.innerHTML='⭐';}
     else{
-      el.className='cel'+(m.indexOf(v)!==-1?' marc':'');
+      el.className='cel'+(m.indexOf(v)!==-1||m.indexOf(String(v))!==-1||m.indexOf(Number(v))!==-1?' marc':'');
       el.textContent=v;
       (function(val,cid,e){e.onclick=function(){
         var arr=marc[cid]||[];var i=arr.indexOf(val);
@@ -504,11 +505,14 @@ function falarNumero(num){
 }
 function salvarLocal(nome){
   if(!cartelas.length)return;
-  var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
-  localStorage.setItem(chave,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
-  cartelas.forEach(function(c){
-    localStorage.setItem('luxbingo_cart_'+COD+'_'+c.id,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
-  });
+  try{
+    var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
+    var dados=JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome});
+    localStorage.setItem(chave,dados);
+    cartelas.forEach(function(c){
+      localStorage.setItem('luxbingo_cart_'+COD+'_'+c.id,dados);
+    });
+  }catch(e){console.log('salvarLocal erro:',e.message);}
 }
 window.onload=function(){
   renderGrid();
