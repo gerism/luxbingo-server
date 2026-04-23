@@ -225,16 +225,31 @@ document.getElementById('iCodCart').oninput=function(){
   this.value=this.value.toUpperCase();
 };
 document.getElementById('btnRecuperar').onclick=function(){
-  var cod=document.getElementById('iCodCart').value.trim().toUpperCase();
-  if(!cod){toast('❌ Digite o código da cartela!',true);return;}
-  var salvo=localStorage.getItem('luxbingo_cart_'+COD+'_'+cod);
-  if(!salvo){toast('❌ Cartela não encontrada!',true);return;}
-  try{
-    var d=JSON.parse(salvo);
-    cartelas=d.cartelas;marc=d.marc;nums=d.nums||[];
-    conectarJogo(d.nome);
-    tela(3);toast('✅ Cartela recuperada!');
-  }catch(e){toast('❌ Erro ao recuperar!',true);}
+  var codCart=document.getElementById('iCodCart').value.trim().toUpperCase();
+  if(!codCart){toast('❌ Digite o código da cartela!',true);return;}
+  toast('⏳ Buscando cartela...');
+  fetch(SERVER+'/cartela/'+COD+'/'+codCart)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.ok){toast('❌ '+(d.erro||'Cartela não encontrada!'),true);return;}
+      // Recalcula marc com base nos sorteados atuais do servidor
+      cartelas=[d.cartela];
+      nums=d.sorteados||[];
+      marc={};
+      marc[d.cartela.id]=[];
+      nums.forEach(function(n){
+        for(var r=0;r<5;r++)for(var c=0;c<5;c++){
+          if(d.cartela.grid[r][c]===n && marc[d.cartela.id].indexOf(n)===-1)
+            marc[d.cartela.id].push(n);
+        }
+      });
+      meuIdUnico=d.idUnico;
+      localStorage.setItem('luxbingo_id_'+COD,d.idUnico);
+      var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+      conectarJogo(nome);
+      tela(3);toast('✅ Cartela recuperada!');
+    })
+    .catch(function(){toast('❌ Erro de conexão!',true);});
 };
 document.getElementById('btnConectar').onclick=function(){
   var nome=document.getElementById('iNome').value.trim();
@@ -338,6 +353,29 @@ if(d.youtubeLink)setYoutube(d.youtubeLink);
     if(d.tipo!=='bingo')setTimeout(function(){box.style.display='none';},5000);
   });
   sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
+  sock.on('sorteio_zerado',function(){
+    nums=[];marc={};
+    cartelas.forEach(function(c){marc[c.id]=[];});
+    document.getElementById('nAtual').textContent='--';
+    var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+    salvarLocal(nome);
+    renderCartelas();renderGrid();
+    toast('🔄 Sorteio zerado pelo ADM!');
+  });
+  sock.on('cartelas_limpas',function(){
+    try{
+      var n=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+      var chave='luxbingo_'+COD+'_'+n.replace(/\s/g,'_');
+      cartelas.forEach(function(c){localStorage.removeItem('luxbingo_cart_'+COD+'_'+c.id);});
+      localStorage.removeItem(chave);
+    }catch(e){}
+    cartelas=[];marc={};nums=[];
+    document.getElementById('nAtual').textContent='--';
+    document.getElementById('semCartela').style.display='block';
+    document.getElementById('cartTabs').innerHTML='';
+    document.getElementById('cartScroll').innerHTML='<div style="text-align:center;padding:30px 16px;color:var(--textl);font-size:12px" id="semCartela">⏳ Aguardando cartela ser liberada...</div>';
+    tela(1);toast('⚠️ Cartelas resetadas pelo ADM!');
+  });
 }
 function conectarJogo(nome){
   if(!meuIdUnico) {
@@ -355,11 +393,18 @@ function conectarJogo(nome){
         nums=r.sorteados||nums;
         if(r.youtubeLink)setYoutube(r.youtubeLink);
         if(r.cartelasExistentes && r.cartelasExistentes.length > 0) {
-          cartelas = r.cartelasExistentes;
-          cartelas.forEach(function(c){
-            if(!marc[c.id]) marc[c.id] = [];
-            nums.forEach(function(n){if(marc[c.id].indexOf(n)===-1)marc[c.id].push(n);});
+         cartelas = r.cartelasExistentes;
+        nums = r.sorteados || [];
+        marc = {};
+        cartelas.forEach(function(c){
+          marc[c.id]=[];
+          nums.forEach(function(n){
+            for(var row=0;row<5;row++)for(var col=0;col<5;col++){
+              if(c.grid[row][col]===n && marc[c.id].indexOf(n)===-1)
+                marc[c.id].push(n);
+            }
           });
+        });
         }
         salvarLocal(nome);renderCartelas();renderGrid();verBingo();
       }
@@ -588,7 +633,15 @@ function sorteiarNumero(sala) {
   s.sorteados.push(num);
   return { numero: num, sorteados: s.sorteados };
 }
-
+app.get('/cartela/:codigo/:cartelaId', (req, res) => {
+  const sala = salas[req.params.codigo.toUpperCase()];
+  if (!sala) return res.json({ ok: false, erro: 'Sala não encontrada' });
+  for (const [idUnico, carts] of Object.entries(sala.cartelasVendidasPorIdUnico)) {
+    const found = carts.find(c => c.id === req.params.cartelaId.toUpperCase());
+    if (found) return res.json({ ok: true, cartela: found, sorteados: sala.sorteados, idUnico });
+  }
+  res.json({ ok: false, erro: 'Cartela não encontrada' });
+});
 io.on('connection', (socket) => {
   console.log(`[+] ${socket.id}`);
 
@@ -809,6 +862,31 @@ setTimeout(()=>{
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
     io.to(codigo).emit('numero_sorteado', res);
     
+	socket.on('zerar_sorteio', ({ codigo }, cb) => {
+  const s = salas[codigo];
+  if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
+  s.sorteados = [];
+  s.ativa = false;
+  s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
+  salvarSalas();
+  io.to(codigo).emit('sorteio_zerado');
+  cb && cb({ ok: true });
+});
+
+socket.on('limpar_cartelas', ({ codigo }, cb) => {
+  const s = salas[codigo];
+  if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
+  s.cartelasVendidasPorIdUnico = {};
+  s.solicitacoes = {};
+  s.pendingCartelas = {};
+  s.sorteados = [];
+  s.ativa = false;
+  s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
+  salvarSalas();
+  io.to(codigo).emit('cartelas_limpas');
+  cb && cb({ ok: true });
+});
+	
     Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
       carts.forEach(cartela => {
         let marc = 0, tot = 0;
