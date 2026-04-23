@@ -450,7 +450,7 @@ function renderCartelas(){
     var v=c.grid[r][col];var el=document.createElement('div');
     if(v==='FREE'){el.className='cel free';el.innerHTML='⭐';}
     else{
-      el.className='cel'+(m.map(Number).indexOf(Number(v))!==-1?' marc':'');
+      el.className='cel'+(m.indexOf(v)!==-1||m.indexOf(String(v))!==-1||m.indexOf(Number(v))!==-1?' marc':'');
       el.textContent=v;
       (function(val,cid,e){e.onclick=function(){
         var arr=marc[cid]||[];var i=arr.indexOf(val);
