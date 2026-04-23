@@ -857,7 +857,15 @@ setTimeout(()=>{
         }
         const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
         if (marc === tot - 1) io.to(codigo).emit('alerta_jogador', { nome, tipo: 'quase', texto: '🔥 ' + nome + ' está quase!' });
-        if (marc === tot) io.to(codigo).emit('alerta_jogador', { nome, tipo: 'bingo', texto: '🎉 ' + nome + ' completou!' });
+        if (marc === tot && !s.vencedor) {
+          io.to(codigo).emit('alerta_jogador', { nome, tipo: 'bingo', texto: '🎉 ' + nome + ' completou!' });
+          // bingo automático pelo servidor
+          s.vencedor = { idUnico, nome, cartelaId: cartela.id, automatico: true };
+          s.ativa = false;
+          io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
+          // avisa ADM especificamente
+          io.to(s.adm.socketId).emit('bingo_automatico', { nome, cartelaId: cartela.id, idUnico });
+        }
       });
     });
     cb({ ok: true, ...res });
