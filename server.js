@@ -983,6 +983,7 @@ setTimeout(()=>{
  socket.on('sortear', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false });
+    if (s.vencedor) return cb({ ok: false, erro: 'Jogo já encerrado' });
     if (!s.ativa) s.ativa = true;
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
