@@ -246,6 +246,11 @@ document.getElementById('btnRecuperar').onclick=function(){
       meuIdUnico=d.idUnico;
       localStorage.setItem('luxbingo_id_'+COD,d.idUnico);
       var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+     // Se a sala da cartela é diferente da sala atual, redireciona
+      if(d.codigoSala && d.codigoSala !== COD) {
+        window.location.href = SERVER+'/jogo/'+d.codigoSala+'?recuperar='+codCart;
+        return;
+      }
       conectarJogo(nome);
       tela(3);toast('✅ Cartela recuperada!');
     })
@@ -528,6 +533,13 @@ function salvarLocal(nome){
 }
 window.onload=function(){
   renderGrid();
+  var params=new URLSearchParams(window.location.search);
+  var autoRec=params.get('recuperar');
+  if(autoRec){
+    document.getElementById('iCodCart').value=autoRec.toUpperCase();
+    setTimeout(function(){document.getElementById('btnRecuperar').click();},500);
+    return;
+  }
   var nome=localStorage.getItem('luxbingo_nome_'+COD);
   if(nome){
     var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
@@ -659,11 +671,13 @@ function sorteiarNumero(sala) {
   return { numero: num, sorteados: s.sorteados };
 }
 app.get('/cartela/:codigo/:cartelaId', (req, res) => {
-  const sala = salas[req.params.codigo.toUpperCase()];
-  if (!sala) return res.json({ ok: false, erro: 'Sala não encontrada' });
-  for (const [idUnico, carts] of Object.entries(sala.cartelasVendidasPorIdUnico)) {
-    const found = carts.find(c => c.id === req.params.cartelaId.toUpperCase());
-    if (found) return res.json({ ok: true, cartela: found, sorteados: sala.sorteados, idUnico });
+  const cartelaId = req.params.cartelaId.toUpperCase();
+  // Busca em todas as salas, não só na sala do código
+  for (const sala of Object.values(salas)) {
+    for (const [idUnico, carts] of Object.entries(sala.cartelasVendidasPorIdUnico)) {
+      const found = carts.find(c => c.id === cartelaId);
+      if (found) return res.json({ ok: true, cartela: found, sorteados: sala.sorteados, idUnico, codigoSala: sala.codigo });
+    }
   }
   res.json({ ok: false, erro: 'Cartela não encontrada' });
 });
