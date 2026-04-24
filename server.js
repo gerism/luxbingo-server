@@ -247,7 +247,7 @@ document.getElementById('btnRecuperar').onclick=function(){
             marc[d.cartela.id].push(n);
         }
       });
-      meuIdUnico=d.idUnico;
+     meuIdUnico=d.idUnico;
       localStorage.setItem('luxbingo_id_'+COD,d.idUnico);
       var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
       if(!nome||nome==='Jogador'){
@@ -255,8 +255,27 @@ document.getElementById('btnRecuperar').onclick=function(){
         nome=nomeInput&&nomeInput.value.trim()||'Jogador';
       }
       localStorage.setItem('luxbingo_nome_'+COD,nome);
-      conectarJogo(nome);
-      tela(3);toast('✅ Cartela recuperada!');
+      // Espera socket conectar antes de mostrar cartela
+      if(sock)sock.disconnect();
+      sock=io(SERVER,{transports:['websocket']});
+      sock.once('connect',function(){
+        registrarEventos(nome);
+        sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
+          cartelas=[d.cartela];
+          nums=d.sorteados||[];
+          marc={};
+          marc[d.cartela.id]=[];
+          nums.forEach(function(n){
+            for(var row=0;row<5;row++)for(var col=0;col<5;col++){
+              if(d.cartela.grid[row][col]===n && marc[d.cartela.id].indexOf(n)===-1)
+                marc[d.cartela.id].push(n);
+            }
+          });
+          renderCartelas();renderGrid();
+          tela(3);toast('✅ Cartela recuperada!');
+        });
+      });
+      sock.on('connect_error',function(){toast('❌ Erro de conexão!',true);});
     })
     .catch(function(){toast('❌ Erro de conexão!',true);});
 };
