@@ -93,7 +93,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:clamp(10px,1.8vw,22px);font-weight:900;color:var(--text);cursor:pointer;user-select:none}
 .cartela-card{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;margin-bottom:8px;max-width:420px;width:100%;margin-left:auto;margin-right:auto}
 .cartelas-area{flex:1;overflow:hidden;display:flex;flex-direction:column;width:100%}
-.cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 10px;display:flex;flex-direction:column;align-items:center}
+.cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 60px;display:flex;flex-direction:column;align-items:center}
 .cel.marc{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy)}
 .cel.free{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy);cursor:default}
 .bingo-btn{width:100%;padding:10px;background:linear-gradient(135deg,#2ecc71,#27ae60);border:none;border-radius:0 0 10px 10px;font-size:14px;font-weight:900;color:#fff;letter-spacing:2px;cursor:pointer;display:none}
@@ -103,7 +103,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .bb-icon{font-size:28px;display:block;margin-bottom:2px}
 .bb-title{font-size:15px;font-weight:900;color:var(--navy);letter-spacing:2px}
 .bb-sub{font-size:10px;color:rgba(13,27,46,.7);margin-top:2px}
-.bottom-bar{display:flex;gap:6px;padding:6px 10px 10px;flex-shrink:0;border-top:1px solid rgba(201,162,39,.15)}
+.bottom-bar{display:flex;gap:6px;padding:6px 10px 10px;flex-shrink:0;border-top:1px solid rgba(201,162,39,.15);padding-bottom:max(10px,env(safe-area-inset-bottom))}
 .btn-audio{flex:1;padding:9px;background:transparent;border:1.5px solid rgba(201,162,39,.4);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit}
 .btn-mais{flex:1;padding:9px;background:rgba(201,162,39,.1);border:1.5px solid rgba(201,162,39,.3);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit}
 .toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);padding:8px 18px;border-radius:50px;font-weight:900;font-size:11px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
