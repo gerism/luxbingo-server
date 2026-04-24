@@ -40,6 +40,11 @@ app.get('/jogo/:codigo', (req, res) => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lux Bingo</title>
 <link rel="icon" type="image/png" href="/icon.png">
+<meta property="og:title" content="Lux Bingo 🎰">
+<meta property="og:description" content="Você foi convidado para jogar Bingo ao vivo! Clique para participar.">
+<meta property="og:image" content="https://luxbingo-server-production.up.railway.app/logo.png">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#c9a227">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"><\/script>
 <style>
 :root{--navy:#0d1b2e;--navy2:#1a2d4e;--gold:#c9a227;--gold2:#f0c040;--gold3:#ffd966;--card:#0f2240;--text:#e8d5a3;--textl:rgba(232,213,163,.6)}
