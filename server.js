@@ -176,10 +176,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
       <span class="num-lbl">Último</span>
       <div class="num-atual" id="nAtual">--</div>
     </div>
-    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-      <div id="codCartBox" style="display:none;font-size:9px;font-weight:700;color:var(--gold2);background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:6px;padding:4px 8px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
-      <button id="btnCopiarCod" style="display:none;background:rgba(201,162,39,.2);border:1px solid rgba(201,162,39,.4);border-radius:6px;padding:4px 8px;font-size:9px;font-weight:700;color:var(--gold2);cursor:pointer;white-space:nowrap">📋 Copiar</button>
-    </div>
+ 
   </div>
   <div id="alertaBox" style="display:none"></div>
   <div id="bingoBox"></div>
@@ -191,8 +188,9 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
       </div>
     </div>
   </div>
-  <div class="bottom-bar">
+<div class="bottom-bar">
     <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
+    <button id="btnCopiarCod" style="display:none;flex:1;padding:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;font-size:11px;font-weight:900;color:var(--navy);cursor:pointer;font-family:inherit">📋 Copiar Código</button>
     <button class="btn-mais" id="btnMais" style="display:none"></button>
   </div>
 </div>
