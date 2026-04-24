@@ -581,7 +581,7 @@ async function salvarSalas() {
     const resp = await fetch(`${UPSTASH_URL}/set/luxbingo_salas`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify([valor])
+      body: JSON.stringify(["luxbingo_salas", valor])
     });
     const result = await resp.json();
     console.log('[REDIS SAVE]', JSON.stringify(result));
@@ -675,11 +675,12 @@ function sorteiarNumero(sala) {
 }
 app.get('/cartela/:codigo/:cartelaId', (req, res) => {
   const cartelaId = req.params.cartelaId.toUpperCase();
-  // Busca em todas as salas, não só na sala do código
   for (const sala of Object.values(salas)) {
+    if (!sala || !sala.cartelasVendidasPorIdUnico) continue;
     for (const [idUnico, carts] of Object.entries(sala.cartelasVendidasPorIdUnico)) {
+      if (!carts) continue;
       const found = carts.find(c => c.id === cartelaId);
-      if (found) return res.json({ ok: true, cartela: found, sorteados: sala.sorteados, idUnico, codigoSala: sala.codigo });
+      if (found) return res.json({ ok: true, cartela: found, sorteados: sala.sorteados||[], idUnico, codigoSala: sala.codigo });
     }
   }
   res.json({ ok: false, erro: 'Cartela não encontrada' });
