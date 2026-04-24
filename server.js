@@ -426,7 +426,7 @@ function conectarJogo(nome){
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(r&&r.ok){
         nums=r.sorteados||nums;
-        if(r.youtubeLink)setYoutube(r.youtubeLink);
+        if(r.youtubeLink){setYoutube(r.youtubeLink);mostrarYoutube();}
         if(r.cartelasExistentes && r.cartelasExistentes.length > 0) {
          cartelas = r.cartelasExistentes;
         nums = r.sorteados || [];
