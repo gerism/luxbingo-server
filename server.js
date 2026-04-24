@@ -232,7 +232,11 @@ document.getElementById('btnRecuperar').onclick=function(){
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d.ok){toast('❌ '+(d.erro||'Cartela não encontrada!'),true);return;}
-      // Recalcula marc com base nos sorteados atuais do servidor
+      // Se a cartela é de outra sala, redireciona
+      if(d.codigoSala && d.codigoSala !== COD){
+        window.location.href=SERVER+'/jogo/'+d.codigoSala+'?recuperar='+encodeURIComponent(codCart);
+        return;
+      }
       cartelas=[d.cartela];
       nums=d.sorteados||[];
       marc={};
@@ -246,11 +250,11 @@ document.getElementById('btnRecuperar').onclick=function(){
       meuIdUnico=d.idUnico;
       localStorage.setItem('luxbingo_id_'+COD,d.idUnico);
       var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
-     // Se a sala da cartela é diferente da sala atual, redireciona
-      if(d.codigoSala && d.codigoSala !== COD) {
-        window.location.href = SERVER+'/jogo/'+d.codigoSala+'?recuperar='+codCart;
-        return;
+      if(!nome||nome==='Jogador'){
+        var nomeInput=document.getElementById('iNome');
+        nome=nomeInput&&nomeInput.value.trim()||'Jogador';
       }
+      localStorage.setItem('luxbingo_nome_'+COD,nome);
       conectarJogo(nome);
       tela(3);toast('✅ Cartela recuperada!');
     })
