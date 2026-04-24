@@ -696,6 +696,23 @@ io.on('connection', (socket) => {
     socket.data.sala = codigo;
     socket.data.papel = 'adm';
     console.log(`[RECONEXAO] ADM ${codigo}`);
+    // Reenviar solicitações pendentes
+    const pendentes = Object.values(s.solicitacoes).filter(sol => sol.status === 'pendente');
+    pendentes.forEach(sol => {
+      setTimeout(() => {
+        socket.emit('nova_solicitacao', {
+          idUnico: sol.idUnico,
+          nome: sol.nome,
+          cpf: sol.cpf,
+          celular: sol.celular,
+          chavePix: sol.chavePix,
+          email: sol.email,
+          cartelasJaTem: sol.cartelasJaTem,
+          qtdSolicitada: sol.qtdSolicitada || 1,
+          timestamp: sol.timestamp
+        });
+      }, 500);
+    });
     cb && cb({ ok: true });
   });
 
