@@ -603,8 +603,7 @@ async function carregarSalas() {
   } catch(e) { console.log('[REDIS LOAD ERROR]', e.message); }
 }
 
-carregarSalas();
-
+// carregarSalas será chamado dentro do listen
 function gerarCodigo() {
   const l = 'ABCDEFGHJKLMNPQRSTUVWXYZ', n = '23456789';
   let c = '';
@@ -983,6 +982,8 @@ socket.on('zerar_sorteio', ({ codigo }, cb) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, async () => {
-  console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`);
+carregarSalas().then(() => {
+  server.listen(PORT, () => {
+    console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`);
+  });
 });
