@@ -538,13 +538,10 @@ function falarNumero(num){
 }
 function copiarCodigos(){
   var codigos=cartelas.map(function(c){return c.id;}).join(', ');
-  var txt='Meus códigos Lux Bingo: '+codigos;
-  if(navigator.share){
-    navigator.share({title:'Lux Bingo',text:txt});
-  } else if(navigator.clipboard){
-    navigator.clipboard.writeText(txt).then(function(){toast('📋 Código copiado!');});
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(codigos).then(function(){toast('📋 Código copiado!');});
   } else {
-    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    var ta=document.createElement('textarea');ta.value=codigos;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
     toast('📋 Código copiado!');
   }
 }
