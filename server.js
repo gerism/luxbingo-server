@@ -66,7 +66,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .aguard-sub{font-size:11px;color:var(--textl);margin-top:5px;line-height:1.5}
 .pix-val{font-size:28px;font-weight:900;color:var(--gold2);text-align:center;margin:6px 0}
 .pix-chave{font-size:13px;font-weight:900;color:var(--gold2);padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);border-radius:8px;word-break:break-all;text-align:center}
-.tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden;position:relative}
+.tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
 .tela-jogo.ativo{display:flex}
 @media(min-width:600px){.cartelas-scroll{display:flex;justify-content:center;}.cartela-card{max-width:380px;width:100%}}
 .yt-wrap{width:100%;background:#000;position:sticky;top:0;z-index:10;flex-shrink:0}
@@ -182,28 +182,25 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
 </div>
 <div class="tela-jogo" id="t3">
-  <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;">
-  <div class="yt-wrap" id="ytWrap" style="display:none">
-    <iframe id="ytFrame" allowfullscreen allow="autoplay"></iframe>
-  </div>
-<div class="info-bar">
-    <div>
-      <span class="num-lbl">Último</span>
-      <div class="num-atual" id="nAtual">--</div>
+  <div id="jogoScroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;">
+    <div class="yt-wrap" id="ytWrap" style="display:none">
+      <iframe id="ytFrame" allowfullscreen allow="autoplay"></iframe>
     </div>
- 
-  </div>
-  <div id="alertaBox" style="display:none"></div>
-  <div id="bingoBox"></div>
-  <div class="cartelas-area">
-    <div class="cartelas-tabs" id="cartTabs"></div>
-    <div class="cartelas-scroll" id="cartScroll">
+    <div class="info-bar">
+      <div>
+        <span class="num-lbl">Último</span>
+        <div class="num-atual" id="nAtual">--</div>
+      </div>
+    </div>
+    <div id="alertaBox" style="display:none"></div>
+    <div id="bingoBox"></div>
+    <div class="cartelas-tabs" id="cartTabs" style="padding:6px 10px 0;display:flex;gap:4px;flex-shrink:0"></div>
+    <div id="cartScroll" style="padding:6px 10px 10px;display:flex;flex-direction:column;align-items:center">
       <div style="text-align:center;padding:30px 16px;color:var(--textl);font-size:12px" id="semCartela">
         ⏳ Aguardando cartela ser liberada...
       </div>
     </div>
   </div>
-</div>
   <div class="bottom-bar">
     <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
     <button id="btnCopiarCod" style="display:none;flex:1;padding:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;font-size:11px;font-weight:900;color:var(--navy);cursor:pointer;font-family:inherit">📋 Copiar Código</button>
