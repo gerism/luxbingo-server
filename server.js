@@ -535,16 +535,6 @@ function salvarLocal(nome){
     localStorage.setItem('luxbingo_cart_'+COD+'_'+c.id,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
   });
 }
-function copiarCodigo(cod){
-  var ta=document.createElement('textarea');
-  ta.value=cod;
-  document.body.appendChild(ta);
-  ta.select();
-  document.execCommand('copy');
-  document.body.removeChild(ta);
-  toast('📋 Código '+cod+' copiado!');
-}
-
 window.onload=function(){
   renderGrid();
   var params=new URLSearchParams(window.location.search);
