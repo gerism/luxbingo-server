@@ -277,6 +277,8 @@ document.getElementById('btnRecuperar').onclick=function(){
       if(d.youtubeLink)setYoutube(d.youtubeLink);
       conectarJogo(nome);
       tela(3);
+      renderCartelas();
+      renderGrid();
       if(d.youtubeLink)mostrarYoutube();
       toast('✅ Cartela recuperada!');
     })
@@ -427,7 +429,7 @@ function conectarJogo(nome){
          cartelas = r.cartelasExistentes;
         nums = r.sorteados || [];
         marc = {};
-        cartelas.forEach(function(c){
+cartelas.forEach(function(c){
           marc[c.id]=[];
           nums.forEach(function(n){
             for(var row=0;row<5;row++)for(var col=0;col<5;col++){
@@ -435,6 +437,8 @@ function conectarJogo(nome){
                 marc[c.id].push(n);
             }
           });
+          // marca FREE automaticamente
+          if(marc[c.id].indexOf('FREE')===-1)marc[c.id].push('FREE');
         });
         }
         salvarLocal(nome);renderCartelas();renderGrid();mostrarCodigosBar();verBingo();
