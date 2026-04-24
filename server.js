@@ -66,10 +66,10 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .aguard-sub{font-size:11px;color:var(--textl);margin-top:5px;line-height:1.5}
 .pix-val{font-size:28px;font-weight:900;color:var(--gold2);text-align:center;margin:6px 0}
 .pix-chave{font-size:13px;font-weight:900;color:var(--gold2);padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);border-radius:8px;word-break:break-all;text-align:center}
-.tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
+.tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden;position:relative}
 .tela-jogo.ativo{display:flex}
 @media(min-width:600px){.cartelas-scroll{display:flex;justify-content:center;}.cartela-card{max-width:380px;width:100%}}
-.yt-wrap{width:100%;background:#000;flex-shrink:0;position:relative}
+.yt-wrap{width:100%;background:#000;position:sticky;top:0;z-index:10;flex-shrink:0}
 .yt-wrap iframe{width:100%;display:block;border:none}
 .info-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(201,162,39,.2);flex-shrink:0}
 .num-atual{font-size:32px;font-weight:900;color:var(--gold2);min-width:44px;text-align:center;line-height:1}
@@ -92,7 +92,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px 6px 6px;width:100%}
 .cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:clamp(10px,1.8vw,22px);font-weight:900;color:var(--text);cursor:pointer;user-select:none}
 .cartela-card{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;margin-bottom:8px;max-width:420px;width:100%;margin-left:auto;margin-right:auto}
-.cartelas-area{flex:1;overflow:auto;display:flex;flex-direction:column;width:100%}
+.cartelas-area{flex:1;overflow-y:auto;display:flex;flex-direction:column;width:100%}
 .cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 10px;display:flex;flex-direction:column;align-items:center}
 .cel.marc{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy)}
 .cel.free{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy);cursor:default}
@@ -182,6 +182,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
 </div>
 <div class="tela-jogo" id="t3">
+  <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;">
   <div class="yt-wrap" id="ytWrap" style="display:none">
     <iframe id="ytFrame" allowfullscreen allow="autoplay"></iframe>
   </div>
@@ -202,7 +203,8 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
       </div>
     </div>
   </div>
-<div class="bottom-bar">
+</div>
+  <div class="bottom-bar">
     <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
     <button id="btnCopiarCod" style="display:none;flex:1;padding:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;font-size:11px;font-weight:900;color:var(--navy);cursor:pointer;font-family:inherit">📋 Copiar Código</button>
     <button class="btn-mais" id="btnMais" style="display:none"></button>
