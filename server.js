@@ -66,7 +66,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .aguard-sub{font-size:11px;color:var(--textl);margin-top:5px;line-height:1.5}
 .pix-val{font-size:28px;font-weight:900;color:var(--gold2);text-align:center;margin:6px 0}
 .pix-chave{font-size:13px;font-weight:900;color:var(--gold2);padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);border-radius:8px;word-break:break-all;text-align:center}
-.tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
+.tela-jogo{display:none;flex-direction:column;width:100vw;height:100dvh;overflow:hidden}
 .tela-jogo.ativo{display:flex}
 @media(min-width:600px){.cartelas-scroll{display:flex;justify-content:center;}.cartela-card{max-width:380px;width:100%}}
 .yt-wrap{width:100%;background:#000;flex-shrink:0;position:relative}
@@ -93,7 +93,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:clamp(10px,1.8vw,22px);font-weight:900;color:var(--text);cursor:pointer;user-select:none}
 .cartela-card{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;margin-bottom:8px;max-width:420px;width:100%;margin-left:auto;margin-right:auto}
 .cartelas-area{flex:1;overflow:hidden;display:flex;flex-direction:column;width:100%}
-.cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 60px;display:flex;flex-direction:column;align-items:center}
+.cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 10px;display:flex;flex-direction:column;align-items:center}
 .cel.marc{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy)}
 .cel.free{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:var(--gold3);color:var(--navy);cursor:default}
 .bingo-btn{width:100%;padding:10px;background:linear-gradient(135deg,#2ecc71,#27ae60);border:none;border-radius:0 0 10px 10px;font-size:14px;font-weight:900;color:#fff;letter-spacing:2px;cursor:pointer;display:none}
