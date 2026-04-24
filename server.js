@@ -261,8 +261,11 @@ document.getElementById('btnRecuperar').onclick=function(){
         nome=nomeInput&&nomeInput.value.trim()||'Jogador';
       }
       localStorage.setItem('luxbingo_nome_'+COD,nome);
+      if(d.youtubeLink)setYoutube(d.youtubeLink);
       conectarJogo(nome);
-      tela(3);toast('✅ Cartela recuperada!');
+      tela(3);
+      if(d.youtubeLink)mostrarYoutube();
+      toast('✅ Cartela recuperada!');
     })
     .catch(function(){toast('❌ Erro de conexão!',true);});
 };
@@ -718,7 +721,7 @@ app.get('/cartela/:codigo/:cartelaId', (req, res) => {
     for (const [idUnico, carts] of Object.entries(sala.cartelasVendidasPorIdUnico)) {
       if (!carts) continue;
       const found = carts.find(c => c.id === cartelaId);
-      if (found) return res.json({ ok: true, cartela: found, sorteados: sala.sorteados||[], idUnico, codigoSala: sala.codigo });
+      if (found) return res.json({ ok: true, cartela: found, sorteados: sala.sorteados||[], idUnico, codigoSala: sala.codigo, youtubeLink: sala.youtubeLink||'' });
     }
   }
   res.json({ ok: false, erro: 'Cartela não encontrada' });
