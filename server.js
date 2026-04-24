@@ -74,8 +74,8 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .tela-jogo{display:none;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
 .tela-jogo.ativo{display:flex}
 @media(min-width:600px){.cartelas-scroll{display:flex;justify-content:center;}.cartela-card{max-width:380px;width:100%}}
-.yt-wrap{width:100%;background:#000;position:sticky;top:0;z-index:10;flex-shrink:0}
-.yt-wrap iframe{width:100%;display:block;border:none}
+.yt-wrap{width:100%;background:#000;position:sticky;top:0;z-index:10;flex-shrink:0;max-height:35vh}
+.yt-wrap iframe{width:100%;display:block;border:none;max-height:35vh}
 .info-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(201,162,39,.2);flex-shrink:0}
 .num-atual{font-size:32px;font-weight:900;color:var(--gold2);min-width:44px;text-align:center;line-height:1}
 .num-lbl{font-size:7px;color:var(--textl);text-transform:uppercase;letter-spacing:1px;display:block}
