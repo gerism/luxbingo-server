@@ -90,7 +90,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .letras-row{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:4px 6px 0}
 .letra{text-align:center;font-size:14px;font-weight:900;color:var(--gold);padding:2px 0}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px 6px 6px;width:100%}
-.cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:clamp(10px,1.8vw,22px);font-weight:900;color:var(--text);cursor:pointer;user-select:none}
+.cel{aspect-ratio:1/0.85;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:clamp(10px,1.8vw,22px);font-weight:900;color:var(--text);cursor:pointer;user-select:none}
 .cartela-card{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;margin-bottom:8px;max-width:420px;width:100%;margin-left:auto;margin-right:auto}
 .cartelas-area{flex:1;overflow-y:auto;display:flex;flex-direction:column;width:100%}
 .cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 10px;display:flex;flex-direction:column;align-items:center}
