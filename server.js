@@ -472,7 +472,7 @@ function renderCartelas(){
   var c=cartelas[tabAtiva];
   var m=marc[c.id]||[];
   var div=document.createElement('div');div.className='cartela-card';
-  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div style="display:flex;align-items:center;gap:6px"><div class="cartela-num">'+c.id+'</div><button onclick="copiarCodigo(\''+c.id+'\')" style="background:rgba(201,162,39,.2);border:1px solid rgba(201,162,39,.4);border-radius:6px;padding:2px 8px;font-size:9px;font-weight:700;color:var(--gold2);cursor:pointer;font-family:inherit">📋</button></div></div>';
+  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div></div>';
   var letRow=document.createElement('div');letRow.className='letras-row';
   ['B','I','N','G','O'].forEach(function(l){var s=document.createElement('div');s.className='letra';s.textContent=l;letRow.appendChild(s);});
   div.appendChild(letRow);
@@ -535,16 +535,6 @@ function salvarLocal(nome){
     localStorage.setItem('luxbingo_cart_'+COD+'_'+c.id,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
   });
 }
-function copiarCodigo(cod){
-  var ta=document.createElement('textarea');
-  ta.value=cod;
-  document.body.appendChild(ta);
-  ta.select();
-  document.execCommand('copy');
-  document.body.removeChild(ta);
-  toast('📋 Código '+cod+' copiado!');
-}
-
 window.onload=function(){
   renderGrid();
   var params=new URLSearchParams(window.location.search);
