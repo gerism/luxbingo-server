@@ -14,6 +14,20 @@ const io = new Server(server, {
 
 app.get('/', (_, res) => res.send('Lux Bingo Server online ✅'));
 app.get('/health', (_, res) => res.json({ status: 'ok', salas: Object.keys(salas).length }));
+app.get('/sala-adm/:admId', (req, res) => {
+  const admId = req.params.admId.toUpperCase();
+  const sala = salas[admId];
+  if (!sala) return res.json({ ok: false });
+  res.json({
+    ok: true,
+    nome: sala.adm.nome || '',
+    valorCartela: sala.valorCartela || '',
+    chavePix: sala.chavePix || '',
+    horario: sala.horario || '',
+    youtubeLink: sala.youtubeLink || '',
+    quantidadeCartelas: sala.cartelas ? sala.cartelas.length : 100
+  });
+});
 
 const LOGO = 'https://luxbingo-server-production.up.railway.app/logo.png';
 
