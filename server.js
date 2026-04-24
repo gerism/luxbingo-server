@@ -950,7 +950,7 @@ socket.on('zerar_sorteio', ({ codigo }, cb) => {
     cb && cb({ ok: true });
   });
 
-  socket.on('limpar_cartelas', ({ codigo }, cb) => {
+socket.on('limpar_cartelas', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
     s.cartelasVendidasPorIdUnico = {};
@@ -958,6 +958,9 @@ socket.on('zerar_sorteio', ({ codigo }, cb) => {
     s.pendingCartelas = {};
     s.sorteados = [];
     s.ativa = false;
+    s.vencedor = null;
+    s.jogadoresPorIdUnico = {};
+    s.jogadoresPorSocket = {};
     s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
     salvarSalas();
     io.to(codigo).emit('cartelas_limpas');
