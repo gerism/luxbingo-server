@@ -556,14 +556,19 @@ const UPSTASH_URL = process.env.UPSTASH_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
 
 async function salvarSalas() {
-  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) {
+    console.log('[REDIS] Variáveis não configuradas! URL:', !!UPSTASH_URL, 'TOKEN:', !!UPSTASH_TOKEN);
+    return;
+  }
   try {
     const valor = JSON.stringify(salas);
-    await fetch(`${UPSTASH_URL}/set/luxbingo_salas`, {
+    const resp = await fetch(`${UPSTASH_URL}/set/luxbingo_salas`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify([valor])
     });
+    const result = await resp.json();
+    console.log('[REDIS SAVE]', JSON.stringify(result));
   } catch(e) { console.log('[REDIS SAVE ERROR]', e.message); }
 }
 
