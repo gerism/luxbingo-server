@@ -167,10 +167,14 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   <div class="yt-wrap" id="ytWrap" style="display:none">
     <iframe id="ytFrame" allowfullscreen allow="autoplay"></iframe>
   </div>
-  <div class="info-bar">
+<div class="info-bar">
     <div>
       <span class="num-lbl">Último</span>
       <div class="num-atual" id="nAtual">--</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <div id="codCartBox" style="display:none;font-size:9px;font-weight:700;color:var(--gold2);background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:6px;padding:4px 8px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      <button id="btnCopiarCod" style="display:none;background:rgba(201,162,39,.2);border:1px solid rgba(201,162,39,.4);border-radius:6px;padding:4px 8px;font-size:9px;font-weight:700;color:var(--gold2);cursor:pointer;white-space:nowrap">📋 Copiar</button>
     </div>
   </div>
   <div id="alertaBox" style="display:none"></div>
@@ -415,7 +419,7 @@ function conectarJogo(nome){
           });
         });
         }
-        salvarLocal(nome);renderCartelas();renderGrid();verBingo();
+        salvarLocal(nome);renderCartelas();renderGrid();mostrarCodigosBar();verBingo();
       }
     });
   });
@@ -527,7 +531,27 @@ function falarNumero(num){
   var m2=new SpeechSynthesisUtterance('Número '+num);m2.lang='pt-BR';m2.rate=0.9;m2.volume=1;
   window.speechSynthesis.speak(m1);m1.onend=function(){setTimeout(function(){window.speechSynthesis.speak(m2);},800);};
 }
+function mostrarCodigosBar(){
+  if(!cartelas.length)return;
+  var codigos=cartelas.map(function(c){return c.id;}).join(', ');
+  var box=document.getElementById('codCartBox');
+  var btn=document.getElementById('btnCopiarCod');
+  if(box){box.textContent='🎟️ '+codigos;box.style.display='block';}
+  if(btn){btn.style.display='block';}
+  btn.onclick=function(){
+    var txt=codigos;
+    if(navigator.share){
+      navigator.share({title:'Meus códigos Lux Bingo',text:'Meus códigos de cartela: '+txt});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(txt).then(function(){toast('📋 Código copiado!');});
+    } else {
+      var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+      toast('📋 Código copiado!');
+    }
+  };
+}
 function salvarLocal(nome){
+  if(!cartelas.length)return;
   if(!cartelas.length)return;
   var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
   localStorage.setItem(chave,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
