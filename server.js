@@ -556,11 +556,13 @@ function falarNumero(num){
   window.speechSynthesis.speak(m1);m1.onend=function(){setTimeout(function(){window.speechSynthesis.speak(m2);},800);};
 }
 function copiarCodigos(){
-  var codigos=cartelas.map(function(c){return c.id;}).join(', ');
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(codigos).then(function(){toast('📋 Código copiado!');});
+  var codigo=cartelas[tabAtiva]?cartelas[tabAtiva].id:cartelas[0].id;
+  if(navigator.share){
+    navigator.share({title:'Lux Bingo',text:codigo});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(codigo).then(function(){toast('📋 Código copiado!');});
   } else {
-    var ta=document.createElement('textarea');ta.value=codigos;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    var ta=document.createElement('textarea');ta.value=codigo;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
     toast('📋 Código copiado!');
   }
 }
