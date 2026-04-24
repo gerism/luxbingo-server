@@ -987,4 +987,3 @@ carregarSalas().then(() => {
     console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`);
   });
 });
-});
