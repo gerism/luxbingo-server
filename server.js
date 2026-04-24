@@ -338,7 +338,7 @@ if(d.youtubeLink)setYoutube(d.youtubeLink);
     mostrarYoutube();
     tela(3);
     document.getElementById('semCartela').style.display='none';
-    salvarLocal(nome);renderCartelas();renderGrid();
+    salvarLocal(nome);renderCartelas();renderGrid();mostrarCodigosBar();
     if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
     else document.getElementById('btnMais').style.display='none';
     toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
