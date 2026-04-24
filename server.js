@@ -339,11 +339,13 @@ sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dad
 });
     });
   });
- sock.on('connect_error',function(){toast('❌ Erro de conexão!',true);});
+ sock.once('connect_error',function(){toast('❌ Erro de conexão!',true);});
 };
 function registrarEventos(nome){
   sock.on('connect',function(){
-    sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
+    if(cartelas.length>0){
+      sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
+    }
   });
   sock.on('cartela_aprovada',function(d){
     var novas=d.cartelas||[d.cartela];
