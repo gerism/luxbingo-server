@@ -426,10 +426,10 @@ function conectarJogo(nome){
       localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
     }
   }
-  if(sock)sock.disconnect();
+  if(sock){sock.off();sock.disconnect();}
   sock=io(SERVER,{transports:['websocket']});
-  sock.on('connect_error',function(e){console.log('reconexao erro:',e);});
-  sock.on('connect',function(){
+  sock.on('connect_error',function(){});
+  sock.once('connect',function(){
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(r&&r.ok){
         nums=r.sorteados||nums;
