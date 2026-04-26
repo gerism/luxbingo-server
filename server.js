@@ -757,8 +757,7 @@ app.get('/cartela/:codigo/:cartelaId', (req, res) => {
 });
 io.on('connection', (socket) => {
   console.log(`[+] ${socket.id}`);
-
-  socket.on('reconectar_adm', ({ codigo }, cb) => {
+socket.on('reconectar_adm', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s) return cb && cb({ ok: false });
     s.adm.socketId = socket.id;
@@ -766,6 +765,17 @@ io.on('connection', (socket) => {
     socket.data.sala = codigo;
     socket.data.papel = 'adm';
     console.log(`[RECONEXAO] ADM ${codigo}`);
+    // Reenviar jogadores conectados
+    const totalJogs = Object.keys(s.jogadoresPorIdUnico).length;
+    Object.entries(s.jogadoresPorIdUnico).forEach(([idUnico, jog]) => {
+      if (jog && jog.socketId) {
+        socket.emit('jogador_entrou', {
+          idUnico,
+          nome: jog.nome,
+          total: totalJogs
+        });
+      }
+    });
     // Reenviar solicitações pendentes
     const pendentes = Object.values(s.solicitacoes).filter(sol => sol.status === 'pendente');
     pendentes.forEach(sol => {
