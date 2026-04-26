@@ -852,8 +852,8 @@ io.on('connection', (socket) => {
     socket.data.sala = codigo.toUpperCase();
     socket.data.papel = 'jogador';
     socket.data.idUnico = idUnico;
-    
-    io.to(s.adm.socketId).emit('jogador_entrou', {
+ 
+ io.to(codigo.toUpperCase()).emit('jogador_entrou', {
       idUnico: idUnico,
       nome: nomeJogador,
       total: Object.keys(s.jogadoresPorIdUnico).length
