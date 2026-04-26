@@ -848,9 +848,10 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     
     const socketId = socket.id;
     
+    const eraNovo = !s.jogadoresPorIdUnico[idUnico];
     if (s.jogadoresPorIdUnico[idUnico]) {
       const oldSocketId = s.jogadoresPorIdUnico[idUnico].socketId;
-      delete s.jogadoresPorSocket[oldSocketId];
+      if (oldSocketId) delete s.jogadoresPorSocket[oldSocketId];
       s.jogadoresPorIdUnico[idUnico].socketId = socketId;
       s.jogadoresPorSocket[socketId] = idUnico;
     } else {
@@ -862,8 +863,8 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     socket.data.sala = codigo.toUpperCase();
     socket.data.papel = 'jogador';
     socket.data.idUnico = idUnico;
- 
- io.to(codigo.toUpperCase()).emit('jogador_entrou', {
+    
+    io.to(codigo.toUpperCase()).emit('jogador_entrou', {
       idUnico: idUnico,
       nome: nomeJogador,
       total: Object.keys(s.jogadoresPorIdUnico).length
