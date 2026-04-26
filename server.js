@@ -313,7 +313,7 @@ document.getElementById('btnConectar').onclick=function(){
     meuIdUnico = gerarIdUnico();
     localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
   }
-  if(sock)sock.disconnect();
+  if(sock){sock.off('connect_error');sock.disconnect();}
   sock=io(SERVER,{transports:['websocket']});
 sock.on('connect',function(){
     localStorage.setItem('luxbingo_nome_'+COD,nome);
@@ -345,7 +345,7 @@ sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dad
 });
     });
   });
- sock.once('connect_error',function(){if(!cartelas.length)toast('❌ Erro de conexão!',true);});
+ sock.once('connect_error',function(){if(!cartelas.length&&!meuIdUnico)toast('❌ Erro de conexão!',true);});
 };
 function registrarEventos(nome){
   sock.on('connect',function(){
@@ -428,7 +428,7 @@ function conectarJogo(nome){
   }
   if(sock)sock.disconnect();
   sock=io(SERVER,{transports:['websocket']});
-  sock.on('connect_error',function(){});
+  sock.on('connect_error',function(e){console.log('reconexao erro:',e);});
   sock.on('connect',function(){
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(r&&r.ok){
