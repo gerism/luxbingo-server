@@ -281,6 +281,11 @@ document.getElementById('btnRecuperar').onclick=function(){
       localStorage.setItem('luxbingo_nome_'+COD,nome);
       if(d.youtubeLink)setYoutube(d.youtubeLink);
       conectarJogo(nome);
+      tela(3);
+      renderCartelas();
+      renderGrid();
+      mostrarCodigosBar();
+      if(d.youtubeLink)mostrarYoutube();
       toast('✅ Cartela recuperada!');
     })
     .catch(function(){toast('❌ Erro de conexão!',true);});
@@ -444,8 +449,12 @@ function conectarJogo(nome){
             if(marc[c.id].indexOf('FREE')===-1)marc[c.id].push('FREE');
           });
         }
-        salvarLocal(nome);renderCartelas();renderGrid();mostrarCodigosBar();verBingo();
-        tela(3);
+       salvarLocal(nome);
+        if(r.cartelasExistentes&&r.cartelasExistentes.length>0){
+          renderCartelas();renderGrid();mostrarCodigosBar();verBingo();tela(3);
+        } else if(cartelas.length>0){
+          renderCartelas();renderGrid();mostrarCodigosBar();verBingo();
+        }
       }
     });
   });
