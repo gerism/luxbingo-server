@@ -281,10 +281,6 @@ document.getElementById('btnRecuperar').onclick=function(){
       localStorage.setItem('luxbingo_nome_'+COD,nome);
       if(d.youtubeLink)setYoutube(d.youtubeLink);
       conectarJogo(nome);
-      tela(3);
-      renderCartelas();
-      renderGrid();
-      if(d.youtubeLink)mostrarYoutube();
       toast('✅ Cartela recuperada!');
     })
     .catch(function(){toast('❌ Erro de conexão!',true);});
@@ -433,23 +429,23 @@ function conectarJogo(nome){
       if(r&&r.ok){
         nums=r.sorteados||nums;
         if(r.youtubeLink){setYoutube(r.youtubeLink);mostrarYoutube();}
-        if(r.cartelasExistentes && r.cartelasExistentes.length > 0) {
-         cartelas = r.cartelasExistentes;
-        nums = r.sorteados || [];
-        marc = {};
-cartelas.forEach(function(c){
-          marc[c.id]=[];
-          nums.forEach(function(n){
-            for(var row=0;row<5;row++)for(var col=0;col<5;col++){
-              if(c.grid[row][col]===n && marc[c.id].indexOf(n)===-1)
-                marc[c.id].push(n);
-            }
+        if(r.cartelasExistentes&&r.cartelasExistentes.length>0){
+          cartelas=r.cartelasExistentes;
+          nums=r.sorteados||[];
+          marc={};
+          cartelas.forEach(function(c){
+            marc[c.id]=[];
+            nums.forEach(function(n){
+              for(var row=0;row<5;row++)for(var col=0;col<5;col++){
+                if(c.grid[row][col]===n&&marc[c.id].indexOf(n)===-1)
+                  marc[c.id].push(n);
+              }
+            });
+            if(marc[c.id].indexOf('FREE')===-1)marc[c.id].push('FREE');
           });
-          // marca FREE automaticamente
-          if(marc[c.id].indexOf('FREE')===-1)marc[c.id].push('FREE');
-        });
         }
         salvarLocal(nome);renderCartelas();renderGrid();mostrarCodigosBar();verBingo();
+        tela(3);
       }
     });
   });
