@@ -388,10 +388,23 @@ if(d.youtubeLink)setYoutube(d.youtubeLink);
     b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>';
     document.getElementById('bingoBox').innerHTML='';document.getElementById('bingoBox').appendChild(b);
   });
-  sock.on('alerta_jogador',function(d){
-    var box=document.getElementById('alertaBox');
-    box.textContent=d.texto;box.className=d.tipo==='bingo'?'alerta-bingo':'alerta-quase';box.style.display='block';
-    if(d.tipo!=='bingo')setTimeout(function(){box.style.display='none';},5000);
+sock.on('alerta_jogador',function(d){
+    var old=document.getElementById('alertaJogador');if(old)document.body.removeChild(old);
+    var div=document.createElement('div');div.id='alertaJogador';
+    var cor=d.tipo==='bingo'?'rgba(46,204,113,.97)':'rgba(201,162,39,.97)';
+    div.style.cssText='position:fixed;top:0;left:0;width:100%;z-index:998;background:'+cor+';padding:20px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5)';
+    div.innerHTML='<div style="font-size:36px">'+(d.tipo==='bingo'?'🎉':'🔥')+'</div>'
+      +'<div style="font-size:20px;font-weight:900;color:#fff;margin:8px 0">'+d.texto+'</div>'
+      +(d.tipo!=='bingo'?'<div style="font-size:11px;color:rgba(255,255,255,.7)">Toque para fechar</div>':'');
+    if(d.tipo!=='bingo'){
+      div.onclick=function(){if(document.body.contains(div))document.body.removeChild(div);};
+      setTimeout(function(){if(document.body.contains(div))document.body.removeChild(div);},6000);
+    }
+    document.body.appendChild(div);
+  });
+  sock.on('fechar_alerta',function(){
+    var div=document.getElementById('alertaJogador');
+    if(div&&document.body.contains(div))document.body.removeChild(div);
   });
   sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
   sock.on('sorteio_zerado',function(){
@@ -683,34 +696,62 @@ function gerarCodigo() {
 }
 
 function gerarCartela90(usados) {
-  const grid = [];
-  const numeros = [];
-  let tentativas = 0;
-  while (numeros.length < 24 && tentativas < 1000) {
-    const n = Math.floor(Math.random() * 90) + 1;
-    if (numeros.indexOf(n) === -1 && usados.indexOf(n) === -1) numeros.push(n);
-    tentativas++;
-  }
-  while (numeros.length < 24) {
-    const n = Math.floor(Math.random() * 90) + 1;
-    if (numeros.indexOf(n) === -1) numeros.push(n);
-  }
-  for (let i = numeros.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [numeros[i], numeros[j]] = [numeros[j], numeros[i]];
-  }
-  let idx = 0;
-  for (let r = 0; r < 5; r++) {
-    const row = [];
-    for (let c = 0; c < 5; c++) {
-      if (r === 2 && c === 2) row.push('FREE');
-      else row.push(numeros[idx++]);
+  const faixas = [
+    { start: 1,  end: 18 },
+    { start: 19, end: 36 },
+    { start: 37, end: 54 },
+    { start: 55, end: 72 },
+    { start: 73, end: 90 },
+  ];
+  const grid = Array.from({length:5}, () => Array(5).fill(null));
+  for (let col = 0; col < 5; col++) {
+    const { start, end } = faixas[col];
+    const pool = [];
+    for (let n = start; n <= end; n++) {
+      if (!usados.includes(n)) pool.push(n);
     }
-    grid.push(row);
+    // fallback se esgotou
+    if (pool.length < 5) {
+      for (let n = start; n <= end; n++) {
+        if (!pool.includes(n)) pool.push(n);
+      }
+    }
+    // embaralha
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    // pega 5 números e ordena
+    const selecionados = pool.slice(0, 5).sort((a, b) => a - b);
+    for (let row = 0; row < 5; row++) {
+      if (row === 2 && col === 2) grid[row][col] = 'FREE';
+      else grid[row][col] = selecionados[row === 2 && col > 2 ? row : (row < 2 || col !== 2 ? row : row - 1)];
+    }
+  }
+  // corrige FREE no centro
+  for (let col = 0; col < 5; col++) {
+    const { start, end } = faixas[col];
+    const nums = [];
+    for (let row = 0; row < 5; row++) {
+      if (!(row === 2 && col === 2)) nums.push(grid[row][col]);
+    }
+    // reseleciona corretamente
+    const pool2 = [];
+    for (let n = start; n <= end; n++) if (!usados.includes(n)) pool2.push(n);
+    if (pool2.length < 4) for (let n = start; n <= end; n++) if (!pool2.includes(n)) pool2.push(n);
+    for (let i = pool2.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool2[i], pool2[j]] = [pool2[j], pool2[i]];
+    }
+    const sel = pool2.slice(0, col === 2 ? 4 : 5).sort((a, b) => a - b);
+    let si = 0;
+    for (let row = 0; row < 5; row++) {
+      if (row === 2 && col === 2) grid[row][col] = 'FREE';
+      else grid[row][col] = sel[si++];
+    }
   }
   return grid;
 }
-
 function gerarBolao(sala, qtd) {
   const cartelas = [];
   const usados = [];
@@ -1051,6 +1092,11 @@ socket.on('limpar_cartelas', ({ codigo }, cb) => {
     io.to(codigo).emit('cartelas_limpas');
     cb && cb({ ok: true });
   });
+  socket.on('fechar_alerta_jogadores', ({ codigo }, cb) => {
+    io.to(codigo).emit('fechar_alerta');
+    cb && cb({ ok: true });
+  });
+  
   socket.on('gritar_bingo', ({ codigo, cartelaId }, cb) => {
     const s = salas[codigo];
     if (!s || !s.ativa || s.vencedor) return cb({ ok: false });
