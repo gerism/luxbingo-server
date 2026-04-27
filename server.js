@@ -1061,6 +1061,10 @@ socket.on('limpar_cartelas', ({ codigo }, cb) => {
     
     s.vencedor = { idUnico: idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId };
     s.ativa = false;
+    salvarSalas();
+    io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
+    io.to(s.adm.socketId).emit('parar_sorteio');s.vencedor = { idUnico: idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId };
+    s.ativa = false;
     io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
     cb({ ok: true });
   });
