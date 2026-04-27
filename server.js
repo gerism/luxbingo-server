@@ -196,6 +196,10 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
         <span class="num-lbl">Último</span>
         <div class="num-atual" id="nAtual">--</div>
       </div>
+      <div id="premioJogBox" style="display:none;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:6px 12px;text-align:center;margin-left:auto">
+        <div style="font-size:8px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px">🏆 Prêmio</div>
+        <div style="font-size:18px;font-weight:900;color:var(--navy)" id="premioJogVal">--</div>
+      </div>
     </div>
     <div id="alertaBox" style="display:none"></div>
     <div id="bingoBox"></div>
@@ -323,6 +327,10 @@ sock.on('connect',function(){
       document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
       document.getElementById('pChave').textContent=r.chavePix||'--';
       if(r.horario){document.getElementById('pHorario').textContent='🕐 '+r.horario;document.getElementById('pHorario').style.display='block';}
+      if(r.premioEstimado){
+        var pb=document.getElementById('premioJogBox');var pv=document.getElementById('premioJogVal');
+        if(pb&&pv){pb.style.display='block';pv.textContent='R$ '+r.premioEstimado.toLocaleString('pt-BR',{minimumFractionDigits:2});}
+      }
       if(r.youtubeLink){setYoutube(r.youtubeLink);}
       if(r.cartelasExistentes && r.cartelasExistentes.length > 0) {
         cartelas = r.cartelasExistentes;
@@ -374,8 +382,12 @@ if(d.youtubeLink)setYoutube(d.youtubeLink);
   sock.on('cartela_rejeitada',function(d){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
   });
-  sock.on('numero_sorteado',function(d){
+ sock.on('numero_sorteado',function(d){
     nums=d.sorteados||nums;
+    if(d.premioEstimado){
+      var pb=document.getElementById('premioJogBox');var pv=document.getElementById('premioJogVal');
+      if(pb&&pv){pb.style.display='block';pv.textContent='R$ '+d.premioEstimado.toLocaleString('pt-BR',{minimumFractionDigits:2});}
+    }
     document.getElementById('nAtual').textContent=d.numero;
     cartelas.forEach(function(c){
       if(marc[c.id].indexOf(d.numero)===-1)marc[c.id].push(d.numero);
@@ -914,6 +926,8 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     }
     const cartelasExistentes = s.cartelasVendidasPorIdUnico[idUnico] || [];
     
+    const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
+    const premioEstimado = totalCartelas * s.valorCartela;
     cb({
       ok: true,
       sorteados: s.sorteados,
@@ -922,7 +936,8 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
       chavePix: s.chavePix,
       horario: s.horario,
       youtubeLink: s.youtubeLink,
-      cartelasExistentes: cartelasExistentes
+      cartelasExistentes: cartelasExistentes,
+      premioEstimado: premioEstimado
     });
   });
 
@@ -1039,7 +1054,9 @@ setTimeout(()=>{
     if (!s.ativa) s.ativa = true;
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
-    io.to(codigo).emit('numero_sorteado', res);
+    const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
+    const premioEstimado = totalCartelas * s.valorCartela;
+    io.to(codigo).emit('numero_sorteado', { ...res, premioEstimado });
     Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
 		
       carts.forEach(cartela => {
