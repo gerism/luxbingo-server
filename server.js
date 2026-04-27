@@ -1054,7 +1054,6 @@ setTimeout(()=>{
         const celMask = celular.length>=4 ? '('+celular.slice(0,2)+')******'+celular.slice(-2) : '';
         const nomeExib = nome + (celMask ? ' '+celMask : '');
         const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
-      const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
         if (marc === tot - 1) {
           io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
           io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1!' });
