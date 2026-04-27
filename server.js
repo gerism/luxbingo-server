@@ -396,9 +396,11 @@ sock.on('alerta_jogador',function(d){
     div.innerHTML='<div style="font-size:36px">'+(d.tipo==='bingo'?'🎉':'🔥')+'</div>'
       +'<div style="font-size:20px;font-weight:900;color:#fff;margin:8px 0">'+d.texto+'</div>'
       +(d.tipo!=='bingo'?'<div style="font-size:11px;color:rgba(255,255,255,.7)">Toque para fechar</div>':'');
-    if(d.tipo!=='bingo'){
+   if(d.tipo!=='bingo'){
       div.onclick=function(){if(document.body.contains(div))document.body.removeChild(div);};
       setTimeout(function(){if(document.body.contains(div))document.body.removeChild(div);},6000);
+    } else {
+      div.innerHTML+='<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">Aguarde o sorteador...</div>';
     }
     document.body.appendChild(div);
   });
@@ -531,7 +533,7 @@ function renderCartelas(){
   var grid=document.createElement('div');grid.className='grid5';
   for(var r=0;r<5;r++)for(var col=0;col<5;col++){
     var v=c.grid[r][col];var el=document.createElement('div');
-    if(v==='FREE'){el.className='cel free';el.innerHTML='<img src="${LOGO}" style="width:70%;height:70%;border-radius:50%;object-fit:cover;">';}
+    if(v==='FREE'){el.className='cel free';el.style.padding='0';el.style.overflow='hidden';el.innerHTML='<img src="${LOGO}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:6px;">';}
     else{
       el.className='cel'+(m.indexOf(v)!==-1?' marc':'');
       el.textContent=v;
