@@ -707,74 +707,7 @@ function gerarCartela90(usados) {
   for (let row = 0; row < 5; row++) grid.push([null,null,null,null,null]);
 
   for (let col = 0; col < 5; col++) {
-    const { start, end } = faixas[col];
-    const pool = [];
-    for (let n = start; n <= end; n++) pool.push(n);
-    // embaralha
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    const need = (col === 2) ? 4 : 5;
-    const sel = pool.slice(0, need).sort((a, b) => a - b);
-    let si = 0;
-    for (let row = 0; row < 5; row++) {
-      if (row === 2 && col === 2) {
-        grid[row][col] = 'FREE';
-      } else {
-        grid[row][col] = sel[si++];
-      }
-    }
-  }
-  return grid;
-}
-    const { start, end } = faixas[col];
-    const pool = [];
-    for (let n = start; n <= end; n++) {
-      if (!usados.includes(n)) pool.push(n);
-    }
-    // fallback se esgotou
-    if (pool.length < 5) {
-      for (let n = start; n <= end; n++) {
-        if (!pool.includes(n)) pool.push(n);
-      }
-    }
-    // embaralha
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    // pega 5 números e ordena
-    const selecionados = pool.slice(0, 5).sort((a, b) => a - b);
-    for (let row = 0; row < 5; row++) {
-      if (row === 2 && col === 2) grid[row][col] = 'FREE';
-      else grid[row][col] = selecionados[row === 2 && col > 2 ? row : (row < 2 || col !== 2 ? row : row - 1)];
-    }
-  }
-  // corrige FREE no centro
-  for (let col = 0; col < 5; col++) {
-    const { start, end } = faixas[col];
-    const nums = [];
-    for (let row = 0; row < 5; row++) {
-      if (!(row === 2 && col === 2)) nums.push(grid[row][col]);
-    }
-    // reseleciona corretamente
-    const pool2 = [];
-    for (let n = start; n <= end; n++) if (!usados.includes(n)) pool2.push(n);
-    if (pool2.length < 4) for (let n = start; n <= end; n++) if (!pool2.includes(n)) pool2.push(n);
-    for (let i = pool2.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool2[i], pool2[j]] = [pool2[j], pool2[i]];
-    }
-    const sel = pool2.slice(0, col === 2 ? 4 : 5).sort((a, b) => a - b);
-    let si = 0;
-    for (let row = 0; row < 5; row++) {
-      if (row === 2 && col === 2) grid[row][col] = 'FREE';
-      else grid[row][col] = sel[si++];
-    }
-  }
-  return grid;
-}
+  
 function gerarBolao(sala, qtd) {
   const cartelas = [];
   const usados = [];
