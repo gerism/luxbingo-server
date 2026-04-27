@@ -1015,8 +1015,11 @@ setTimeout(()=>{
           else { tot++; if (s.sorteados.includes(v)) marc++; }
         }
         const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
-        if (marc === tot - 1) io.to(codigo).emit('alerta_jogador', { nome, tipo: 'quase', texto: '🔥 ' + nome + ' está quase!' });
-        if (marc === tot) io.to(codigo).emit('alerta_jogador', { nome, tipo: 'bingo', texto: '🎉 ' + nome + ' completou!' });
+       const celular = s.solicitacoes[idUnico]?.celular || '';
+        const celFinal = celular ? celular.slice(-4) : '';
+        const nomeExib = nome + (celFinal ? ' ('+celFinal+')' : '');
+        if (marc === tot - 1) io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
+        if (marc === tot) io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 '+nomeExib+' completou!' });
       });
     });
     cb({ ok: true, ...res });
