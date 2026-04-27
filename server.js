@@ -531,7 +531,7 @@ function renderCartelas(){
   var grid=document.createElement('div');grid.className='grid5';
   for(var r=0;r<5;r++)for(var col=0;col<5;col++){
     var v=c.grid[r][col];var el=document.createElement('div');
-    if(v==='FREE'){el.className='cel free';el.innerHTML='⭐';}
+    if(v==='FREE'){el.className='cel free';el.innerHTML='<img src="${LOGO}" style="width:70%;height:70%;border-radius:50%;object-fit:cover;">';}
     else{
       el.className='cel'+(m.indexOf(v)!==-1?' marc':'');
       el.textContent=v;
@@ -703,8 +703,36 @@ function gerarCartela90(usados) {
     { start: 55, end: 72 },
     { start: 73, end: 90 },
   ];
+  // grid[row][col] — cada coluna tem sua faixa
   const grid = Array.from({length:5}, () => Array(5).fill(null));
   for (let col = 0; col < 5; col++) {
+    const { start, end } = faixas[col];
+    let pool = [];
+    for (let n = start; n <= end; n++) {
+      if (!usados.includes(n)) pool.push(n);
+    }
+    if (pool.length < 5) {
+      for (let n = start; n <= end; n++) {
+        if (!pool.includes(n)) pool.push(n);
+      }
+    }
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const need = col === 2 ? 4 : 5;
+    const sel = pool.slice(0, need).sort((a, b) => a - b);
+    let si = 0;
+    for (let row = 0; row < 5; row++) {
+      if (row === 2 && col === 2) {
+        grid[row][col] = 'FREE';
+      } else {
+        grid[row][col] = sel[si++];
+      }
+    }
+  }
+  return grid;
+}
     const { start, end } = faixas[col];
     const pool = [];
     for (let n = start; n <= end; n++) {
@@ -1059,8 +1087,15 @@ setTimeout(()=>{
         const celular = s.solicitacoes[idUnico]?.celular || '';
         const celMask = celular.length>=4 ? '('+celular.slice(0,2)+')******'+celular.slice(-2) : '';
         const nomeExib = nome + (celMask ? ' '+celMask : '');
-        if (marc === tot - 1) io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
-        if (marc === tot) io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 '+nomeExib+' completou!' });
+        const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
+        if (marc === tot - 1) {
+          io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
+          if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1 número!' });
+        }
+        if (marc === tot) {
+          io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 '+nomeExib+' completou!' });
+          if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 Você completou a cartela!' });
+        }
       });
     });
     cb({ ok: true, ...res });
