@@ -505,6 +505,23 @@ function conectarJogo(nome){
       }
     });
   });
+ sock.on('connect', function(){
+    sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
+      if(r&&r.ok){
+        nums=r.sorteados||nums;
+        cartelas.forEach(function(c){
+          if(!marc[c.id])marc[c.id]=[];
+          nums.forEach(function(n){
+            for(var row=0;row<5;row++)for(var col=0;col<5;col++){
+              if(c.grid[row][col]===n&&marc[c.id].indexOf(n)===-1)marc[c.id].push(n);
+            }
+          });
+          if(marc[c.id].indexOf('FREE')===-1)marc[c.id].push('FREE');
+        });
+        renderCartelas();renderGrid();
+      }
+    });
+  });
   registrarEventos(nome);
 }
 document.getElementById('btnMais').onclick=function(){
@@ -814,8 +831,8 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     console.log(`[RECONEXAO] ADM ${codigo}`);
     // Reenviar jogadores conectados
     const totalJogs = Object.keys(s.jogadoresPorIdUnico).length;
-    Object.entries(s.jogadoresPorIdUnico).forEach(([idUnico, jog]) => {
-      if (jog && jog.socketId) {
+  Object.entries(s.jogadoresPorIdUnico).forEach(([idUnico, jog]) => {
+      if (jog) {
         socket.emit('jogador_entrou', {
           idUnico,
           nome: jog.nome,
