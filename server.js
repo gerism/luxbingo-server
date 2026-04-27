@@ -95,7 +95,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .letras-row{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:4px 6px 0}
 .letra{text-align:center;font-size:14px;font-weight:900;color:var(--gold);padding:2px 0}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px 6px 6px;width:100%}
-.cel{aspect-ratio:1/0.85;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:clamp(10px,1.8vw,22px);font-weight:900;color:var(--text);cursor:pointer;user-select:none}
+.cel{aspect-ratio:1/0.85;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.2);font-size:clamp(14px,4vw,28px);font-weight:900;color:var(--text);cursor:pointer;user-select:none}
 .cartela-card{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;margin-bottom:8px;max-width:420px;width:100%;margin-left:auto;margin-right:auto}
 .cartelas-area{flex:1;overflow-y:auto;display:flex;flex-direction:column;width:100%}
 .cartelas-scroll{flex:1;overflow-y:auto;padding:6px 10px 10px;display:flex;flex-direction:column;align-items:center}
@@ -1016,8 +1016,9 @@ setTimeout(()=>{
         }
         const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
        const celular = s.solicitacoes[idUnico]?.celular || '';
-        const celFinal = celular ? celular.slice(-4) : '';
-        const nomeExib = nome + (celFinal ? ' ('+celFinal+')' : '');
+      const celular = s.solicitacoes[idUnico]?.celular || '';
+        const celMask = celular.length>=4 ? '('+celular.slice(0,2)+')******'+celular.slice(-2) : '';
+        const nomeExib = nome + (celMask ? ' '+celMask : '');
         if (marc === tot - 1) io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
         if (marc === tot) io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 '+nomeExib+' completou!' });
       });
