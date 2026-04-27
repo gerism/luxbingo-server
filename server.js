@@ -705,9 +705,25 @@ function gerarCartela90(usados) {
   ];
   const grid = [];
   for (let row = 0; row < 5; row++) grid.push([null,null,null,null,null]);
-
   for (let col = 0; col < 5; col++) {
-  
+    const { start, end } = faixas[col];
+    const pool = [];
+    for (let n = start; n <= end; n++) pool.push(n);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const need = (col === 2) ? 4 : 5;
+    const sel = pool.slice(0, need).sort((a, b) => a - b);
+    let si = 0;
+    for (let row = 0; row < 5; row++) {
+      if (row === 2 && col === 2) grid[row][col] = 'FREE';
+      else grid[row][col] = sel[si++];
+    }
+  }
+  return grid;
+}
+
 function gerarBolao(sala, qtd) {
   const cartelas = [];
   const usados = [];
