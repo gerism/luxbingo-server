@@ -1014,9 +1014,8 @@ setTimeout(()=>{
           if (v === 'FREE') { marc++; tot++; }
           else { tot++; if (s.sorteados.includes(v)) marc++; }
         }
-        const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
-       const celular = s.solicitacoes[idUnico]?.celular || '';
-      const celular = s.solicitacoes[idUnico]?.celular || '';
+      const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
+        const celular = s.solicitacoes[idUnico]?.celular || '';
         const celMask = celular.length>=4 ? '('+celular.slice(0,2)+')******'+celular.slice(-2) : '';
         const nomeExib = nome + (celMask ? ' '+celMask : '');
         if (marc === tot - 1) io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
@@ -1067,9 +1066,7 @@ socket.on('limpar_cartelas', ({ codigo }, cb) => {
     s.ativa = false;
     salvarSalas();
     io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
-    io.to(s.adm.socketId).emit('parar_sorteio');s.vencedor = { idUnico: idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId };
-    s.ativa = false;
-    io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
+    io.to(s.adm.socketId).emit('parar_sorteio');
     cb({ ok: true });
   });
 
