@@ -404,9 +404,29 @@ sock.on('alerta_jogador',function(d){
     }
     document.body.appendChild(div);
   });
-  sock.on('fechar_alerta',function(){
+ sock.on('fechar_alerta',function(){
     var div=document.getElementById('alertaJogador');
     if(div&&document.body.contains(div))document.body.removeChild(div);
+  });
+  sock.on('alerta_geral',function(d){
+    var box=document.getElementById('alertasBox');
+    if(!box){
+      box=document.createElement('div');
+      box.id='alertasBox';
+      box.style.cssText='position:fixed;bottom:60px;left:0;right:0;z-index:990;display:flex;flex-direction:column;gap:4px;padding:0 8px;max-height:40vh;overflow-y:auto;pointer-events:none';
+      document.body.appendChild(box);
+    }
+    var item=document.createElement('div');
+    var cor=d.tipo==='bingo'?'rgba(46,204,113,.92)':'rgba(201,162,39,.92)';
+    item.style.cssText='background:'+cor+';border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:8px;pointer-events:auto';
+    item.innerHTML='<span style="font-size:18px">'+(d.tipo==='bingo'?'🎉':'🔥')+'</span>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:12px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+d.nome+'</div>'
+      +'<div style="font-size:10px;color:rgba(255,255,255,.85)">'+d.texto+'</div>'
+      +'</div>'
+      +'<span style="font-size:14px;color:rgba(255,255,255,.6);cursor:pointer;padding:4px" onclick="this.parentElement.remove()">✕</span>';
+    box.appendChild(item);
+    if(d.tipo!=='bingo')setTimeout(function(){if(item.parentElement)item.remove();},8000);
   });
   sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
   sock.on('sorteio_zerado',function(){
@@ -1034,12 +1054,15 @@ setTimeout(()=>{
         const celMask = celular.length>=4 ? '('+celular.slice(0,2)+')******'+celular.slice(-2) : '';
         const nomeExib = nome + (celMask ? ' '+celMask : '');
         const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
+      const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
         if (marc === tot - 1) {
           io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
+          io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1!' });
           if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1 número!' });
         }
         if (marc === tot) {
           io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 '+nomeExib+' completou!' });
+          io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'bingo', texto: '🎉 BINGO!' });
           if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 Você completou a cartela!' });
         }
       });
