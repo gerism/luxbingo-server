@@ -703,24 +703,19 @@ function gerarCartela90(usados) {
     { start: 55, end: 72 },
     { start: 73, end: 90 },
   ];
-  // grid[row][col] — cada coluna tem sua faixa
-  const grid = Array.from({length:5}, () => Array(5).fill(null));
+  const grid = [];
+  for (let row = 0; row < 5; row++) grid.push([null,null,null,null,null]);
+
   for (let col = 0; col < 5; col++) {
     const { start, end } = faixas[col];
-    let pool = [];
-    for (let n = start; n <= end; n++) {
-      if (!usados.includes(n)) pool.push(n);
-    }
-    if (pool.length < 5) {
-      for (let n = start; n <= end; n++) {
-        if (!pool.includes(n)) pool.push(n);
-      }
-    }
+    const pool = [];
+    for (let n = start; n <= end; n++) pool.push(n);
+    // embaralha
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    const need = col === 2 ? 4 : 5;
+    const need = (col === 2) ? 4 : 5;
     const sel = pool.slice(0, need).sort((a, b) => a - b);
     let si = 0;
     for (let row = 0; row < 5; row++) {
