@@ -162,19 +162,22 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   <img src="${LOGO}" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
-  <div class="aguard">
-    <span class="aguard-icon">⏳</span>
-    <div class="aguard-title">AGUARDANDO APROVAÇÃO</div>
-    <div class="aguard-sub">O sorteador está verificando seu pagamento.<br>Sua cartela será liberada em breve!</div>
-  </div>
-  <div class="card" style="max-width:400px">
-    <div class="ct" style="text-align:center">💳 REALIZE O PAGAMENTO</div>
-    <div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:4px">Valor da cartela:</div>
+  <div class="card" style="max-width:400px;text-align:center">
+    <div class="ct" style="text-align:center">💳 PAGUE COM PIX</div>
+    <div style="font-size:11px;color:var(--textl);margin-bottom:4px">Valor total:</div>
     <div class="pix-val" id="pValor">R$ --</div>
-    <div style="font-size:11px;color:var(--textl);text-align:center;margin:8px 0 6px">Chave Pix do sorteador:</div>
-    <div class="pix-chave" id="pChave">--</div>
+    <div id="pixQrBox" style="display:none;margin:12px 0">
+      <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Escaneie o QR Code ou copie o código:</div>
+      <div style="background:#fff;padding:10px;border-radius:12px;display:inline-block;border:2px solid var(--gold);margin-bottom:8px">
+        <img id="pixQrImg" src="" width="180" height="180" style="display:block;border-radius:4px">
+      </div>
+      <div id="pixCopiaECola" style="background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.3);border-radius:8px;padding:8px;font-size:9px;color:var(--gold2);word-break:break-all;margin-bottom:8px;text-align:left"></div>
+      <button onclick="copiarPix()" style="width:100%;padding:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;font-size:13px;font-weight:900;color:var(--navy);cursor:pointer;margin-bottom:6px">📋 COPIAR CÓDIGO PIX</button>
+    </div>
+    <div id="pixCarregando" style="padding:20px;color:var(--textl);font-size:12px">⏳ Gerando QR Code...</div>
+    <div id="pixTimer" style="font-size:13px;font-weight:700;color:var(--gold2);margin:8px 0"></div>
     <div id="pHorario" style="display:none;font-size:12px;font-weight:700;color:var(--gold2);margin-top:8px;padding:7px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:8px;text-align:center"></div>
-    <div style="font-size:10px;color:var(--textl);text-align:center;margin-top:8px">Após pagar aguarde a confirmação</div>
+    <div style="font-size:10px;color:var(--textl);margin-top:8px">✅ Cartela liberada automaticamente após pagamento</div>
   </div>
 </div>
 <div class="tela" id="t4">
@@ -350,6 +353,28 @@ sock.on('connect',function(){
 sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
   if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
   tela(2);toast('✅ Solicitação enviada!');
+  // Gerar QR Code Pix automático
+  fetch(SERVER+'/criar-pagamento/'+COD, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({idUnico:meuIdUnico,nome:nome,cpf:cpf,email:email,qtd:qtdCartelas})
+  }).then(function(r){return r.json();}).then(function(d){
+    document.getElementById('pixCarregando').style.display='none';
+    if(d.ok&&d.qrCode){
+      pixCopiaCola=d.qrCode;
+      document.getElementById('pValor').textContent='R$ '+d.valor.toLocaleString('pt-BR',{minimumFractionDigits:2});
+      if(d.qrCodeBase64){
+        document.getElementById('pixQrImg').src='data:image/png;base64,'+d.qrCodeBase64;
+      }
+      document.getElementById('pixCopiaECola').textContent=d.qrCode;
+      document.getElementById('pixQrBox').style.display='block';
+      iniciarTimerPix(d.expiracao||600);
+    } else {
+      document.getElementById('pixCarregando').textContent='❌ '+(d.erro||'Erro ao gerar Pix. Use a chave manual.');
+    }
+  }).catch(function(){
+    document.getElementById('pixCarregando').textContent='❌ Erro de conexão.';
+  });
 });
     });
   });
@@ -719,7 +744,31 @@ function printCartela(idx){
     copiarCodigos();
   }
 }
-
+var pixCopiaCola='';
+var pixTimerInterval=null;
+function copiarPix(){
+  if(!pixCopiaCola)return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(pixCopiaCola).then(function(){toast('📋 Código Pix copiado!');});
+  } else {
+    var ta=document.createElement('textarea');ta.value=pixCopiaCola;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    toast('📋 Código Pix copiado!');
+  }
+}
+function iniciarTimerPix(segundos){
+  if(pixTimerInterval)clearInterval(pixTimerInterval);
+  var restante=segundos;
+  var el=document.getElementById('pixTimer');
+  function atualizar(){
+    if(!el)return;
+    var m=Math.floor(restante/60);var s=restante%60;
+    el.textContent='⏱️ Expira em: '+m+':'+(s<10?'0':'')+s;
+    if(restante<=0){clearInterval(pixTimerInterval);el.textContent='❌ QR Code expirado. Recarregue a página.';}
+    restante--;
+  }
+  atualizar();
+  pixTimerInterval=setInterval(atualizar,1000);
+}
 window.onload=function(){
   renderGrid();
   var params=new URLSearchParams(window.location.search);
@@ -870,6 +919,129 @@ app.get('/cartela/:codigo/:cartelaId', (req, res) => {
   }
   res.json({ ok: false, erro: 'Cartela não encontrada' });
 });
+
+// ─── MERCADO PAGO ──────────────────────────────────────────
+app.use(express.json());
+
+app.post('/criar-pagamento/:codigo', async (req, res) => {
+  const { codigo } = req.params;
+  const s = salas[codigo?.toUpperCase()];
+  if (!s) return res.json({ ok: false, erro: 'Sala não encontrada' });
+  if (!s.mpToken) return res.json({ ok: false, erro: 'Token MP não configurado' });
+
+  const { idUnico, nome, cpf, email, qtd } = req.body;
+  const valor = s.valorCartela * (qtd || 1);
+
+  try {
+    const r = await fetch('https://api.mercadopago.com/v1/payments', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${s.mpToken}`,
+        'Content-Type': 'application/json',
+        'X-Idempotency-Key': `${codigo}-${idUnico}-${Date.now()}`
+      },
+      body: JSON.stringify({
+        transaction_amount: valor,
+        description: `Lux Bingo - ${qtd||1} cartela(s) - Sala ${codigo}`,
+        payment_method_id: 'pix',
+        payer: {
+          email: email || 'jogador@luxbingo.com',
+          first_name: nome.split(' ')[0],
+          last_name: nome.split(' ').slice(1).join(' ') || 'Jogador',
+          identification: { type: 'CPF', number: cpf.replace(/\D/g,'') }
+        },
+        notification_url: `https://luxbingo-server-production.up.railway.app/webhook-mp`,
+        metadata: { codigo, idUnico, qtd: qtd||1 }
+      })
+    });
+    const d = await r.json();
+    console.log('[MP] Pagamento criado:', d.id, d.status);
+    if (!d.id) return res.json({ ok: false, erro: d.message || 'Erro MP' });
+    res.json({
+      ok: true,
+      paymentId: d.id,
+      qrCode: d.point_of_interaction?.transaction_data?.qr_code,
+      qrCodeBase64: d.point_of_interaction?.transaction_data?.qr_code_base64,
+      valor,
+      expiracao: 600
+    });
+  } catch(e) {
+    console.log('[MP ERROR]', e.message);
+    res.json({ ok: false, erro: e.message });
+  }
+});
+
+app.post('/webhook-mp', async (req, res) => {
+  res.sendStatus(200);
+  const { type, data } = req.body;
+  if (type !== 'payment') return;
+  const paymentId = data?.id;
+  if (!paymentId) return;
+
+  try {
+    // Busca o token MP da sala correta pelo metadata
+    // Primeiro busca o pagamento sem token para pegar o metadata
+    for (const [codigo, s] of Object.entries(salas)) {
+      if (!s.mpToken) continue;
+      const r = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: { 'Authorization': `Bearer ${s.mpToken}` }
+      });
+      const payment = await r.json();
+      if (payment.error) continue;
+      if (payment.status !== 'approved') return;
+
+      const { codigo: codPag, idUnico, qtd } = payment.metadata || {};
+      if (!codPag || codPag !== codigo) continue;
+
+      const sala = salas[codPag];
+      if (!sala) return;
+
+      // Libera cartela automaticamente
+      const sol = sala.solicitacoes[idUnico];
+      if (!sol || sol.status === 'aprovado') return;
+
+      const vendidas = Object.values(sala.cartelasVendidasPorIdUnico).flat().map(c => c.id);
+      const disp = sala.cartelas.filter(c => !vendidas.includes(c.id));
+      if (!disp.length) return;
+
+      const cartelas = disp.slice(0, qtd || 1);
+      sala.cartelasVendidasPorIdUnico[idUnico] = [...(sala.cartelasVendidasPorIdUnico[idUnico] || []), ...cartelas];
+      sala.solicitacoes[idUnico].status = 'aprovado';
+
+      const jogador = sala.jogadoresPorIdUnico[idUnico];
+      const socketDestino = jogador?.socketId;
+
+      const payload = {
+        cartelas, cartela: cartelas[0],
+        sorteados: sala.sorteados,
+        horario: sala.horario || '',
+        youtubeLink: sala.youtubeLink || '',
+        mensagem: '✅ Pagamento confirmado! Cartela liberada!'
+      };
+
+      if (socketDestino && io.sockets.sockets.has(socketDestino)) {
+        io.to(socketDestino).emit('cartela_aprovada', payload);
+      } else {
+        sala.pendingCartelas = sala.pendingCartelas || {};
+        sala.pendingCartelas[idUnico] = payload;
+      }
+
+      // Notifica ADM
+      if (sala.adm?.socketId) {
+        io.to(sala.adm.socketId).emit('pagamento_confirmado', {
+          nome: sol.nome, idUnico, qtd: qtd||1, valor: payment.transaction_amount
+        });
+      }
+
+      salvarSalas();
+      console.log('[WEBHOOK] Cartela liberada automaticamente para', idUnico);
+      break;
+    }
+  } catch(e) {
+    console.log('[WEBHOOK ERROR]', e.message);
+  }
+});
+
 io.on('connection', (socket) => {
   console.log(`[+] ${socket.id}`);
 socket.on('reconectar_adm', ({ codigo }, cb) => {
