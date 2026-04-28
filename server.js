@@ -911,7 +911,7 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     cb && cb({ ok: true });
   });
 
-  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink }, cb) => {
+  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink, mpToken }, cb) => {
     console.log('[DEBUG] criar_sala recebido:', { nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink });
     
     if (!nomeAdm) {
@@ -944,6 +944,7 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
       chavePix: chavePix || '',
       horario: horario || '', 
       youtubeLink: youtubeLink || '',
+      mpToken: mpToken || '',
       vencedor: null
     };
     
