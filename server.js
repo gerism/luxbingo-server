@@ -930,6 +930,7 @@ app.post('/criar-pagamento/:codigo', async (req, res) => {
   const token = s.mpToken || process.env.MP_TOKEN_DEFAULT;
 if (!token) return res.json({ ok: false, erro: 'Token MP não configurado' });
 
+  console.log('[PAGAMENTO] sala:', codigo, 'mpToken:', s.mpToken ? 'OK' : 'VAZIO');
   const { idUnico, nome, cpf, email, qtd } = req.body;
   const valor = s.valorCartela * (qtd || 1);
 
