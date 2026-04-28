@@ -933,8 +933,10 @@ app.use(express.json());
 
 app.post('/criar-pagamento/:codigo', async (req, res) => {
   const { codigo } = req.params;
+  console.log('[PAGAMENTO] recebido codigo:', codigo, 'body:', JSON.stringify(req.body));
   const s = salas[codigo?.toUpperCase()];
   if (!s) return res.json({ ok: false, erro: 'Sala não encontrada' });
+  console.log('[PAGAMENTO] sala encontrada, mpToken:', s.mpToken ? 'OK' : 'VAZIO', 'env:', process.env.MP_TOKEN_DEFAULT ? 'OK' : 'VAZIO');
   const token = s.mpToken || process.env.MP_TOKEN_DEFAULT;
 const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
   if (!mpToken) return res.json({ ok: false, erro: 'Token MP não configurado' });
