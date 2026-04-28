@@ -575,7 +575,7 @@ function renderCartelas(){
   var c=cartelas[tabAtiva];
   var m=marc[c.id]||[];
   var div=document.createElement('div');div.className='cartela-card';
-  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button onclick="copiarCodigos()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:var(--navy);cursor:pointer;margin-left:6px">📋 Salvar</button></div>';
+  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button onclick="printCartela('+tabAtiva+')" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:var(--navy);cursor:pointer;margin-left:6px">📸 Print</button></div>';
   var letRow=document.createElement('div');letRow.className='letras-row';
   ['B','I','N','G','O'].forEach(function(l){var s=document.createElement('div');s.className='letra';s.textContent=l;letRow.appendChild(s);});
   div.appendChild(letRow);
@@ -669,6 +669,57 @@ function salvarLocal(nome){
     localStorage.setItem('luxbingo_cart_'+COD+'_'+c.id,JSON.stringify({cartelas:cartelas,marc:marc,nums:nums,nome:nome}));
   });
 }
+function printCartela(idx){
+  var c=cartelas[idx];
+  if(!c)return;
+  var m=marc[c.id]||[];
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<style>'
+    +'body{background:#0d1b2e;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:Segoe UI,sans-serif}'
+    +'.card{background:#0f2240;border:3px solid #c9a227;border-radius:16px;padding:20px;width:340px}'
+    +'.header{background:linear-gradient(135deg,#0a1628,#1a2d4e);border-bottom:3px solid #c9a227;border-radius:10px 10px 0 0;padding:10px;text-align:center;margin:-20px -20px 12px}'
+    +'.titulo{font-size:18px;font-weight:900;color:#f0c040;letter-spacing:2px}'
+    +'.cod{font-size:11px;color:rgba(232,213,163,.6);margin-top:4px}'
+    +'.letras{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:4px}'
+    +'.letra{text-align:center;font-size:18px;font-weight:900;color:#c9a227;padding:4px}'
+    +'.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}'
+    +'.cel{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.07);border:2px solid rgba(201,162,39,.3);font-size:22px;font-weight:900;color:#e8d5a3}'
+    +'.marc{background:linear-gradient(135deg,#c9a227,#f0c040);border-color:#ffd966;color:#0d1b2e}'
+    +'.free{background:linear-gradient(135deg,#c9a227,#f0c040);border-color:#ffd966;padding:2px}'
+    +'.footer{text-align:center;margin-top:12px;font-size:11px;color:rgba(232,213,163,.5)}'
+    +'</style></head><body><div class="card">'
+    +'<div class="header"><div class="titulo">🎰 LUX BINGO</div><div class="titulo" style="font-size:14px">CARTELA '+(idx+1)+'</div><div class="cod">'+c.id+'</div></div>'
+    +'<div class="letras"><div class="letra">B</div><div class="letra">I</div><div class="letra">N</div><div class="letra">G</div><div class="letra">O</div></div>'
+    +'<div class="grid">';
+  for(var r=0;r<5;r++)for(var col=0;col<5;col++){
+    var v=c.grid[r][col];
+    if(v==='FREE'){
+      html+='<div class="cel free"><img src="'+window.location.origin+'/logo.png" style="width:90%;height:90%;border-radius:50%;object-fit:cover;"></div>';
+    } else {
+      var isMarcado=m.indexOf(v)!==-1;
+      html+='<div class="cel'+(isMarcado?' marc':'')+'">'+v+'</div>';
+    }
+  }
+  html+='</div><div class="footer">'+window.location.origin+'</div></div></body></html>';
+  var win=window.open('','_blank','width=400,height=600');
+  if(win){
+    win.document.write(html);
+    win.document.close();
+    setTimeout(function(){
+      win.print();
+      if(cartelas.length>1){
+        var prox=idx+1;
+        if(prox<cartelas.length){
+          setTimeout(function(){printCartela(prox);},1000);
+        }
+      }
+    },500);
+  } else {
+    toast('❌ Permita pop-ups para tirar print',true);
+    copiarCodigos();
+  }
+}
+
 window.onload=function(){
   renderGrid();
   var params=new URLSearchParams(window.location.search);
