@@ -956,7 +956,7 @@ if (!token) return res.json({ ok: false, erro: 'Token MP não configurado' });
       })
     });
     const d = await r.json();
-    console.log('[MP] Pagamento criado:', d.id, d.status);
+   console.log('[MP] Resposta completa:', JSON.stringify(d));
     if (!d.id) return res.json({ ok: false, erro: d.message || 'Erro MP' });
     res.json({
       ok: true,
