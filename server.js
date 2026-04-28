@@ -811,7 +811,15 @@ async function salvarSalas() {
     return;
   }
   try {
-    const valor = JSON.stringify(salas);
+    const salasReduzidas = {};
+    for (const [cod, s] of Object.entries(salas)) {
+      if (!s) continue;
+      salasReduzidas[cod] = {
+        ...s,
+        cartelas: [],
+      };
+    }
+    const valor = JSON.stringify(salasReduzidas);
     const resp = await fetch(`${UPSTASH_URL}/set/luxbingo_salas`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
@@ -928,7 +936,8 @@ app.post('/criar-pagamento/:codigo', async (req, res) => {
   const s = salas[codigo?.toUpperCase()];
   if (!s) return res.json({ ok: false, erro: 'Sala não encontrada' });
   const token = s.mpToken || process.env.MP_TOKEN_DEFAULT;
-if (!token) return res.json({ ok: false, erro: 'Token MP não configurado' });
+const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
+  if (!mpToken) return res.json({ ok: false, erro: 'Token MP não configurado' });
 
   console.log('[PAGAMENTO] sala:', codigo, 'mpToken:', s.mpToken ? 'OK' : 'VAZIO');
   const { idUnico, nome, cpf, email, qtd } = req.body;
