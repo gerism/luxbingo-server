@@ -927,7 +927,8 @@ app.post('/criar-pagamento/:codigo', async (req, res) => {
   const { codigo } = req.params;
   const s = salas[codigo?.toUpperCase()];
   if (!s) return res.json({ ok: false, erro: 'Sala não encontrada' });
-  if (!s.mpToken) return res.json({ ok: false, erro: 'Token MP não configurado' });
+  const token = s.mpToken || process.env.MP_TOKEN_DEFAULT;
+if (!token) return res.json({ ok: false, erro: 'Token MP não configurado' });
 
   const { idUnico, nome, cpf, email, qtd } = req.body;
   const valor = s.valorCartela * (qtd || 1);
