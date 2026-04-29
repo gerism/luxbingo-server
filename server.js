@@ -949,7 +949,7 @@ const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
     const r = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${s.mpToken}`,
+        'Authorization': `Bearer ${mpToken}`,
         'Content-Type': 'application/json',
         'X-Idempotency-Key': `${codigo}-${idUnico}-${Date.now()}`
       },
@@ -1053,6 +1053,16 @@ app.post('/webhook-mp', async (req, res) => {
   } catch(e) {
     console.log('[WEBHOOK ERROR]', e.message);
   }
+});
+
+app.get('/teste-mp/:codigo', (req, res) => {
+  const s = salas[req.params.codigo?.toUpperCase()];
+  res.json({ 
+    ok: true, 
+    sala: !!s, 
+    mpToken: s?.mpToken ? 'OK' : 'VAZIO',
+    env: process.env.MP_TOKEN_DEFAULT ? 'OK' : 'VAZIO'
+  });
 });
 
 io.on('connection', (socket) => {
