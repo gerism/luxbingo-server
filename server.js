@@ -1013,15 +1013,16 @@ app.post('/webhook-mp', async (req, res) => {
       if (payment.error) { console.log('[WEBHOOK] payment error:', payment.error); continue; }
       if (payment.status !== 'approved') { console.log('[WEBHOOK] não aprovado:', payment.status); return; }
 
-      const { codigo: codPag, idUnico, qtd } = payment.metadata || {};
+      const { codigo: codPag, id_unico: idUnico, qtd } = payment.metadata || {};
       if (!codPag || codPag !== codigo) continue;
 
-      const sala = salas[codPag];
-      if (!sala) return;
+     const sala = salas[codPag];
+      if (!sala) { console.log('[WEBHOOK] sala não encontrada:', codPag); return; }
 
       // Libera cartela automaticamente
       const sol = sala.solicitacoes[idUnico];
-      if (!sol || sol.status === 'aprovado') return;
+      if (!sol) { console.log('[WEBHOOK] solicitacao nao encontrada para idUnico:', idUnico); return; }
+      if (sol.status === 'aprovado') { console.log('[WEBHOOK] ja aprovado'); return; }
 
       const vendidas = Object.values(sala.cartelasVendidasPorIdUnico).flat().map(c => c.id);
       const disp = sala.cartelas.filter(c => !vendidas.includes(c.id));
