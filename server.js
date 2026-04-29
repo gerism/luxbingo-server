@@ -942,6 +942,8 @@ const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
 
   console.log('[PAGAMENTO] sala:', codigo, 'mpToken:', s.mpToken ? 'OK' : 'VAZIO');
   const { idUnico, nome, cpf, email, qtd } = req.body;
+  const cpfLimpo = (cpf||'').replace(/\D/g,'');
+  if (cpfLimpo.length !== 11) return res.json({ ok: false, erro: 'CPF inválido. Digite os 11 dígitos.' });
   const valor = s.valorCartela * (qtd || 1);
 
   try {
@@ -960,7 +962,7 @@ const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
           email: email || 'jogador@luxbingo.com',
           first_name: nome.split(' ')[0],
           last_name: nome.split(' ').slice(1).join(' ') || 'Jogador',
-          identification: { type: 'CPF', number: cpf.replace(/\D/g,'') }
+          identification: { type: 'CPF', number: cpfLimpo }
         },
         notification_url: `https://luxbingo-server-production.up.railway.app/webhook-mp`,
         metadata: { codigo, idUnico, qtd: qtd||1 }
