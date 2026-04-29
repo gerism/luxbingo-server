@@ -987,10 +987,18 @@ const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
 
 app.post('/webhook-mp', async (req, res) => {
   res.sendStatus(200);
+  console.log('[WEBHOOK] recebido:', JSON.stringify(req.body));
   const { type, data } = req.body;
-  if (type !== 'payment') return;
+  if (type !== 'payment') {
+    console.log('[WEBHOOK] tipo ignorado:', type);
+    return;
+  }
   const paymentId = data?.id;
-  if (!paymentId) return;
+  if (!paymentId) {
+    console.log('[WEBHOOK] sem paymentId');
+    return;
+  }
+  console.log('[WEBHOOK] processando paymentId:', paymentId);
 
   try {
     // Busca o token MP da sala correta pelo metadata
@@ -1001,8 +1009,9 @@ app.post('/webhook-mp', async (req, res) => {
         headers: { 'Authorization': `Bearer ${s.mpToken}` }
       });
       const payment = await r.json();
-      if (payment.error) continue;
-      if (payment.status !== 'approved') return;
+      console.log('[WEBHOOK] payment status:', payment.status, 'metadata:', JSON.stringify(payment.metadata));
+      if (payment.error) { console.log('[WEBHOOK] payment error:', payment.error); continue; }
+      if (payment.status !== 'approved') { console.log('[WEBHOOK] não aprovado:', payment.status); return; }
 
       const { codigo: codPag, idUnico, qtd } = payment.metadata || {};
       if (!codPag || codPag !== codigo) continue;
