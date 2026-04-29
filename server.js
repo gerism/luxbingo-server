@@ -263,7 +263,6 @@ document.getElementById('btnRecuperar').onclick=function(){
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d.ok){toast('❌ '+(d.erro||'Cartela não encontrada!'),true);return;}
-      // Se a cartela é de outra sala, redireciona
       if(d.codigoSala && d.codigoSala !== COD){
         window.location.href=SERVER+'/jogo/'+d.codigoSala+'?recuperar='+encodeURIComponent(codCart);
         return;
@@ -308,7 +307,6 @@ document.getElementById('btnConectar').onclick=function(){
     meuIdUnico=gerarIdUnico();
     localStorage.setItem('luxbingo_id_'+COD,meuIdUnico);
   }
-  // Se já conectado, só solicita cartela
   if(sock&&sock.connected){
     sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
       if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
@@ -352,7 +350,6 @@ sock.on('connect',function(){
 sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
   if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
   tela(2);toast('✅ Solicitação enviada!');
-  // Gerar QR Code Pix automático
   fetch(SERVER+'/criar-pagamento/'+COD, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -1031,7 +1028,6 @@ app.post('/webhook-mp', async (req, res) => {
       const cartelas = disp.slice(0, qtd || 1);
       sala.cartelasVendidasPorIdUnico[idUnico] = [...(sala.cartelasVendidasPorIdUnico[idUnico] || []), ...cartelas];
       sala.solicitacoes[idUnico].status = 'aprovado';
-      // Permite nova solicitação futura
       sala.solicitacoes[idUnico].pagoViaMp = true;
 
       const jogador = sala.jogadoresPorIdUnico[idUnico];
@@ -1052,11 +1048,20 @@ app.post('/webhook-mp', async (req, res) => {
         sala.pendingCartelas[idUnico] = payload;
       }
 
-      // Notifica ADM
-      if (sala.adm?.socketId) {
+      // 🔹 NOTIFICAR ADM (online ou offline)
+      if (!sala.pagamentosNotificadosAdm) sala.pagamentosNotificadosAdm = {};
+      if (sala.adm?.socketId && io.sockets.sockets.has(sala.adm.socketId)) {
         io.to(sala.adm.socketId).emit('pagamento_confirmado', {
-          nome: sol.nome, idUnico, qtd: qtd||1, valor: payment.transaction_amount
+          nome: sol.nome,
+          idUnico: idUnico,
+          qtd: qtd || 1,
+          valor: payment.transaction_amount
         });
+        sala.pagamentosNotificadosAdm[idUnico] = true;
+      } else {
+        // ADM offline: guarda para ser enviado na reconexão
+        sala.pagamentosNotificadosAdm[idUnico] = true;
+        console.log(`[WEBHOOK] Pagamento de ${sol.nome} aguardando ADM reconectar`);
       }
 
       salvarSalas();
@@ -1088,59 +1093,83 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     socket.data.sala = codigo;
     socket.data.papel = 'adm';
     console.log(`[RECONEXAO] ADM ${codigo}`);
-    // Reenviar jogadores conectados
-    const totalJogs = Object.keys(s.jogadoresPorIdUnico).length;
-  Object.entries(s.jogadoresPorIdUnico).forEach(([idUnico, jog]) => {
-      if (jog) {
-        socket.emit('jogador_entrou', {
-          idUnico,
-          nome: jog.nome,
-          total: totalJogs
-        });
+    
+    // 🔹 ENVIAR TODOS OS JOGADORES ONLINE (que têm socketId ativo)
+    const jogadoresOnline = [];
+    for (const [idUnico, jog] of Object.entries(s.jogadoresPorIdUnico)) {
+      if (jog && jog.socketId) {
+        const socketExiste = io.sockets.sockets.has(jog.socketId);
+        if (socketExiste) {
+          jogadoresOnline.push({
+            idUnico,
+            nome: jog.nome,
+            cartelas: (s.cartelasVendidasPorIdUnico[idUnico] || []).length
+          });
+          socket.emit('jogador_entrou', {
+            idUnico,
+            nome: jog.nome,
+            cartelas: (s.cartelasVendidasPorIdUnico[idUnico] || []).length,
+            total: 0
+          });
+        }
       }
-    });
-    // Reenviar jogadores que compraram via MP (podem não estar em jogadoresPorIdUnico)
-    Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
-      if (!s.jogadoresPorIdUnico[idUnico] && carts && carts.length > 0) {
-        const sol = s.solicitacoes[idUnico];
-        const nome = sol?.nome || 'Jogador';
-        socket.emit('jogador_entrou', {
-          idUnico,
-          nome,
-          total: totalJogs
+    }
+    
+    // 🔹 ENVIAR TODOS OS PAGAMENTOS CONFIRMADOS (cartelas liberadas)
+    for (const [idUnico, cartelas] of Object.entries(s.cartelasVendidasPorIdUnico)) {
+      if (!cartelas || cartelas.length === 0) continue;
+      
+      const solicitacao = s.solicitacoes[idUnico];
+      const nome = solicitacao?.nome || 'Jogador';
+      const qtd = solicitacao?.qtdSolicitada || cartelas.length;
+      const valorTotal = (s.valorCartela || 0) * qtd;
+      
+      const jaNotificado = s.pagamentosNotificadosAdm?.[idUnico];
+      if (!jaNotificado) {
+        socket.emit('pagamento_confirmado', {
+          nome: nome,
+          idUnico: idUnico,
+          qtd: qtd,
+          valor: valorTotal
         });
-        // Também reenviar como solicitação aprovada para aparecer no histórico
-        socket.emit('nova_solicitacao', {
-          idUnico,
-          nome,
-          cpf: sol?.cpf || '',
-          celular: sol?.celular || '',
-          chavePix: sol?.chavePix || '',
-          email: sol?.email || '',
-          cartelasJaTem: carts.length,
-          qtdSolicitada: carts.length,
-          timestamp: sol?.timestamp || Date.now()
-        });
+        if (!s.pagamentosNotificadosAdm) s.pagamentosNotificadosAdm = {};
+        s.pagamentosNotificadosAdm[idUnico] = true;
       }
-    });
-    // Reenviar solicitações pendentes
+      
+      socket.emit('nova_solicitacao', {
+        idUnico: idUnico,
+        nome: nome,
+        cpf: solicitacao?.cpf || '',
+        celular: solicitacao?.celular || '',
+        chavePix: solicitacao?.chavePix || '',
+        email: solicitacao?.email || '',
+        cartelasJaTem: cartelas.length,
+        qtdSolicitada: qtd,
+        timestamp: solicitacao?.timestamp || Date.now(),
+        statusMp: 'aprovado'
+      });
+    }
+    
+    // 🔹 ENVIAR SOLICITAÇÕES PENDENTES
     const pendentes = Object.values(s.solicitacoes).filter(sol => sol.status === 'pendente');
     pendentes.forEach(sol => {
-      setTimeout(() => {
-        socket.emit('nova_solicitacao', {
-          idUnico: sol.idUnico,
-          nome: sol.nome,
-          cpf: sol.cpf,
-          celular: sol.celular,
-          chavePix: sol.chavePix,
-          email: sol.email,
-          cartelasJaTem: sol.cartelasJaTem,
-          qtdSolicitada: sol.qtdSolicitada || 1,
-          timestamp: sol.timestamp
-        });
-      }, 500);
+      socket.emit('nova_solicitacao', {
+        idUnico: sol.idUnico,
+        nome: sol.nome,
+        cpf: sol.cpf,
+        celular: sol.celular,
+        chavePix: sol.chavePix,
+        email: sol.email,
+        cartelasJaTem: sol.cartelasJaTem || 0,
+        qtdSolicitada: sol.qtdSolicitada || 1,
+        timestamp: sol.timestamp
+      });
     });
-    cb && cb({ ok: true });
+    
+    // Atualiza total de jogadores
+    socket.emit('atualizar_total_jogadores', { total: jogadoresOnline.length });
+    
+    cb && cb({ ok: true, totalJogadores: jogadoresOnline.length });
   });
 
   socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink, mpToken, porc }, cb) => {
@@ -1178,7 +1207,8 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
       youtubeLink: (youtubeLink && !youtubeLink.startsWith('APP_USR') && !youtubeLink.startsWith('TEST-')) ? youtubeLink : '',
       mpToken: mpToken || '',
       porc: parseFloat(porc) || 20,
-      vencedor: null
+      vencedor: null,
+      pagamentosNotificadosAdm: {}  // NOVO: controla pagamentos já notificados ao ADM
     };
     
     socket.join(codigo);
@@ -1415,6 +1445,7 @@ socket.on('limpar_cartelas', ({ codigo }, cb) => {
     s.jogadoresPorIdUnico = {};
     s.jogadoresPorSocket = {};
     s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
+    s.pagamentosNotificadosAdm = {};  // Reset das notificações
     salvarSalas();
     io.to(codigo).emit('cartelas_limpas');
     cb && cb({ ok: true });
