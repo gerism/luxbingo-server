@@ -1107,7 +1107,7 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     cb && cb({ ok: true });
   });
 
-  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink, mpToken }, cb) => {
+  socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink, mpToken, porc }, cb) => {
     console.log('[DEBUG] criar_sala recebido:', { nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink });
     
     if (!nomeAdm) {
@@ -1141,6 +1141,7 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
       horario: horario || '', 
       youtubeLink: youtubeLink || '',
       mpToken: mpToken || '',
+      porc: parseFloat(porc) || 20,
       vencedor: null
     };
     
@@ -1324,7 +1325,7 @@ socket.on('sortear', ({ codigo }, cb) => {
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
     const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
-    const premioEstimado = totalCartelas * s.valorCartela;
+    const premioEstimado = totalCartelas * s.valorCartela * (1 - (s.porc||20)/100);
     io.to(codigo).emit('numero_sorteado', { ...res, premioEstimado });
     Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
 		
