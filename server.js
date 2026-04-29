@@ -980,11 +980,13 @@ app.post('/criar-pagamento/:codigo', async (req, res) => {
 app.post('/webhook-mp', async (req, res) => {
   res.sendStatus(200);
   console.log('[WEBHOOK] recebido:', JSON.stringify(req.body));
+  
   const { type, data } = req.body;
   if (type !== 'payment') {
     console.log('[WEBHOOK] tipo ignorado:', type);
     return;
   }
+  
   const paymentId = data?.id;
   if (!paymentId) {
     console.log('[WEBHOOK] sem paymentId');
@@ -992,25 +994,24 @@ app.post('/webhook-mp', async (req, res) => {
   }
 
   try {
-    for (const [codigo, s] of Object.entries(salas)) {
-      if (!s.mpToken) continue;
+    for (const [codigo, sala] of Object.entries(salas)) {
+      if (!sala.mpToken) continue;
+      
       const r = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-        headers: { 'Authorization': `Bearer ${s.mpToken}` }
+        headers: { 'Authorization': `Bearer ${sala.mpToken}` }
       });
       const payment = await r.json();
-      if (payment.error) { continue; }
-      if (payment.status !== 'approved') { return; }
+      
+      if (payment.error) continue;
+      if (payment.status !== 'approved') return;
 
       const { codigo: codPag, id_unico: idUnico, qtd } = payment.metadata || {};
       if (!codPag || codPag !== codigo) continue;
 
-      const sala = salas[codPag];
-      if (!sala) { continue; }
-
       const sol = sala.solicitacoes[idUnico];
-      if (!sol) { continue; }
-      if (sol.status === 'aprovado') { continue; }
+      if (!sol || sol.status === 'aprovado') continue;
 
+      // Libera cartelas
       const vendidas = Object.values(sala.cartelasVendidasPorIdUnico).flat().map(c => c.id);
       const disp = sala.cartelas.filter(c => !vendidas.includes(c.id));
       if (!disp.length) return;
@@ -1018,36 +1019,28 @@ app.post('/webhook-mp', async (req, res) => {
       const cartelas = disp.slice(0, qtd || 1);
       sala.cartelasVendidasPorIdUnico[idUnico] = [...(sala.cartelasVendidasPorIdUnico[idUnico] || []), ...cartelas];
       sala.solicitacoes[idUnico].status = 'aprovado';
-      sala.solicitacoes[idUnico].pagoViaMp = true;
 
-      // 🔹 REGISTRAR JOGADOR MESMO OFFLINE
+      // 🔴🔴🔴 CRUCIAL: Registra o jogador mesmo offline 🔴🔴🔴
       if (!sala.jogadoresPorIdUnico[idUnico]) {
         sala.jogadoresPorIdUnico[idUnico] = {
           socketId: null,
           nome: sol.nome || 'Jogador'
         };
-        console.log(`[WEBHOOK] Jogador ${sol.nome} registrado (offline)`);
+        console.log(`[WEBHOOK] Jogador ${sol.nome} registrado com ${cartelas.length} cartela(s)`);
       }
 
-      const jogador = sala.jogadoresPorIdUnico[idUnico];
-      const socketDestino = jogador?.socketId;
-
-      const payload = {
-        cartelas, cartela: cartelas[0],
-        sorteados: sala.sorteados,
+      // Salva cartela pendente para quando o jogador conectar
+      sala.pendingCartelas = sala.pendingCartelas || {};
+      sala.pendingCartelas[idUnico] = {
+        cartelas: cartelas,
+        cartela: cartelas[0],
+        sorteados: sala.sorteados || [],
         horario: sala.horario || '',
         youtubeLink: sala.youtubeLink || '',
-        mensagem: '✅ Pagamento confirmado! Cartela liberada!'
+        mensagem: '✅ Pagamento confirmado!'
       };
 
-      if (socketDestino && io.sockets.sockets.has(socketDestino)) {
-        io.to(socketDestino).emit('cartela_aprovada', payload);
-      } else {
-        sala.pendingCartelas = sala.pendingCartelas || {};
-        sala.pendingCartelas[idUnico] = payload;
-      }
-
-      if (!sala.pagamentosNotificadosAdm) sala.pagamentosNotificadosAdm = {};
+      // Notifica ADM se estiver online
       if (sala.adm?.socketId && io.sockets.sockets.has(sala.adm.socketId)) {
         io.to(sala.adm.socketId).emit('pagamento_confirmado', {
           nome: sol.nome,
@@ -1055,14 +1048,10 @@ app.post('/webhook-mp', async (req, res) => {
           qtd: qtd || 1,
           valor: payment.transaction_amount
         });
-        sala.pagamentosNotificadosAdm[idUnico] = true;
-      } else {
-        sala.pagamentosNotificadosAdm[idUnico] = true;
-        console.log(`[WEBHOOK] Pagamento de ${sol.nome} aguardando ADM reconectar`);
       }
 
       salvarSalas();
-      console.log('[WEBHOOK] Cartela liberada para', idUnico);
+      console.log('[WEBHOOK] ✅ Cartela liberada e jogador registrado para', idUnico);
       break;
     }
   } catch(e) {
