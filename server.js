@@ -1312,10 +1312,14 @@ setTimeout(()=>{
     cb({ ok: true });
   });
 
- socket.on('sortear', ({ codigo }, cb) => {
+socket.on('sortear', ({ codigo }, cb) => {
     const s = salas[codigo];
-    if (!s || s.adm.socketId !== socket.id) return cb({ ok: false });
+    if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
+    if (s.adm.socketId !== socket.id) {
+      s.adm.socketId = socket.id;
+    }
     if (s.vencedor) return cb({ ok: false, erro: 'Jogo já encerrado' });
+    console.log('[SORTEAR] cod:',codigo,'sorteados:',s.sorteados.length,'vencedor:',s.vencedor,'jogoEncerrado no servidor: N/A');
     if (!s.ativa) s.ativa = true;
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
