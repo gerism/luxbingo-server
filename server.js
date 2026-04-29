@@ -328,7 +328,6 @@ sock.on('connect',function(){
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);sock.disconnect();return;}
       document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
-      document.getElementById('pChave').textContent=r.chavePix||'--';
       if(r.horario){document.getElementById('pHorario').textContent='🕐 '+r.horario;document.getElementById('pHorario').style.display='block';}
       if(r.premioEstimado){
         var pb=document.getElementById('premioJogBox');var pv=document.getElementById('premioJogVal');
@@ -580,7 +579,7 @@ function mostrarYoutube(){
   frame.src='https://www.youtube.com/embed/'+ytVid+'?autoplay=1&mute=0';
 }
 function renderGrid(){
-  var g=document.getElementById('nGrid');g.innerHTML='';var u=nums[nums.length-1];
+  var g=document.getElementById('nGrid');if(!g)return;var u=nums[nums.length-1];
   for(var i=1;i<=90;i++){
     var d=document.createElement('div');
     d.className='nm90'+(nums.indexOf(i)!==-1?(i===u?' u':' s'):'');
