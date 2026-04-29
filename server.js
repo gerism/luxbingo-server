@@ -1175,7 +1175,7 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
       valorCartela: parseFloat(valorCartela) || 0, 
       chavePix: chavePix || '',
       horario: horario || '', 
-      youtubeLink: youtubeLink || '',
+      youtubeLink: (youtubeLink && !youtubeLink.startsWith('APP_USR') && !youtubeLink.startsWith('TEST-')) ? youtubeLink : '',
       mpToken: mpToken || '',
       porc: parseFloat(porc) || 20,
       vencedor: null
