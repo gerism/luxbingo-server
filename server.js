@@ -1087,6 +1087,30 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
         });
       }
     });
+    // Reenviar jogadores que compraram via MP (podem não estar em jogadoresPorIdUnico)
+    Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
+      if (!s.jogadoresPorIdUnico[idUnico] && carts && carts.length > 0) {
+        const sol = s.solicitacoes[idUnico];
+        const nome = sol?.nome || 'Jogador';
+        socket.emit('jogador_entrou', {
+          idUnico,
+          nome,
+          total: totalJogs
+        });
+        // Também reenviar como solicitação aprovada para aparecer no histórico
+        socket.emit('nova_solicitacao', {
+          idUnico,
+          nome,
+          cpf: sol?.cpf || '',
+          celular: sol?.celular || '',
+          chavePix: sol?.chavePix || '',
+          email: sol?.email || '',
+          cartelasJaTem: carts.length,
+          qtdSolicitada: carts.length,
+          timestamp: sol?.timestamp || Date.now()
+        });
+      }
+    });
     // Reenviar solicitações pendentes
     const pendentes = Object.values(s.solicitacoes).filter(sol => sol.status === 'pendente');
     pendentes.forEach(sol => {
