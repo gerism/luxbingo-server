@@ -1031,6 +1031,8 @@ app.post('/webhook-mp', async (req, res) => {
       const cartelas = disp.slice(0, qtd || 1);
       sala.cartelasVendidasPorIdUnico[idUnico] = [...(sala.cartelasVendidasPorIdUnico[idUnico] || []), ...cartelas];
       sala.solicitacoes[idUnico].status = 'aprovado';
+      // Permite nova solicitação futura
+      sala.solicitacoes[idUnico].pagoViaMp = true;
 
       const jogador = sala.jogadoresPorIdUnico[idUnico];
       const socketDestino = jogador?.socketId;
@@ -1058,7 +1060,7 @@ app.post('/webhook-mp', async (req, res) => {
       }
 
       salvarSalas();
-      console.log('[WEBHOOK] Cartela liberada automaticamente para', idUnico);
+      console.log('[WEBHOOK] Cartela liberada automaticamente para', idUnico, 'adm socketId:', sala.adm?.socketId);
       break;
     }
   } catch(e) {
@@ -1250,7 +1252,7 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     if (cj.length >= 5) return cb({ ok: false, erro: 'Máximo de 5 cartelas!' });
     
   const sol = s.solicitacoes[idUnico];
-    if (sol && sol.status === 'pendente') return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
+    if (sol && sol.status === 'pendente' && !sol.pagoViaMp) return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
     if (sol && sol.status === 'aprovado') {
       // Permite nova solicitação se já tem cartelas mas quer mais
     }
