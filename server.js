@@ -841,7 +841,6 @@ async function carregarSalas() {
   } catch(e) { console.log('[REDIS LOAD ERROR]', e.message); }
 }
 
-// carregarSalas será chamado dentro do listen
 function gerarCodigo() {
   const l = 'ABCDEFGHJKLMNPQRSTUVWXYZ', n = '23456789';
   let c = '';
@@ -911,6 +910,7 @@ function sorteiarNumero(sala) {
   s.sorteados.push(num);
   return { numero: num, sorteados: s.sorteados };
 }
+
 app.get('/cartela/:codigo/:cartelaId', (req, res) => {
   const cartelaId = req.params.cartelaId.toUpperCase();
   for (const sala of Object.values(salas)) {
@@ -924,7 +924,6 @@ app.get('/cartela/:codigo/:cartelaId', (req, res) => {
   res.json({ ok: false, erro: 'Cartela não encontrada' });
 });
 
-// ─── MERCADO PAGO ──────────────────────────────────────────
 app.use(express.json());
 
 app.post('/criar-pagamento/:codigo', async (req, res) => {
@@ -932,12 +931,9 @@ app.post('/criar-pagamento/:codigo', async (req, res) => {
   console.log('[PAGAMENTO] recebido codigo:', codigo, 'body:', JSON.stringify(req.body));
   const s = salas[codigo?.toUpperCase()];
   if (!s) return res.json({ ok: false, erro: 'Sala não encontrada' });
-  console.log('[PAGAMENTO] sala encontrada, mpToken:', s.mpToken ? 'OK' : 'VAZIO', 'env:', process.env.MP_TOKEN_DEFAULT ? 'OK' : 'VAZIO');
-  const token = s.mpToken || process.env.MP_TOKEN_DEFAULT;
-const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
+  const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
   if (!mpToken) return res.json({ ok: false, erro: 'Token MP não configurado' });
 
-  console.log('[PAGAMENTO] sala:', codigo, 'mpToken:', s.mpToken ? 'OK' : 'VAZIO');
   const { idUnico, nome, cpf, email, qtd } = req.body;
   const cpfLimpo = (cpf||'').replace(/\D/g,'');
   if (cpfLimpo.length !== 11) return res.json({ ok: false, erro: 'CPF inválido. Digite os 11 dígitos.' });
@@ -966,7 +962,6 @@ const mpToken = s.mpToken || process.env.MP_TOKEN_DEFAULT;
       })
     });
     const d = await r.json();
-   console.log('[MP] Resposta completa:', JSON.stringify(d));
     if (!d.id) return res.json({ ok: false, erro: d.message || 'Erro MP' });
     res.json({
       ok: true,
@@ -995,31 +990,26 @@ app.post('/webhook-mp', async (req, res) => {
     console.log('[WEBHOOK] sem paymentId');
     return;
   }
-  console.log('[WEBHOOK] processando paymentId:', paymentId);
 
   try {
-    // Busca o token MP da sala correta pelo metadata
-    // Primeiro busca o pagamento sem token para pegar o metadata
     for (const [codigo, s] of Object.entries(salas)) {
       if (!s.mpToken) continue;
       const r = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
         headers: { 'Authorization': `Bearer ${s.mpToken}` }
       });
       const payment = await r.json();
-      console.log('[WEBHOOK] payment status:', payment.status, 'metadata:', JSON.stringify(payment.metadata));
-      if (payment.error) { console.log('[WEBHOOK] payment error:', payment.error); continue; }
-      if (payment.status !== 'approved') { console.log('[WEBHOOK] não aprovado:', payment.status); return; }
+      if (payment.error) { continue; }
+      if (payment.status !== 'approved') { return; }
 
       const { codigo: codPag, id_unico: idUnico, qtd } = payment.metadata || {};
       if (!codPag || codPag !== codigo) continue;
 
-     const sala = salas[codPag];
-      if (!sala) { console.log('[WEBHOOK] sala não encontrada:', codPag); return; }
+      const sala = salas[codPag];
+      if (!sala) { continue; }
 
-      // Libera cartela automaticamente
       const sol = sala.solicitacoes[idUnico];
-      if (!sol) { console.log('[WEBHOOK] solicitacao nao encontrada para idUnico:', idUnico); return; }
-      if (sol.status === 'aprovado') { console.log('[WEBHOOK] ja aprovado'); return; }
+      if (!sol) { continue; }
+      if (sol.status === 'aprovado') { continue; }
 
       const vendidas = Object.values(sala.cartelasVendidasPorIdUnico).flat().map(c => c.id);
       const disp = sala.cartelas.filter(c => !vendidas.includes(c.id));
@@ -1029,6 +1019,15 @@ app.post('/webhook-mp', async (req, res) => {
       sala.cartelasVendidasPorIdUnico[idUnico] = [...(sala.cartelasVendidasPorIdUnico[idUnico] || []), ...cartelas];
       sala.solicitacoes[idUnico].status = 'aprovado';
       sala.solicitacoes[idUnico].pagoViaMp = true;
+
+      // 🔹 REGISTRAR JOGADOR MESMO OFFLINE
+      if (!sala.jogadoresPorIdUnico[idUnico]) {
+        sala.jogadoresPorIdUnico[idUnico] = {
+          socketId: null,
+          nome: sol.nome || 'Jogador'
+        };
+        console.log(`[WEBHOOK] Jogador ${sol.nome} registrado (offline)`);
+      }
 
       const jogador = sala.jogadoresPorIdUnico[idUnico];
       const socketDestino = jogador?.socketId;
@@ -1048,7 +1047,6 @@ app.post('/webhook-mp', async (req, res) => {
         sala.pendingCartelas[idUnico] = payload;
       }
 
-      // 🔹 NOTIFICAR ADM (online ou offline)
       if (!sala.pagamentosNotificadosAdm) sala.pagamentosNotificadosAdm = {};
       if (sala.adm?.socketId && io.sockets.sockets.has(sala.adm.socketId)) {
         io.to(sala.adm.socketId).emit('pagamento_confirmado', {
@@ -1059,13 +1057,12 @@ app.post('/webhook-mp', async (req, res) => {
         });
         sala.pagamentosNotificadosAdm[idUnico] = true;
       } else {
-        // ADM offline: guarda para ser enviado na reconexão
         sala.pagamentosNotificadosAdm[idUnico] = true;
         console.log(`[WEBHOOK] Pagamento de ${sol.nome} aguardando ADM reconectar`);
       }
 
       salvarSalas();
-      console.log('[WEBHOOK] Cartela liberada automaticamente para', idUnico, 'adm socketId:', sala.adm?.socketId);
+      console.log('[WEBHOOK] Cartela liberada para', idUnico);
       break;
     }
   } catch(e) {
@@ -1085,105 +1082,112 @@ app.get('/teste-mp/:codigo', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log(`[+] ${socket.id}`);
-socket.on('reconectar_adm', ({ codigo }, cb) => {
+
+  socket.on('reconectar_adm', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s) return cb && cb({ ok: false });
+    
     s.adm.socketId = socket.id;
     socket.join(codigo);
     socket.data.sala = codigo;
     socket.data.papel = 'adm';
-    console.log(`[RECONEXAO] ADM ${codigo}`);
     
-    // 🔹 ENVIAR TODOS OS JOGADORES ONLINE (que têm socketId ativo)
-    const jogadoresOnline = [];
+    console.log(`[RECONEXAO] ADM ${codigo} reconectou`);
+    
+    let totalJogadores = 0;
     for (const [idUnico, jog] of Object.entries(s.jogadoresPorIdUnico)) {
-      if (jog && jog.socketId) {
-        const socketExiste = io.sockets.sockets.has(jog.socketId);
-        if (socketExiste) {
-          jogadoresOnline.push({
-            idUnico,
-            nome: jog.nome,
-            cartelas: (s.cartelasVendidasPorIdUnico[idUnico] || []).length
-          });
-          socket.emit('jogador_entrou', {
-            idUnico,
-            nome: jog.nome,
-            cartelas: (s.cartelasVendidasPorIdUnico[idUnico] || []).length,
-            total: 0
-          });
+        if (jog && jog.socketId) {
+            const socketExiste = io.sockets.sockets.has(jog.socketId);
+            if (socketExiste) {
+                totalJogadores++;
+                socket.emit('jogador_entrou', {
+                    idUnico: idUnico,
+                    nome: jog.nome,
+                    cartelas: (s.cartelasVendidasPorIdUnico[idUnico] || []).length
+                });
+            }
         }
-      }
     }
     
-    // 🔹 ENVIAR TODOS OS PAGAMENTOS CONFIRMADOS (cartelas liberadas)
     for (const [idUnico, cartelas] of Object.entries(s.cartelasVendidasPorIdUnico)) {
-      if (!cartelas || cartelas.length === 0) continue;
-      
-      const solicitacao = s.solicitacoes[idUnico];
-      const nome = solicitacao?.nome || 'Jogador';
-      const qtd = solicitacao?.qtdSolicitada || cartelas.length;
-      const valorTotal = (s.valorCartela || 0) * qtd;
-      
-      const jaNotificado = s.pagamentosNotificadosAdm?.[idUnico];
-      if (!jaNotificado) {
+        if (!cartelas || cartelas.length === 0) continue;
+        
+        const solicitacao = s.solicitacoes[idUnico];
+        const nome = solicitacao?.nome || 'Jogador';
+        const qtd = solicitacao?.qtdSolicitada || cartelas.length;
+        const valorTotal = (s.valorCartela || 0) * qtd;
+        
         socket.emit('pagamento_confirmado', {
-          nome: nome,
-          idUnico: idUnico,
-          qtd: qtd,
-          valor: valorTotal
+            nome: nome,
+            idUnico: idUnico,
+            qtd: qtd,
+            valor: valorTotal
         });
-        if (!s.pagamentosNotificadosAdm) s.pagamentosNotificadosAdm = {};
-        s.pagamentosNotificadosAdm[idUnico] = true;
-      }
-      
-      socket.emit('nova_solicitacao', {
-        idUnico: idUnico,
-        nome: nome,
-        cpf: solicitacao?.cpf || '',
-        celular: solicitacao?.celular || '',
-        chavePix: solicitacao?.chavePix || '',
-        email: solicitacao?.email || '',
-        cartelasJaTem: cartelas.length,
-        qtdSolicitada: qtd,
-        timestamp: solicitacao?.timestamp || Date.now(),
-        statusMp: 'aprovado'
-      });
+        
+        socket.emit('nova_solicitacao', {
+            idUnico: idUnico,
+            nome: nome,
+            cpf: solicitacao?.cpf || '',
+            celular: solicitacao?.celular || '',
+            chavePix: solicitacao?.chavePix || '',
+            email: solicitacao?.email || '',
+            cartelasJaTem: cartelas.length,
+            qtdSolicitada: qtd,
+            timestamp: solicitacao?.timestamp || Date.now(),
+            statusMp: 'aprovado'
+        });
     }
     
-    // 🔹 ENVIAR SOLICITAÇÕES PENDENTES
     const pendentes = Object.values(s.solicitacoes).filter(sol => sol.status === 'pendente');
     pendentes.forEach(sol => {
-      socket.emit('nova_solicitacao', {
-        idUnico: sol.idUnico,
-        nome: sol.nome,
-        cpf: sol.cpf,
-        celular: sol.celular,
-        chavePix: sol.chavePix,
-        email: sol.email,
-        cartelasJaTem: sol.cartelasJaTem || 0,
-        qtdSolicitada: sol.qtdSolicitada || 1,
-        timestamp: sol.timestamp
-      });
+        socket.emit('nova_solicitacao', {
+            idUnico: sol.idUnico,
+            nome: sol.nome,
+            cpf: sol.cpf,
+            celular: sol.celular,
+            chavePix: sol.chavePix,
+            email: sol.email,
+            cartelasJaTem: sol.cartelasJaTem || 0,
+            qtdSolicitada: sol.qtdSolicitada || 1,
+            timestamp: sol.timestamp
+        });
     });
     
-    // Atualiza total de jogadores
-    socket.emit('atualizar_total_jogadores', { total: jogadoresOnline.length });
+    if (s.sorteados && s.sorteados.length > 0) {
+        socket.emit('sorteio_restaurado', {
+            sorteados: s.sorteados,
+            ultimo: s.sorteados[s.sorteados.length - 1],
+            ativa: s.ativa
+        });
+    }
     
-    cb && cb({ ok: true, totalJogadores: jogadoresOnline.length });
+    const totalCartelasVendidas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
+    const totalArrecadado = totalCartelasVendidas * s.valorCartela;
+    const lucroAdm = totalArrecadado * ((s.porc || 20) / 100);
+    const premio = totalArrecadado - lucroAdm;
+    
+    socket.emit('atualizar_estatisticas', {
+        arrecadado: totalArrecadado,
+        lucro: lucroAdm,
+        premio: premio,
+        totalCartelas: totalCartelasVendidas
+    });
+    
+    socket.emit('atualizar_total_jogadores', { total: totalJogadores });
+    socket.emit('atualizar_contadores', {
+        jogadores: totalJogadores,
+        cartelasVendidas: totalCartelasVendidas,
+        pendentes: pendentes.length,
+        aprovadas: Object.values(s.solicitacoes).filter(sol => sol.status === 'aprovado').length
+    });
+    
+    cb && cb({ ok: true, totalJogadores: totalJogadores });
   });
 
   socket.on('criar_sala', ({ nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink, mpToken, porc }, cb) => {
-    console.log('[DEBUG] criar_sala recebido:', { nomeAdm, valorCartela, chavePix, quantidadeCartelas, horario, youtubeLink });
-    
-    if (!nomeAdm) {
-      return cb({ ok: false, erro: 'Nome do administrador é obrigatório' });
-    }
-    if (!valorCartela && valorCartela !== 0) {
-      return cb({ ok: false, erro: 'Valor da cartela é obrigatório' });
-    }
-    if (!chavePix) {
-      return cb({ ok: false, erro: 'Chave Pix é obrigatória' });
-    }
+    if (!nomeAdm) return cb({ ok: false, erro: 'Nome do administrador é obrigatório' });
+    if (!valorCartela && valorCartela !== 0) return cb({ ok: false, erro: 'Valor da cartela é obrigatório' });
+    if (!chavePix) return cb({ ok: false, erro: 'Chave Pix é obrigatória' });
     
     let codigo;
     do { codigo = gerarCodigo(); } while (salas[codigo]);
@@ -1208,7 +1212,7 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
       mpToken: mpToken || '',
       porc: parseFloat(porc) || 20,
       vencedor: null,
-      pagamentosNotificadosAdm: {}  // NOVO: controla pagamentos já notificados ao ADM
+      pagamentosNotificadosAdm: {}
     };
     
     socket.join(codigo);
@@ -1221,14 +1225,12 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
   });
 
   socket.on('entrar_sala', ({ codigo, idUnico, nomeJogador }, cb) => {
-    console.log('[ENTRAR_SALA] codigo:', codigo, 'salas:', Object.keys(salas));
     const s = salas[codigo?.toUpperCase()];
     if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
     if (s.vencedor) return cb({ ok: false, erro: 'Jogo já encerrado' });
     
     const socketId = socket.id;
     
-    const eraNovo = !s.jogadoresPorIdUnico[idUnico];
     if (s.jogadoresPorIdUnico[idUnico]) {
       const oldSocketId = s.jogadoresPorIdUnico[idUnico].socketId;
       if (oldSocketId) delete s.jogadoresPorSocket[oldSocketId];
@@ -1250,17 +1252,17 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
       total: Object.keys(s.jogadoresPorIdUnico).length
     });
     
-    // Entregar cartela pendente se existir
     if (s.pendingCartelas && s.pendingCartelas[idUnico]) {
       const payload = s.pendingCartelas[idUnico];
       delete s.pendingCartelas[idUnico];
       setTimeout(() => socket.emit('cartela_aprovada', payload), 500);
       console.log('[ENTRAR] entregando pendente para idUnico:',idUnico);
     }
-    const cartelasExistentes = s.cartelasVendidasPorIdUnico[idUnico] || [];
     
+    const cartelasExistentes = s.cartelasVendidasPorIdUnico[idUnico] || [];
     const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
     const premioEstimado = totalCartelas * s.valorCartela;
+    
     cb({
       ok: true,
       sorteados: s.sorteados,
@@ -1281,11 +1283,8 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
     const cj = s.cartelasVendidasPorIdUnico[idUnico] || [];
     if (cj.length >= 5) return cb({ ok: false, erro: 'Máximo de 5 cartelas!' });
     
-  const sol = s.solicitacoes[idUnico];
+    const sol = s.solicitacoes[idUnico];
     if (sol && sol.status === 'pendente' && !sol.pagoViaMp) return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
-    if (sol && sol.status === 'aprovado') {
-      // Permite nova solicitação se já tem cartelas mas quer mais
-    }
     
     s.solicitacoes[idUnico] = {
       idUnico: idUnico,
@@ -1296,32 +1295,29 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
       email: dados.email || '',
       status: 'pendente',
       timestamp: Date.now(),
-       cartelasJaTem: cj.length,
-     qtdSolicitada: qtd || dados.qtd || 1
+      cartelasJaTem: cj.length,
+      qtdSolicitada: qtd || dados.qtd || 1
     };
     
-    console.log('[SOLICITACAO] emitindo para adm socketId:',s.adm.socketId);
     io.to(s.adm.socketId).emit('nova_solicitacao', {
-  idUnico: idUnico,
-  nome: s.solicitacoes[idUnico].nome,
-  cpf: dados.cpf || '',
-  celular: dados.celular || '',
-  chavePix: dados.chavePix || '',
-  email: dados.email || '',
-  cartelasJaTem: cj.length,
-  qtdSolicitada: s.solicitacoes[idUnico].qtdSolicitada || 1,
-  timestamp: Date.now()
-});
+      idUnico: idUnico,
+      nome: s.solicitacoes[idUnico].nome,
+      cpf: dados.cpf || '',
+      celular: dados.celular || '',
+      chavePix: dados.chavePix || '',
+      email: dados.email || '',
+      cartelasJaTem: cj.length,
+      qtdSolicitada: s.solicitacoes[idUnico].qtdSolicitada || 1,
+      timestamp: Date.now()
+    });
     
     cb({ ok: true, mensagem: 'Solicitação enviada!' });
   });
 
-socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
-    console.log('[APROVAR_RECEBIDO] codigo:',codigo,'idUnico:',idUnico,'jogadores:',JSON.stringify(Object.keys(salas[codigo]?.jogadoresPorIdUnico||{})));
+  socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb({ ok: false, erro: 'Não autorizado' });
     
-    // Buscar pelo idUnico ou qualquer pendente
     let sol = s.solicitacoes[idUnico];
     let solKey = idUnico;
     if (!sol) {
@@ -1340,12 +1336,12 @@ socket.on('aprovar_cartela', ({ codigo, idUnico }, cb) => {
     s.cartelasVendidasPorIdUnico[solKey] = [...(s.cartelasVendidasPorIdUnico[solKey] || []), ...cartelas];
     s.solicitacoes[solKey].status = 'aprovado';
     
-   const jogador = s.jogadoresPorIdUnico[solKey];
-const socketDestino = jogador?.socketId;
-console.log('[APROVAR] solKey:',solKey,'socketDestino:',socketDestino,'socketExiste:',socketDestino ? io.sockets.sockets.has(socketDestino) : false);
+    const jogador = s.jogadoresPorIdUnico[solKey];
+    const socketDestino = jogador?.socketId;
+    
     if (socketDestino && io.sockets.sockets.has(socketDestino)) {
-setTimeout(()=>{
-     io.to(socketDestino).emit('cartela_aprovada', {
+      setTimeout(() => {
+        io.to(socketDestino).emit('cartela_aprovada', {
           cartelas: cartelas,
           cartela: cartelas[0],
           sorteados: s.sorteados,
@@ -1353,16 +1349,13 @@ setTimeout(()=>{
           youtubeLink: s.youtubeLink || '',
           mensagem: '✅ Cartela liberada!'
         });
-        console.log('[SUCESSO] Cartela enviada para socket:',socketDestino);
       }, 1000);
     } else {
-      // Socket offline — guardar pendente pelo idUnico
       s.pendingCartelas = s.pendingCartelas || {};
-      s.pendingCartelas[solKey] = {cartelas:cartelas,cartela:cartelas[0],sorteados:s.sorteados,horario:s.horario||'',youtubeLink:s.youtubeLink||'',mensagem:'✅ Cartela liberada!'};
-      console.log('[APROVAR] socket offline, pendente para idUnico:',solKey);
+      s.pendingCartelas[solKey] = {cartelas:cartelas, cartela:cartelas[0], sorteados:s.sorteados, horario:s.horario||'', youtubeLink:s.youtubeLink||'', mensagem:'✅ Cartela liberada!'};
     }
     
-   salvarSalas();
+    salvarSalas();
     cb({ ok: true });
   });
 
@@ -1380,22 +1373,21 @@ setTimeout(()=>{
     cb({ ok: true });
   });
 
-socket.on('sortear', ({ codigo }, cb) => {
+  socket.on('sortear', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
-    if (s.adm.socketId !== socket.id) {
-      s.adm.socketId = socket.id;
-    }
+    if (s.adm.socketId !== socket.id) s.adm.socketId = socket.id;
     if (s.vencedor) return cb({ ok: false, erro: 'Jogo já encerrado' });
-    console.log('[SORTEAR] cod:',codigo,'sorteados:',s.sorteados.length,'vencedor:',s.vencedor,'jogoEncerrado no servidor: N/A');
     if (!s.ativa) s.ativa = true;
+    
     const res = sorteiarNumero(codigo);
     if (!res) return cb({ ok: false, erro: 'Sem números restantes' });
+    
     const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
     const premioEstimado = totalCartelas * s.valorCartela * (1 - (s.porc||20)/100);
     io.to(codigo).emit('numero_sorteado', { ...res, premioEstimado });
+    
     Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
-		
       carts.forEach(cartela => {
         let marc = 0, tot = 0;
         for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
@@ -1403,11 +1395,12 @@ socket.on('sortear', ({ codigo }, cb) => {
           if (v === 'FREE') { marc++; tot++; }
           else { tot++; if (s.sorteados.includes(v)) marc++; }
         }
-      const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
+        const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
         const celular = s.solicitacoes[idUnico]?.celular || '';
         const celMask = celular.length>=4 ? '('+celular.slice(0,2)+')******'+celular.slice(-2) : '';
         const nomeExib = nome + (celMask ? ' '+celMask : '');
         const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
+        
         if (marc === tot - 1) {
           io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
           io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1!' });
@@ -1422,7 +1415,8 @@ socket.on('sortear', ({ codigo }, cb) => {
     });
     cb({ ok: true, ...res });
   });
-socket.on('zerar_sorteio', ({ codigo }, cb) => {
+
+  socket.on('zerar_sorteio', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
     s.sorteados = [];
@@ -1433,7 +1427,7 @@ socket.on('zerar_sorteio', ({ codigo }, cb) => {
     cb && cb({ ok: true });
   });
 
-socket.on('limpar_cartelas', ({ codigo }, cb) => {
+  socket.on('limpar_cartelas', ({ codigo }, cb) => {
     const s = salas[codigo];
     if (!s || s.adm.socketId !== socket.id) return cb && cb({ ok: false });
     s.cartelasVendidasPorIdUnico = {};
@@ -1445,16 +1439,17 @@ socket.on('limpar_cartelas', ({ codigo }, cb) => {
     s.jogadoresPorIdUnico = {};
     s.jogadoresPorSocket = {};
     s.numeros = Array.from({ length: 90 }, (_, i) => i + 1);
-    s.pagamentosNotificadosAdm = {};  // Reset das notificações
+    s.pagamentosNotificadosAdm = {};
     salvarSalas();
     io.to(codigo).emit('cartelas_limpas');
     cb && cb({ ok: true });
   });
+
   socket.on('fechar_alerta_jogadores', ({ codigo }, cb) => {
     io.to(codigo).emit('fechar_alerta');
     cb && cb({ ok: true });
   });
-  
+
   socket.on('gritar_bingo', ({ codigo, cartelaId }, cb) => {
     const s = salas[codigo];
     if (!s || !s.ativa || s.vencedor) return cb({ ok: false });
