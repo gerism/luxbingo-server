@@ -1155,6 +1155,7 @@ socket.on('reconectar_adm', ({ codigo }, cb) => {
   });
 
   socket.on('entrar_sala', ({ codigo, idUnico, nomeJogador }, cb) => {
+    console.log('[ENTRAR_SALA] codigo:', codigo, 'salas:', Object.keys(salas));
     const s = salas[codigo?.toUpperCase()];
     if (!s) return cb({ ok: false, erro: 'Sala não encontrada' });
     if (s.vencedor) return cb({ ok: false, erro: 'Jogo já encerrado' });
