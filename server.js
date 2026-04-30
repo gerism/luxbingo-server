@@ -320,6 +320,26 @@ document.getElementById('btnConectar').onclick=function(){
   }
   if(sock){sock.off('connect_error');sock.disconnect();}
   sock=io(SERVER,{transports:['websocket']});
+sock.on('cartela_aprovada',function(d){
+    var novas=d.cartelas||[d.cartela];
+    novas.forEach(function(cart){
+      cartelas.push(cart);
+      if(!marc[cart.id])marc[cart.id]=[];
+      nums=d.sorteados||nums;
+      nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
+    });
+    if(d.youtubeLink)setYoutube(d.youtubeLink);
+    salvarLocal(nome);
+    mostrarTelaSalvar(novas, function(){
+      mostrarYoutube();
+      tela(3);
+      document.getElementById('semCartela').style.display='none';
+      renderCartelas();renderGrid();mostrarCodigosBar();
+      if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
+      else document.getElementById('btnMais').style.display='none';
+      toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
+    });
+  });
 sock.on('connect',function(){
     localStorage.setItem('luxbingo_nome_'+COD,nome);
     registrarEventos(nome);
@@ -1305,6 +1325,17 @@ app.post('/webhook-mp', async (req, res) => {
           qtd: qtd || 1,
           valor: payment.transaction_amount
         });
+      }
+
+     // Entrega direto se jogador já estiver conectado
+      const jogador = sala.jogadoresPorIdUnico[idUnico];
+      if (jogador && jogador.socketId && io.sockets.sockets.has(jogador.socketId)) {
+        const payload = sala.pendingCartelas[idUnico];
+        delete sala.pendingCartelas[idUnico];
+        setTimeout(() => {
+          io.to(jogador.socketId).emit('cartela_aprovada', payload);
+          console.log('[WEBHOOK] ✅ Cartela entregue diretamente ao jogador', idUnico);
+        }, 500);
       }
 
       salvarSalas();
