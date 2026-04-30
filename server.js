@@ -128,11 +128,13 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="info-box"><div class="info-cod">SALA: ${codigo}</div></div>
-  <div class="card">
-    <div class="ct">🔑 Já tem cartela?</div>
-    <label class="lbl">Código da sua cartela</label>
-    <input class="inp" id="iCodCart" type="text" placeholder="Ex: ABC123-1" style="text-transform:uppercase">
-    <button class="btn-b" id="btnRecuperar">RECUPERAR CARTELA →</button>
+<div class="card">
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px">
+            <img src="${LOGO_URL}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold)">
+            <div class="ct" style="margin-bottom:0">🎲 SORTEIO AO VIVO</div>
+          </div>
+          <div class="bola-c" style="margin:6px 0"><div class="bola" id="bola" style="width:72px;height:72px;font-size:42px;border-radius:14px">--</div></div>
+          <button class="btn-g" id="btnSort" style="font-size:14px;padding:10px">🎲 SORTEAR</button>
   </div>
   <div class="divider"><div class="divider-line"></div><div class="divider-txt">OU SOLICITAR NOVA</div><div class="divider-line"></div></div>
   <div class="card">
