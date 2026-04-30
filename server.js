@@ -802,10 +802,7 @@ const UPSTASH_URL = process.env.UPSTASH_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
 
 async function salvarSalas() {
-  if (!UPSTASH_URL || !UPSTASH_TOKEN) {
-    console.log('[REDIS] Variáveis não configuradas! URL:', !!UPSTASH_URL, 'TOKEN:', !!UPSTASH_TOKEN);
-    return;
-  }
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
   try {
     const salasReduzidas = {};
     for (const [cod, s] of Object.entries(salas)) {
@@ -813,10 +810,29 @@ async function salvarSalas() {
       salasReduzidas[cod] = {
         ...s,
         cartelas: [],
+        cartelasVendidasPorIdUnico: {},  // salva separado
       };
     }
-    const valor = JSON.stringify(salasReduzidas);
-    const resp = await fetch(`${UPSTASH_URL}/set/luxbingo_salas`, {
+    // Salva estrutura principal
+    await fetch(`${UPSTASH_URL}/set/luxbingo_salas`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(["luxbingo_salas", JSON.stringify(salasReduzidas)])
+    });
+    // Salva cartelas vendidas separado por sala
+    for (const [cod, s] of Object.entries(salas)) {
+      if (!s || !s.cartelasVendidasPorIdUnico) continue;
+      const vendidas = s.cartelasVendidasPorIdUnico;
+      if (Object.keys(vendidas).length === 0) continue;
+      await fetch(`${UPSTASH_URL}/set/luxbingo_vendidas_${cod}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify([`luxbingo_vendidas_${cod}`, JSON.stringify(vendidas)])
+      });
+    }
+    console.log('[REDIS SAVE] OK');
+  } catch(e) { console.log('[REDIS SAVE ERROR]', e.message); }
+}
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(["luxbingo_salas", valor])
@@ -836,6 +852,18 @@ async function carregarSalas() {
     if (d.result) {
       const salvas = JSON.parse(d.result);
       Object.assign(salas, salvas);
+      // Restaura cartelas vendidas
+      for (const cod of Object.keys(salas)) {
+        try {
+          const r2 = await fetch(`${UPSTASH_URL}/get/luxbingo_vendidas_${cod}`, {
+            headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+          });
+          const d2 = await r2.json();
+          if (d2.result) {
+            salas[cod].cartelasVendidasPorIdUnico = JSON.parse(d2.result);
+          }
+        } catch(e) {}
+      }
       console.log('[REDIS RESTORE] Salas:', Object.keys(salas));
     }
   } catch(e) { console.log('[REDIS LOAD ERROR]', e.message); }
