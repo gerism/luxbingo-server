@@ -376,6 +376,239 @@ sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dad
   });
  sock.once('connect_error',function(){if(!cartelas.length&&!meuIdUnico)toast('❌ Erro de conexão!',true);});
 };
+function gerarCanvasCartela(cart, marcados) {
+  var cv = document.createElement('canvas');
+  var W = 390, H = 600;
+  cv.width = W; cv.height = H;
+  var ctx = cv.getContext('2d');
+ 
+  function rr(x,y,w,h,r){
+    ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+    ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+  }
+  function gold(x,y,w){
+    var g=ctx.createLinearGradient(x,y,x+w,y);
+    g.addColorStop(0,'#7a5a0f');g.addColorStop(0.25,'#c9a227');
+    g.addColorStop(0.5,'#ffd966');g.addColorStop(0.75,'#c9a227');
+    g.addColorStop(1,'#7a5a0f');return g;
+  }
+  function goldV(x,y,h){
+    var g=ctx.createLinearGradient(x,y,x,y+h);
+    g.addColorStop(0,'#ffd966');g.addColorStop(1,'#c9a227');return g;
+  }
+  function fillRR(x,y,w,h,r,style){ctx.fillStyle=style;rr(x,y,w,h,r);ctx.fill();}
+  function strokeRR(x,y,w,h,r,style,lw){ctx.strokeStyle=style;ctx.lineWidth=lw||1;rr(x,y,w,h,r);ctx.stroke();}
+ 
+  // Fundo principal
+  var bgMain=ctx.createLinearGradient(0,0,W,H);
+  bgMain.addColorStop(0,'#0a1525');bgMain.addColorStop(0.5,'#0e1f3d');bgMain.addColorStop(1,'#0a1525');
+  fillRR(0,0,W,H,18,bgMain);
+ 
+  // Bordas externas
+  strokeRR(2,2,W-4,H-4,17,gold(0,0,W),2.5);
+  strokeRR(6,6,W-12,H-12,14,'rgba(201,162,39,0.3)',0.8);
+  strokeRR(9,9,W-18,H-18,12,'rgba(255,217,102,0.1)',0.4);
+ 
+  // Ornamentos nos cantos
+  [[12,12],[W-12,12],[12,H-12],[W-12,H-12]].forEach(function(p,i){
+    var dx=i%2===0?1:-1, dy=i<2?1:-1;
+    ctx.strokeStyle=gold(p[0]-10,p[1]-10,20);ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(p[0]+dx*18,p[1]);ctx.lineTo(p[0],p[1]);ctx.lineTo(p[0],p[1]+dy*18);ctx.stroke();
+    ctx.fillStyle='#ffd966';
+    ctx.beginPath();ctx.moveTo(p[0],p[1]-5);ctx.lineTo(p[0]+4,p[1]);ctx.lineTo(p[0],p[1]+5);ctx.lineTo(p[0]-4,p[1]);ctx.closePath();ctx.fill();
+  });
+ 
+  // Header bg
+  var hBg=ctx.createLinearGradient(0,12,0,96);
+  hBg.addColorStop(0,'#1c3366');hBg.addColorStop(1,'#0d1b2e');
+  fillRR(12,12,W-24,84,14,hBg);
+ 
+  // Linha separadora header
+  ctx.strokeStyle=gold(12,0,W-24);ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(20,96);ctx.lineTo(W-20,96);ctx.stroke();
+  ctx.strokeStyle='rgba(255,217,102,0.25)';ctx.lineWidth=0.4;
+  ctx.beginPath();ctx.moveTo(20,99);ctx.lineTo(W-20,99);ctx.stroke();
+  // Losango central
+  ctx.fillStyle='#ffd966';
+  ctx.beginPath();ctx.moveTo(W/2,93);ctx.lineTo(W/2+5,98);ctx.lineTo(W/2,103);ctx.lineTo(W/2-5,98);ctx.closePath();ctx.fill();
+ 
+  // Logo círculo
+  var lx=44,ly=54,lr=28;
+  ctx.beginPath();ctx.arc(lx,ly,lr,0,Math.PI*2);
+  var lgBg=ctx.createRadialGradient(lx,ly,2,lx,ly,lr);
+  lgBg.addColorStop(0,'#1a2d50');lgBg.addColorStop(1,'#0a1525');
+  ctx.fillStyle=lgBg;ctx.fill();
+  strokeRR(lx-lr,ly-lr,lr*2,lr*2,lr,gold(lx-lr,ly,lr*2),1.8);
+  ctx.strokeStyle='rgba(255,217,102,0.2)';ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.arc(lx,ly,lr-4,0,Math.PI*2);ctx.stroke();
+  ctx.font='bold 12px Georgia,serif';ctx.fillStyle='#ffd966';ctx.textAlign='center';ctx.fillText('LUX',lx,ly-3);
+  ctx.font='bold 10px Georgia,serif';ctx.fillStyle='#c9a227';ctx.fillText('BINGO',lx,ly+12);
+ 
+  // Título
+  ctx.font='bold 30px Georgia,serif';
+  ctx.fillStyle=gold(80,20,230);
+  ctx.textAlign='center';ctx.fillText('LUX BINGO',W/2+10,52);
+  ctx.font='italic 10px Georgia,serif';ctx.fillStyle='#c9a227';
+  ctx.fillText('\u2014  CARTELA OFICIAL  \u2014',W/2+10,70);
+  ctx.strokeStyle='rgba(201,162,39,0.3)';ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(110,78);ctx.lineTo(W-30,78);ctx.stroke();
+ 
+  // Badge código
+  var bx=W-100,by=20,bw=88,bh=52;
+  var bgBadge=ctx.createLinearGradient(bx,by,bx+bw,by+bh);
+  bgBadge.addColorStop(0,'#1a2d4e');bgBadge.addColorStop(1,'#0a1525');
+  fillRR(bx,by,bw,bh,8,bgBadge);
+  strokeRR(bx,by,bw,bh,8,gold(bx,by,bw),1.2);
+  ctx.font='bold 8px Georgia,serif';ctx.fillStyle='#c9a227';ctx.textAlign='center';
+  ctx.fillText('CÓDIGO',bx+bw/2,by+17);
+  ctx.font='bold 13px Georgia,serif';ctx.fillStyle='#ffd966';
+  ctx.fillText(cart.id,bx+bw/2,by+35);
+ 
+  // Letras BINGO
+  var cols=[47,117,187,257,327];
+  ctx.font='bold 20px Georgia,serif';
+  ctx.fillStyle=goldV(0,108,20);ctx.textAlign='center';
+  ['B','I','N','G','O'].forEach(function(l,i){ctx.fillText(l,cols[i]+30,120);});
+  for(var i=0;i<4;i++){
+    ctx.fillStyle='rgba(201,162,39,0.5)';
+    ctx.beginPath();ctx.arc(cols[i]+30+(cols[i+1]-cols[i])/2,112,2,0,Math.PI*2);ctx.fill();
+  }
+ 
+  // Grade 5x5
+  var sx=14, sy=132, cW=68, cH=82, gap=6;
+  for(var row=0;row<5;row++){
+    for(var col=0;col<5;col++){
+      var x=sx+col*(cW+gap);
+      var y=sy+row*(cH+gap);
+      var val=cart.grid[row][col];
+      var isMark=marcados.indexOf(val)!==-1;
+      var isFree=val==='FREE';
+ 
+      if(isFree){
+        var gFree=ctx.createLinearGradient(x,y,x+cW,y+cH);
+        gFree.addColorStop(0,'#9a6e0a');gFree.addColorStop(0.4,'#e8b820');
+        gFree.addColorStop(0.6,'#ffd966');gFree.addColorStop(1,'#9a6e0a');
+        fillRR(x,y,cW,cH,10,gFree);
+        strokeRR(x,y,cW,cH,10,gold(x,y,cW),2);
+        strokeRR(x+3,y+3,cW-6,cH-6,8,'rgba(255,255,255,0.2)',0.5);
+        ctx.font='bold 15px Georgia,serif';ctx.fillStyle='#0a1525';ctx.textAlign='center';
+        ctx.fillText('FREE',x+cW/2,y+cH/2-2);
+        ctx.font='11px serif';ctx.fillText('\u2605',x+cW/2,y+cH/2+16);
+ 
+      } else if(isMark){
+        var gMark=ctx.createLinearGradient(x,y,x+cW,y+cH);
+        gMark.addColorStop(0,'#0f4a28');gMark.addColorStop(1,'#1d8040');
+        fillRR(x,y,cW,cH,10,gMark);
+        strokeRR(x,y,cW,cH,10,'#27ae60',1.5);
+        strokeRR(x+3,y+3,cW-6,cH-6,8,'rgba(80,220,120,0.15)',0.5);
+        ctx.fillStyle='rgba(46,204,113,0.7)';
+        ctx.beginPath();ctx.arc(x+cW-9,y+9,4,0,Math.PI*2);ctx.fill();
+        ctx.font='bold 28px Georgia,serif';ctx.fillStyle='#fff';ctx.textAlign='center';
+        ctx.fillText(val,x+cW/2,y+cH/2+10);
+ 
+      } else {
+        var gNorm=ctx.createLinearGradient(x,y,x+cW,y+cH);
+        gNorm.addColorStop(0,'#0f1e38');gNorm.addColorStop(1,'#091528');
+        fillRR(x,y,cW,cH,10,gNorm);
+        strokeRR(x,y,cW,cH,10,gold(x,y,cW),1);
+        strokeRR(x+2,y+2,cW-4,cH-4,9,'rgba(255,217,102,0.06)',0.4);
+        ctx.font='bold 28px Georgia,serif';ctx.fillStyle='#dcc98a';ctx.textAlign='center';
+        ctx.fillText(val,x+cW/2,y+cH/2+10);
+      }
+    }
+  }
+ 
+  // Footer
+  ctx.strokeStyle=gold(20,0,W-40);ctx.lineWidth=0.8;
+  ctx.beginPath();ctx.moveTo(20,H-30);ctx.lineTo(W-20,H-30);ctx.stroke();
+  ctx.fillStyle='rgba(201,162,39,0.5)';
+  ctx.beginPath();ctx.moveTo(W/2,H-33);ctx.lineTo(W/2+4,H-29);ctx.lineTo(W/2,H-25);ctx.lineTo(W/2-4,H-29);ctx.closePath();ctx.fill();
+  var gLegVerd=ctx.createLinearGradient(18,H-22,18,H-10);
+  gLegVerd.addColorStop(0,'#0f4a28');gLegVerd.addColorStop(1,'#1d8040');
+  fillRR(18,H-22,12,12,3,gLegVerd);
+  ctx.font='10px Georgia,serif';ctx.fillStyle='rgba(201,162,39,0.55)';ctx.textAlign='left';
+  ctx.fillText('Marcado',36,H-13);
+  ctx.textAlign='center';ctx.fillStyle='rgba(201,162,39,0.4)';
+  ctx.fillText('Guarde: '+cart.id,W/2+30,H-13);
+ 
+  return cv;
+}
+ 
+function mostrarTelaSalvar(novas, onJogar){
+  var old=document.getElementById('telaSalvar');
+  if(old)document.body.removeChild(old);
+ 
+  var overlay=document.createElement('div');
+  overlay.id='telaSalvar';
+  overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#0a1525;z-index:990;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:20px 16px 30px;gap:12px';
+ 
+  // Título
+  var tit=document.createElement('div');
+  tit.style.cssText='text-align:center;padding-top:8px';
+  tit.innerHTML='<div style="font-size:24px;font-weight:900;color:#ffd966;font-family:Georgia,serif;letter-spacing:2px">🎉 Cartela Liberada!</div>'
+    +'<div style="font-size:11px;color:rgba(201,162,39,0.7);margin-top:6px;line-height:1.6">Salve sua cartela antes de jogar.<br>Se fechar o app, recupere pelo código.</div>';
+  overlay.appendChild(tit);
+ 
+  // Preview da cartela (primeira)
+  var cv=gerarCanvasCartela(novas[0],[]);
+  cv.style.cssText='border-radius:14px;max-width:100%;width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.6)';
+  overlay.appendChild(cv);
+ 
+  // Se tiver mais de 1 cartela, mostra os códigos
+  if(novas.length>1){
+    var info=document.createElement('div');
+    info.style.cssText='background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.3);border-radius:10px;padding:8px 16px;font-size:11px;color:rgba(201,162,39,0.8);text-align:center;width:100%;max-width:340px';
+    info.textContent=novas.length+' cartelas: '+novas.map(function(c){return c.id;}).join(', ');
+    overlay.appendChild(info);
+  }
+ 
+  // Botão SALVAR
+  var btnSalvar=document.createElement('button');
+  btnSalvar.textContent='💾 SALVAR CARTELA'+(novas.length>1?'S':'');
+  btnSalvar.style.cssText='width:100%;max-width:340px;padding:15px;background:linear-gradient(135deg,#c9a227,#ffd966);border:none;border-radius:13px;font-size:15px;font-weight:900;color:#0a1628;font-family:Georgia,serif;letter-spacing:2px;cursor:pointer';
+ 
+  // Botão JOGAR — oculto até salvar
+  var btnJogar=document.createElement('button');
+  btnJogar.textContent='▶ JOGAR AGORA';
+  btnJogar.style.cssText='width:100%;max-width:340px;padding:15px;background:linear-gradient(135deg,#155c30,#25a05a);border:none;border-radius:13px;font-size:15px;font-weight:900;color:#fff;font-family:Georgia,serif;letter-spacing:2px;cursor:pointer;display:none';
+ 
+  var salvou=false;
+  btnSalvar.onclick=function(){
+    // Baixa todas as cartelas
+    novas.forEach(function(cart,idx){
+      setTimeout(function(){
+        var c=gerarCanvasCartela(cart,[]);
+        var a=document.createElement('a');
+        a.download='lux-bingo-'+cart.id+'.jpg';
+        a.href=c.toDataURL('image/jpeg',0.95);
+        a.click();
+      }, idx*300);
+    });
+    // Atualiza visual do botão salvar
+    setTimeout(function(){
+      btnSalvar.textContent='✅ CARTELA SALVA!';
+      btnSalvar.style.background='rgba(46,204,113,0.15)';
+      btnSalvar.style.border='2px solid #2ecc71';
+      btnSalvar.style.color='#2ecc71';
+      btnSalvar.disabled=true;
+      // Libera botão jogar
+      btnJogar.style.display='block';
+    }, novas.length*300+200);
+  };
+ 
+  btnJogar.onclick=function(){
+    document.body.removeChild(overlay);
+    onJogar();
+  };
+ 
+  overlay.appendChild(btnSalvar);
+  overlay.appendChild(btnJogar);
+  document.body.appendChild(overlay);
+}
+ 
 function registrarEventos(nome){
   sock.on('connect',function(){
     if(cartelas.length>0){
@@ -390,15 +623,17 @@ function registrarEventos(nome){
       nums=d.sorteados||nums;
       nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
     });
-  console.log('youtubeLink recebido:', d.youtubeLink);
-if(d.youtubeLink)setYoutube(d.youtubeLink);
-    mostrarYoutube();
-    tela(3);
-    document.getElementById('semCartela').style.display='none';
-    salvarLocal(nome);renderCartelas();renderGrid();mostrarCodigosBar();
-    if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
-    else document.getElementById('btnMais').style.display='none';
-    toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
+    if(d.youtubeLink)setYoutube(d.youtubeLink);
+    salvarLocal(nome);
+    mostrarTelaSalvar(novas, function(){
+      mostrarYoutube();
+      tela(3);
+      document.getElementById('semCartela').style.display='none';
+      renderCartelas();renderGrid();mostrarCodigosBar();
+      if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
+      else document.getElementById('btnMais').style.display='none';
+      toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
+    });
   });
   sock.on('cartela_rejeitada',function(d){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
