@@ -199,6 +199,10 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
         <span class="num-lbl">Último</span>
         <div class="num-atual" id="nAtual">--</div>
       </div>
+      <div id="aguardandoBox" style="flex:1;text-align:center;padding:0 8px">
+        <div style="font-size:10px;font-weight:900;color:rgba(201,162,39,0.6);text-transform:uppercase;letter-spacing:2px">⏳ Aguardando Sorteio</div>
+        <div id="horarioJogBox" style="font-size:11px;font-weight:700;color:#ffd966;margin-top:2px"></div>
+      </div>
       <div id="premioJogBox" style="display:none;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:6px 12px;text-align:center;margin-left:auto">
         <div style="font-size:8px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px">🏆 Prêmio</div>
         <div style="font-size:18px;font-weight:900;color:var(--navy)" id="premioJogVal">--</div>
@@ -346,7 +350,10 @@ sock.on('connect',function(){
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
       if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);sock.disconnect();return;}
       document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
-      if(r.horario){document.getElementById('pHorario').textContent='🕐 '+r.horario;document.getElementById('pHorario').style.display='block';}
+      if(r.horario){
+        var hb=document.getElementById('horarioJogBox');
+        if(hb)hb.textContent='🕐 '+r.horario;
+      }
       if(r.premioEstimado){
         var pb=document.getElementById('premioJogBox');var pv=document.getElementById('premioJogVal');
         if(pb&&pv){pb.style.display='block';pv.textContent='R$ '+r.premioEstimado.toLocaleString('pt-BR',{minimumFractionDigits:2});}
@@ -592,7 +599,7 @@ function mostrarTelaSalvar(novas, onJogar){
  
   // Botão JOGAR — oculto até salvar
   var btnJogar=document.createElement('button');
-  btnJogar.textContent='▶ JOGAR AGORA';
+  btnJogar.textContent='▶ AGUARDANDO O SORTEIO';
   btnJogar.style.cssText='width:100%;max-width:340px;padding:15px;background:linear-gradient(135deg,#155c30,#25a05a);border:none;border-radius:13px;font-size:15px;font-weight:900;color:#fff;font-family:Georgia,serif;letter-spacing:2px;cursor:pointer;display:none';
  
   var salvou=false;
@@ -665,6 +672,8 @@ function registrarEventos(nome){
       if(pb&&pv){pb.style.display='block';pv.textContent='R$ '+d.premioEstimado.toLocaleString('pt-BR',{minimumFractionDigits:2});}
     }
     document.getElementById('nAtual').textContent=d.numero;
+    var ab=document.getElementById('aguardandoBox');
+    if(ab)ab.style.display='none';
     cartelas.forEach(function(c){
       if(marc[c.id].indexOf(d.numero)===-1)marc[c.id].push(d.numero);
     });
