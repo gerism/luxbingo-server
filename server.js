@@ -834,14 +834,7 @@ async function salvarSalas() {
     console.log('[REDIS SAVE] OK');
   } catch(e) { console.log('[REDIS SAVE ERROR]', e.message); }
 }
-      method: 'POST',
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(["luxbingo_salas", valor])
-    });
-    const result = await resp.json();
-    console.log('[REDIS SAVE]', JSON.stringify(result));
-  } catch(e) { console.log('[REDIS SAVE ERROR]', e.message); }
-}
+     
 
 async function carregarSalas() {
   if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
