@@ -1334,6 +1334,19 @@ app.post('/webhook-mp', async (req, res) => {
           qtd: qtd || 1,
           valor: payment.transaction_amount
         });
+        // Atualiza solicitação para aprovado no ADM
+        io.to(sala.adm.socketId).emit('nova_solicitacao', {
+          idUnico: idUnico,
+          nome: sol.nome,
+          cpf: sol.cpf || '',
+          celular: sol.celular || '',
+          chavePix: sol.chavePix || '',
+          email: sol.email || '',
+          cartelasJaTem: cartelas.length,
+          qtdSolicitada: qtd || 1,
+          timestamp: sol.timestamp || Date.now(),
+          statusMp: 'aprovado'
+        });
       }
 
      // Entrega direto se jogador já estiver conectado
