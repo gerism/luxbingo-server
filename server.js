@@ -199,9 +199,9 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
         <span class="num-lbl">Último</span>
         <div class="num-atual" id="nAtual">--</div>
       </div>
-      <div id="aguardandoBox" style="flex:1;text-align:center;padding:0 8px">
-        <div style="font-size:10px;font-weight:900;color:rgba(201,162,39,0.6);text-transform:uppercase;letter-spacing:2px">⏳ Aguardando Sorteio</div>
-        <div id="horarioJogBox" style="font-size:11px;font-weight:700;color:#ffd966;margin-top:2px"></div>
+     <div id="aguardandoBox" style="flex:1;text-align:center;padding:0 6px">
+        <div style="font-size:clamp(10px,3vw,14px);font-weight:900;color:#ffd966;text-transform:uppercase;letter-spacing:1px;text-shadow:0 0 10px rgba(255,217,102,0.6)">⏳ Aguardando Sorteio</div>
+        <div id="horarioJogBox" style="font-size:clamp(10px,2.5vw,12px);font-weight:700;color:#c9a227;margin-top:2px"></div>
       </div>
       <div id="premioJogBox" style="display:none;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:6px 12px;text-align:center;margin-left:auto">
         <div style="font-size:8px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px">🏆 Prêmio</div>
