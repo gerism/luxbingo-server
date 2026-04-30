@@ -1274,17 +1274,17 @@ io.on('connection', (socket) => {
     const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
     const premioEstimado = totalCartelas * s.valorCartela;
     
-    cb({
-      ok: true,
-      sorteados: s.sorteados,
-      ativa: s.ativa,
-      valorCartela: s.valorCartela,
-      chavePix: s.chavePix,
-      horario: s.horario,
-      youtubeLink: s.youtubeLink,
-      cartelasExistentes: cartelasExistentes,
-      premioEstimado: premioEstimado
-    });
+   cb({
+  ok: true,
+  sorteados: s.sorteados,
+  ativa: s.ativa,
+  valorCartela: s.valorCartela,
+  chavePix: s.chavePix,
+  horario: s.horario,
+  youtubeLink: s.youtubeLink,
+  cartelasExistentes: cartelasExistentes,
+  premioEstimado: s.ativa ? premioEstimado : null
+});
   });
 
   socket.on('solicitar_cartela', ({ codigo, idUnico, qtd, dados }, cb) => {
