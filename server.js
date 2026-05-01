@@ -323,7 +323,8 @@ document.getElementById('btnConectar').onclick=function(){
     localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
   }
   if(sock){sock.off('connect_error');sock.disconnect();}
-  sock=io(SERVER,{transports:['websocket']});
+sock=io(SERVER,{transports:['websocket']});
+  sock.off('cartela_aprovada');
 sock.on('cartela_aprovada',function(d){
     var novas=d.cartelas||[d.cartela];
     novas.forEach(function(cart){
@@ -642,8 +643,8 @@ function registrarEventos(nome){
       sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
     }
   });
-  
-  sock.on('cartela_rejeitada',function(d){
+  sock.off('cartela_aprovada');
+  sock.on('cartela_aprovada',function(d){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
   });
  sock.on('numero_sorteado',function(d){
