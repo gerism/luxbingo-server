@@ -643,8 +643,7 @@ function registrarEventos(nome){
       sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
     }
   });
-  sock.off('cartela_aprovada');
-  sock.on('cartela_aprovada',function(d){
+  sock.on('cartela_rejeitada',function(d){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
   });
  sock.on('numero_sorteado',function(d){
