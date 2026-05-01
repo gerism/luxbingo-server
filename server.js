@@ -29,7 +29,7 @@ app.get('/sala-adm/:admId', (req, res) => {
   });
 });
 
-const LOGO = 'https://luxbingo-server-production.up.railway.app/logo.png';
+const LOGO = 'https://i.ibb.co/SEU-LINK-AQUI/logo.png';
 
 app.get('/jogo/:codigo', (req, res) => {
   const codigo = req.params.codigo.toUpperCase();
@@ -1763,7 +1763,16 @@ io.on('connection', (socket) => {
     s.vencedor = { idUnico: idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId };
     s.ativa = false;
     salvarSalas();
-    io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
+    const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
+    const premioFinal = totalCartelas * s.valorCartela * (1 - (s.porc||20)/100);
+    const solVencedor = s.solicitacoes[idUnico];
+    io.to(codigo).emit('bingo_confirmado', { 
+      vencedor: s.vencedor, 
+      sorteados: s.sorteados,
+      chavePix: solVencedor?.chavePix || '',
+      nomeVencedor: solVencedor?.nome || s.vencedor.nome,
+      premio: premioFinal
+    });
     io.to(s.adm.socketId).emit('parar_sorteio');
     cb({ ok: true });
   });
