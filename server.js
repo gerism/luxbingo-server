@@ -124,7 +124,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 <body>
 <div class="toast" id="toast"></div>
 <div class="tela ativo" id="t1">
-  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
+  <img src="${LOGO}" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="info-box"><div class="info-cod">SALA: ${codigo}</div></div>
@@ -159,7 +159,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
 </div>
 <div class="tela" id="t2">
-  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
+  <img src="${LOGO}" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="card" style="max-width:400px;text-align:center">
@@ -181,7 +181,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
 </div>
 <div class="tela" id="t4">
-  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
+  <img src="${LOGO}" class="logo-img">
   <div class="card" style="max-width:400px;text-align:center;padding:24px">
     <div style="font-size:44px;margin-bottom:10px">❌</div>
     <div style="font-size:16px;font-weight:900;color:#e74c3c;margin-bottom:8px">Solicitação Rejeitada</div>
@@ -323,10 +323,8 @@ document.getElementById('btnConectar').onclick=function(){
     localStorage.setItem('luxbingo_id_'+COD, meuIdUnico);
   }
   if(sock){sock.off('connect_error');sock.disconnect();}
-sock=io(SERVER,{transports:['websocket']});
-sock.on('connect',function(){
-    localStorage.setItem('luxbingo_nome_'+COD,nome);
-    registrarEventos(nome);
+  sock=io(SERVER,{transports:['websocket']});
+sock.on('cartela_aprovada',function(d){
     var novas=d.cartelas||[d.cartela];
     novas.forEach(function(cart){
       cartelas.push(cart);
@@ -639,7 +637,11 @@ function mostrarTelaSalvar(novas, onJogar){
 }
  
 function registrarEventos(nome){
-  sock.off('cartela_aprovada');
+  sock.on('connect',function(){
+    if(cartelas.length>0){
+      sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
+    }
+  });
   sock.on('cartela_aprovada',function(d){
     var novas=d.cartelas||[d.cartela];
     novas.forEach(function(cart){
@@ -659,14 +661,6 @@ function registrarEventos(nome){
       else document.getElementById('btnMais').style.display='none';
       toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
     });
-  });
-  sock.on('cartela_rejeitada',function(d){
-    document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
-  });
-  sock.on('connect',function(){
-    if(cartelas.length>0){
-      sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
-    }
   });
   sock.on('cartela_rejeitada',function(d){
     document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
@@ -873,7 +867,7 @@ function renderCartelas(){
   var grid=document.createElement('div');grid.className='grid5';
   for(var r=0;r<5;r++)for(var col=0;col<5;col++){
     var v=c.grid[r][col];var el=document.createElement('div');
-    if(v==='FREE'){el.className='cel free';el.style.padding='0';el.style.overflow='hidden';el.innerHTML='<img src="'+SERVER+'/logo.png" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:6px;">';}
+    if(v==='FREE'){el.className='cel free';el.style.padding='0';el.style.overflow='hidden';el.innerHTML='<img src="${LOGO}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:6px;">';}
     else{
       el.className='cel'+(m.indexOf(v)!==-1?' marc':'');
       el.textContent=v;
@@ -1769,16 +1763,7 @@ io.on('connection', (socket) => {
     s.vencedor = { idUnico: idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId };
     s.ativa = false;
     salvarSalas();
-    const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
-    const premioFinal = totalCartelas * s.valorCartela * (1 - (s.porc||20)/100);
-    const solVencedor = s.solicitacoes[idUnico];
-    io.to(codigo).emit('bingo_confirmado', { 
-      vencedor: s.vencedor, 
-      sorteados: s.sorteados,
-      chavePix: solVencedor?.chavePix || '',
-      nomeVencedor: solVencedor?.nome || s.vencedor.nome,
-      premio: premioFinal
-    });
+    io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
     io.to(s.adm.socketId).emit('parar_sorteio');
     cb({ ok: true });
   });
