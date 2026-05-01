@@ -124,7 +124,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 <body>
 <div class="toast" id="toast"></div>
 <div class="tela ativo" id="t1">
-  <img src="${LOGO}" class="logo-img">
+  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="info-box"><div class="info-cod">SALA: ${codigo}</div></div>
@@ -159,7 +159,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
 </div>
 <div class="tela" id="t2">
-  <img src="${LOGO}" class="logo-img">
+  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
   <div class="logo-title">LUX BINGO</div>
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="card" style="max-width:400px;text-align:center">
@@ -181,7 +181,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
 </div>
 <div class="tela" id="t4">
-  <img src="${LOGO}" class="logo-img">
+  <img src="https://luxbingo-server-production.up.railway.app/logo.png" class="logo-img">
   <div class="card" style="max-width:400px;text-align:center;padding:24px">
     <div style="font-size:44px;margin-bottom:10px">❌</div>
     <div style="font-size:16px;font-weight:900;color:#e74c3c;margin-bottom:8px">Solicitação Rejeitada</div>
