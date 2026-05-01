@@ -867,7 +867,7 @@ function renderCartelas(){
   var grid=document.createElement('div');grid.className='grid5';
   for(var r=0;r<5;r++)for(var col=0;col<5;col++){
     var v=c.grid[r][col];var el=document.createElement('div');
-    if(v==='FREE'){el.className='cel free';el.style.padding='0';el.style.overflow='hidden';el.innerHTML='<img src="${LOGO}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:6px;">';}
+    if(v==='FREE'){el.className='cel free';el.style.padding='0';el.style.overflow='hidden';el.innerHTML='<img src="'+SERVER+'/logo.png" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:6px;">';}
     else{
       el.className='cel'+(m.indexOf(v)!==-1?' marc':'');
       el.textContent=v;
