@@ -324,8 +324,9 @@ document.getElementById('btnConectar').onclick=function(){
   }
   if(sock){sock.off('connect_error');sock.disconnect();}
 sock=io(SERVER,{transports:['websocket']});
-  sock.off('cartela_aprovada');
-sock.on('cartela_aprovada',function(d){
+sock.on('connect',function(){
+    localStorage.setItem('luxbingo_nome_'+COD,nome);
+    registrarEventos(nome);
     var novas=d.cartelas||[d.cartela];
     novas.forEach(function(cart){
       cartelas.push(cart);
@@ -638,6 +639,30 @@ function mostrarTelaSalvar(novas, onJogar){
 }
  
 function registrarEventos(nome){
+  sock.off('cartela_aprovada');
+  sock.on('cartela_aprovada',function(d){
+    var novas=d.cartelas||[d.cartela];
+    novas.forEach(function(cart){
+      cartelas.push(cart);
+      if(!marc[cart.id])marc[cart.id]=[];
+      nums=d.sorteados||nums;
+      nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
+    });
+    if(d.youtubeLink)setYoutube(d.youtubeLink);
+    salvarLocal(nome);
+    mostrarTelaSalvar(novas, function(){
+      mostrarYoutube();
+      tela(3);
+      document.getElementById('semCartela').style.display='none';
+      renderCartelas();renderGrid();mostrarCodigosBar();
+      if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
+      else document.getElementById('btnMais').style.display='none';
+      toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
+    });
+  });
+  sock.on('cartela_rejeitada',function(d){
+    document.getElementById('motivo').textContent=d.mensagem||'Pagamento não confirmado.';tela(4);
+  });
   sock.on('connect',function(){
     if(cartelas.length>0){
       sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
