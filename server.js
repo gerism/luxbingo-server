@@ -661,7 +661,11 @@ function registrarEventos(nome){
   });
   sock.on('bingo_confirmado',function(d){
     var b=document.createElement('div');b.className='bingo-banner';
-    b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>';
+    var pixVenc=d.vencedor.chavePix||'';
+    b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>'
+      +(pixVenc?'<div style="margin-top:8px;font-size:11px;color:rgba(13,27,46,.7)">Chave Pix:</div>'
+      +'<div style="font-size:13px;font-weight:900;color:#0a1628;background:rgba(255,255,255,.3);border-radius:8px;padding:5px 8px;margin:4px 0;word-break:break-all">'+pixVenc+'</div>'
+      +'<button onclick="(function(){if(navigator.clipboard){navigator.clipboard.writeText(\''+pixVenc+'\').then(function(){toast(\'📋 Chave Pix copiada!\');})}else{var t=document.createElement(\'textarea\');t.value=\''+pixVenc+'\';document.body.appendChild(t);t.select();document.execCommand(\'copy\');document.body.removeChild(t);toast(\'📋 Chave Pix copiada!\');}})()" style="margin-top:4px;padding:6px 16px;background:#0a1628;border:none;border-radius:8px;font-size:11px;font-weight:900;color:#ffd966;cursor:pointer;letter-spacing:1px">📋 COPIAR PIX</button>':'');
     document.getElementById('bingoBox').innerHTML='';document.getElementById('bingoBox').appendChild(b);
   });
 sock.on('alerta_jogador',function(d){
@@ -1756,7 +1760,8 @@ io.on('connection', (socket) => {
     s.vencedor = { idUnico: idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId };
     s.ativa = false;
     salvarSalas();
-    io.to(codigo).emit('bingo_confirmado', { vencedor: s.vencedor, sorteados: s.sorteados });
+    const chavePix = s.solicitacoes[s.vencedor.idUnico]?.chavePix || '';
+io.to(codigo).emit('bingo_confirmado', { vencedor: { ...s.vencedor, chavePix }, sorteados: s.sorteados });
     io.to(s.adm.socketId).emit('parar_sorteio');
     cb({ ok: true });
   });
