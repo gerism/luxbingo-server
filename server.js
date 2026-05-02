@@ -45,7 +45,7 @@ app.get('/jogo/:codigo', (req, res) => {
 <meta property="og:image" content="https://luxbingo-server-production.up.railway.app/logo.png">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#c9a227">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js?v=${Date.now()}<\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js?v=${Date.now()}"><\/script>
 <style>
 :root{--navy:#0d1b2e;--navy2:#1a2d4e;--gold:#c9a227;--gold2:#f0c040;--gold3:#ffd966;--card:#0f2240;--text:#e8d5a3;--textl:rgba(232,213,163,.6)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
