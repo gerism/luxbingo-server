@@ -1278,11 +1278,7 @@ app.post('/webhook-mp', async (req, res) => {
     console.log('[WEBHOOK] sem paymentId');
     return;
   }
-if (pagamentosProcessados.has(String(paymentId))) {
-  console.log('[WEBHOOK] duplicado ignorado:', paymentId);
-  return;
-}
-pagamentosProcessados.add(String(paymentId));
+
   try {
     for (const [codigo, sala] of Object.entries(salas)) {
       if (!sala.mpToken) continue;
