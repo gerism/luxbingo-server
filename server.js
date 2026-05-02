@@ -659,13 +659,26 @@ function registrarEventos(nome){
     salvarLocal(localStorage.getItem('luxbingo_nome_'+COD)||'Jogador');
     renderCartelas();renderGrid();verBingo();falarNumero(d.numero);
   });
-  sock.on('bingo_confirmado',function(d){
+ var _pixVencedor='';
+function copiarPixVencedor(){
+  if(!_pixVencedor)return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(_pixVencedor).then(function(){toast('📋 Chave Pix copiada!');});
+  } else {
+    var t=document.createElement('textarea');t.value=_pixVencedor;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
+    toast('📋 Chave Pix copiada!');
+  }
+}
+sock.on('bingo_confirmado',function(d){
     var b=document.createElement('div');b.className='bingo-banner';
-    var pixVenc=d.vencedor.chavePix||'';
-    b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>'
-      +(pixVenc?'<div style="margin-top:8px;font-size:11px;color:rgba(13,27,46,.7)">Chave Pix:</div>'
-      +'<div style="font-size:13px;font-weight:900;color:#0a1628;background:rgba(255,255,255,.3);border-radius:8px;padding:5px 8px;margin:4px 0;word-break:break-all">'+pixVenc+'</div>'
-      +'<button onclick="(function(){if(navigator.clipboard){navigator.clipboard.writeText(\''+pixVenc+'\').then(function(){toast(\'📋 Chave Pix copiada!\');})}else{var t=document.createElement(\'textarea\');t.value=\''+pixVenc+'\';document.body.appendChild(t);t.select();document.execCommand(\'copy\');document.body.removeChild(t);toast(\'📋 Chave Pix copiada!\');}})()" style="margin-top:4px;padding:6px 16px;background:#0a1628;border:none;border-radius:8px;font-size:11px;font-weight:900;color:#ffd966;cursor:pointer;letter-spacing:1px">📋 COPIAR PIX</button>':'');
+    _pixVencedor=d.vencedor.chavePix||'';
+    var pixHtml='';
+    if(_pixVencedor){
+      pixHtml='<div style="margin-top:8px;font-size:11px;color:rgba(13,27,46,.7)">Chave Pix:</div>'
+        +'<div style="font-size:13px;font-weight:900;color:#0a1628;background:rgba(255,255,255,.3);border-radius:8px;padding:5px 8px;margin:4px 0;word-break:break-all">'+_pixVencedor+'</div>'
+        +'<button onclick="copiarPixVencedor()" style="margin-top:4px;padding:6px 16px;background:#0a1628;border:none;border-radius:8px;font-size:11px;font-weight:900;color:#ffd966;cursor:pointer;letter-spacing:1px">📋 COPIAR PIX</button>';
+    }
+    b.innerHTML='<span class="bb-icon">🎊</span><div class="bb-title">BINGO!</div><div class="bb-sub">Vencedor: '+d.vencedor.nome+'</div>'+pixHtml;
     document.getElementById('bingoBox').innerHTML='';document.getElementById('bingoBox').appendChild(b);
   });
 sock.on('alerta_jogador',function(d){
