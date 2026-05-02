@@ -263,7 +263,6 @@ window.onload=function(){
     this.value=v;
   };
   if(elCod)elCod.oninput=function(){this.value=this.value.toUpperCase();};
-
   renderGrid();
   var params=new URLSearchParams(window.location.search);
   var autoRec=params.get('recuperar');
@@ -1040,32 +1039,7 @@ function iniciarTimerPix(segundos){
   atualizar();
   pixTimerInterval=setInterval(atualizar,1000);
 }
-window.onload=function(){
-  renderGrid();
-  var params=new URLSearchParams(window.location.search);
-  var autoRec=params.get('recuperar');
-  if(autoRec){
-    document.getElementById('iCodCart').value=autoRec.toUpperCase();
-    setTimeout(function(){document.getElementById('btnRecuperar').click();},500);
-    return;
-  }
-  var nome=localStorage.getItem('luxbingo_nome_'+COD);
-  if(nome){
-    var chave='luxbingo_'+COD+'_'+nome.replace(/\\s/g,'_');
-    var salvo=localStorage.getItem(chave);
-    if(salvo){
-      try{
-        var d=JSON.parse(salvo);
-        cartelas=d.cartelas||[];marc=d.marc||{};nums=d.nums||[];
-        if(cartelas.length){
-          conectarJogo(nome);
-          renderCartelas();renderGrid();tela(3);
-          toast('✅ Sessão restaurada!');return;
-        }
-      }catch(e){}
-    }
-  }
-};
+
 <\/script>
 </body>
 </html>`);
