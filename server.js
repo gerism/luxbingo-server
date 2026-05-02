@@ -248,18 +248,46 @@ function toast(m,e){
   var t=document.getElementById('toast');t.textContent=m;t.className='toast on'+(e?' err':'');
   setTimeout(function(){t.className='toast';},3000);
 }
-document.getElementById('iCpf').oninput=function(){
-  var v=this.value.replace(/\\D/g,'');
-  v=v.replace(/(\\d{3})(\\d)/,'$1.$2').replace(/(\\d{3})(\\d)/,'$1.$2').replace(/(\\d{3})(\\d{1,2})$/,'$1-$2');
-  this.value=v;
-};
-document.getElementById('iCel').oninput=function(){
-  var v=this.value.replace(/\\D/g,'');
-  v=v.replace(/^(\\d{2})(\\d)/,'($1) $2').replace(/(\\d{5})(\\d{1,4})$/,'$1-$2');
-  this.value=v;
-};
-document.getElementById('iCodCart').oninput=function(){
-  this.value=this.value.toUpperCase();
+window.onload=function(){
+  var elCpf=document.getElementById('iCpf');
+  var elCel=document.getElementById('iCel');
+  var elCod=document.getElementById('iCodCart');
+  if(elCpf)elCpf.oninput=function(){
+    var v=this.value.replace(/\D/g,'');
+    v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+    this.value=v;
+  };
+  if(elCel)elCel.oninput=function(){
+    var v=this.value.replace(/\D/g,'');
+    v=v.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{1,4})$/,'$1-$2');
+    this.value=v;
+  };
+  if(elCod)elCod.oninput=function(){this.value=this.value.toUpperCase();};
+
+  renderGrid();
+  var params=new URLSearchParams(window.location.search);
+  var autoRec=params.get('recuperar');
+  if(autoRec){
+    document.getElementById('iCodCart').value=autoRec.toUpperCase();
+    setTimeout(function(){document.getElementById('btnRecuperar').click();},500);
+    return;
+  }
+  var nome=localStorage.getItem('luxbingo_nome_'+COD);
+  if(nome){
+    var chave='luxbingo_'+COD+'_'+nome.replace(/\s/g,'_');
+    var salvo=localStorage.getItem(chave);
+    if(salvo){
+      try{
+        var d=JSON.parse(salvo);
+        cartelas=d.cartelas||[];marc=d.marc||{};nums=d.nums||[];
+        if(cartelas.length){
+          conectarJogo(nome);
+          renderCartelas();renderGrid();tela(3);
+          toast('✅ Sessão restaurada!');return;
+        }
+      }catch(e){}
+    }
+  }
 };
 document.getElementById('btnRecuperar').onclick=function(){
   var codCart=document.getElementById('iCodCart').value.trim().toUpperCase();
