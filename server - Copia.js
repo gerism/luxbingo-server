@@ -1701,7 +1701,16 @@ io.on('connection', (socket) => {
     const premioEstimado = totalCartelas * s.valorCartela * (1 - (s.porc||20)/100);
     io.to(codigo).emit('numero_sorteado', { ...res, premioEstimado });
     
-    Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
+Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
+      const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
+      const celular = s.solicitacoes[idUnico]?.celular || '';
+      const celMask = celular.length>=4 ? '('+celular.slice(0,2)+')******'+celular.slice(-2) : '';
+      const nomeExib = nome + (celMask ? ' '+celMask : '');
+      const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
+
+      let melhorQuase = false;
+      let melhorBingo = false;
+
       carts.forEach(cartela => {
         let marc = 0, tot = 0;
         for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
@@ -1709,23 +1718,19 @@ io.on('connection', (socket) => {
           if (v === 'FREE') { marc++; tot++; }
           else { tot++; if (s.sorteados.includes(v)) marc++; }
         }
-        const nome = s.jogadoresPorIdUnico[idUnico]?.nome || 'Jogador';
-        const celular = s.solicitacoes[idUnico]?.celular || '';
-        const celMask = celular.length>=4 ? '('+celular.slice(0,2)+')******'+celular.slice(-2) : '';
-        const nomeExib = nome + (celMask ? ' '+celMask : '');
-        const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
-        
-        if (marc === tot - 1) {
-          io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
-          io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1!' });
-          if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1 número!' });
-        }
-        if (marc === tot) {
-          io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 '+nomeExib+' completou!' });
-          io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'bingo', texto: '🎉 BINGO!' });
-          if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 Você completou a cartela!' });
-        }
+        if (marc === tot) melhorBingo = true;
+        else if (marc === tot - 1) melhorQuase = true;
       });
+
+      if (melhorBingo) {
+        io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 '+nomeExib+' completou!' });
+        io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'bingo', texto: '🎉 BINGO!' });
+        if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 Você completou a cartela!' });
+      } else if (melhorQuase) {
+        io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
+        io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1!' });
+        if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1 número!' });
+      }
     });
     cb({ ok: true, ...res });
   });
