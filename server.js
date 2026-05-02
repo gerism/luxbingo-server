@@ -129,11 +129,13 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   <div class="logo-sub">JOGO AO VIVO</div>
   <div class="info-box"><div class="info-cod">SALA: ${codigo}</div></div>
   <div class="card">
-    <div class="ct">🔑 Já tem cartela?</div>
-    <label class="lbl">Código da sua cartela</label>
-    <input class="inp" id="iCodCart" type="text" placeholder="Ex: ABC123-1" style="text-transform:uppercase">
-    <button class="btn-b" id="btnRecuperar">RECUPERAR CARTELA →</button>
+  <div class="ct" style="display:flex;align-items:center;justify-content:space-between">
+    <span>🎪 Minhas Salas</span>
+    <button id="btnAtualizarSalas" style="background:rgba(201,162,39,.15);border:1px solid rgba(201,162,39,.3);border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--gold2);cursor:pointer;font-family:inherit">🔄 Atualizar</button>
   </div>
+  <div id="listaSalas"><div class="empty"><span class="ei">🎰</span>Nenhuma sala criada ainda</div></div>
+  <button class="btn-g" id="btnAbrir" style="margin-top:8px">＋ CRIAR NOVA SALA</button>
+</div>
   <div class="divider"><div class="divider-line"></div><div class="divider-txt">OU SOLICITAR NOVA</div><div class="divider-line"></div></div>
   <div class="card">
     <div class="ct">📝 Seus Dados</div>
