@@ -263,6 +263,144 @@ window.onload=function(){
     this.value=v;
   };
   if(elCod)elCod.oninput=function(){this.value=this.value.toUpperCase();};
+  document.getElementById('btnRecuperar').onclick=function(){
+    var codCart=document.getElementById('iCodCart').value.trim().toUpperCase();
+    if(!codCart){toast('❌ Digite o código da cartela!',true);return;}
+    toast('⏳ Buscando cartela...');
+    fetch(SERVER+'/cartela/'+COD+'/'+codCart)
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d.ok){toast('❌ '+(d.erro||'Cartela não encontrada!'),true);return;}
+        if(d.codigoSala && d.codigoSala !== COD){
+          window.location.href=SERVER+'/jogo/'+d.codigoSala+'?recuperar='+encodeURIComponent(codCart);
+          return;
+        }
+        cartelas=[d.cartela];
+        nums=d.sorteados||[];
+        marc={};
+        marc[d.cartela.id]=[];
+        nums.forEach(function(n){
+          for(var r=0;r<5;r++)for(var c=0;c<5;c++){
+            if(d.cartela.grid[r][c]===n && marc[d.cartela.id].indexOf(n)===-1)
+              marc[d.cartela.id].push(n);
+          }
+        });
+        meuIdUnico=d.idUnico;
+        localStorage.setItem('luxbingo_id_'+COD,d.idUnico);
+        var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+        if(!nome||nome==='Jogador'){
+          var nomeInput=document.getElementById('iNome');
+          nome=nomeInput&&nomeInput.value.trim()||'Jogador';
+        }
+        localStorage.setItem('luxbingo_nome_'+COD,nome);
+        if(d.youtubeLink)setYoutube(d.youtubeLink);
+        conectarJogo(nome);
+        tela(3);
+        renderCartelas();
+        renderGrid();
+        mostrarCodigosBar();
+        if(d.youtubeLink)mostrarYoutube();
+        toast('✅ Cartela recuperada!');
+      })
+      .catch(function(){toast('❌ Erro de conexão!',true);});
+  };
+  document.getElementById('btnConectar').onclick=function(){
+    var nome=document.getElementById('iNome').value.trim();
+    var cpf=document.getElementById('iCpf').value.trim();
+    var cel=document.getElementById('iCel').value.trim();
+    var pix=document.getElementById('iPix').value.trim();
+    var email=document.getElementById('iEmail').value.trim();
+    if(!nome||!cpf||!cel||!pix){toast('❌ Preencha todos os campos!',true);return;}
+    if(!meuIdUnico){
+      meuIdUnico=gerarIdUnico();
+      localStorage.setItem('luxbingo_id_'+COD,meuIdUnico);
+    }
+    if(sock&&sock.connected){
+      sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
+        if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
+        tela(2);toast('✅ Solicitação enviada!');
+      });
+      return;
+    }
+    if(!meuIdUnico){
+      meuIdUnico=gerarIdUnico();
+      localStorage.setItem('luxbingo_id_'+COD,meuIdUnico);
+    }
+    if(sock){sock.off('connect_error');sock.disconnect();}
+    sock=io(SERVER,{transports:['websocket']});
+    sock.on('connect',function(){
+      localStorage.setItem('luxbingo_nome_'+COD,nome);
+      registrarEventos(nome);
+      sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
+        if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);sock.disconnect();return;}
+        document.getElementById('pValor').textContent='R$ '+(r.valorCartela||'?');
+        if(r.horario){
+          var hb=document.getElementById('horarioJogBox');
+          if(hb)hb.textContent='🕐 '+r.horario;
+        }
+        if(r.premioEstimado){
+          var pb=document.getElementById('premioJogBox');var pv=document.getElementById('premioJogVal');
+          if(pb&&pv){pb.style.display='block';pv.textContent='R$ '+r.premioEstimado.toLocaleString('pt-BR',{minimumFractionDigits:2});}
+        }
+        if(r.youtubeLink){setYoutube(r.youtubeLink);}
+        if(r.cartelasExistentes && r.cartelasExistentes.length > 0){
+          cartelas=r.cartelasExistentes;
+          nums=r.sorteados||[];
+          cartelas.forEach(function(c){
+            if(!marc[c.id])marc[c.id]=[];
+            nums.forEach(function(n){
+              if(marc[c.id].indexOf(n)===-1)marc[c.id].push(n);
+            });
+          });
+          renderCartelas();
+          renderGrid();
+          tela(3);
+          toast('✅ Cartelas carregadas!');
+          return;
+        }
+        sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,qtd:qtdCartelas,dados:{nome:nome,cpf:cpf,celular:cel,chavePix:pix,email:email}},function(r2){
+          if(!r2.ok){toast('❌ '+(r2.erro||'Erro'),true);return;}
+          tela(2);toast('✅ Solicitação enviada!');
+          fetch(SERVER+'/criar-pagamento/'+COD,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({idUnico:meuIdUnico,nome:nome,cpf:cpf,email:email,qtd:qtdCartelas})
+          }).then(function(r){return r.json();}).then(function(d){
+            document.getElementById('pixCarregando').style.display='none';
+            if(d.ok&&d.qrCode){
+              pixCopiaCola=d.qrCode;
+              document.getElementById('pValor').textContent='R$ '+d.valor.toLocaleString('pt-BR',{minimumFractionDigits:2});
+              if(d.qrCodeBase64){
+                document.getElementById('pixQrImg').src='data:image/png;base64,'+d.qrCodeBase64;
+              }
+              document.getElementById('pixCopiaECola').textContent=d.qrCode;
+              document.getElementById('pixQrBox').style.display='block';
+              iniciarTimerPix(d.expiracao||600);
+            } else {
+              document.getElementById('pixCarregando').textContent='❌ '+(d.erro||'Erro ao gerar Pix. Use a chave manual.');
+            }
+          }).catch(function(){
+            document.getElementById('pixCarregando').textContent='❌ Erro de conexão.';
+          });
+        });
+      });
+    });
+    sock.once('connect_error',function(){if(!cartelas.length&&!meuIdUnico)toast('❌ Erro de conexão!',true);});
+  };
+  document.getElementById('btnMais').onclick=function(){
+    if(!sock||cartelas.length>=5){toast('❌ Máximo de 5 cartelas!',true);return;}
+    var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+    sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:'',celular:'',chavePix:'',email:''}},function(r){
+      if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);return;}
+      toast('✅ Solicitação de cartela '+(cartelas.length+1)+' enviada!');
+    });
+  };
+  document.getElementById('btnVoltar').onclick=function(){tela(1);};
+  document.getElementById('btnAudio').onclick=function(){
+    audioOn=!audioOn;this.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';
+    this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
+    this.style.color=audioOn?'var(--gold2)':'#e74c3c';
+  };
   renderGrid();
   var params=new URLSearchParams(window.location.search);
   var autoRec=params.get('recuperar');
@@ -288,7 +426,20 @@ window.onload=function(){
     }
   }
 };
-document.getElementById('btnRecuperar').onclick=function(){
+document.getElementById('btnMais').onclick=function(){
+  if(!sock||cartelas.length>=5){toast('❌ Máximo de 5 cartelas!',true);return;}
+  var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
+  sock.emit('solicitar_cartela',{codigo:COD,idUnico:meuIdUnico,dados:{nome:nome,cpf:'',celular:'',chavePix:'',email:''}},function(r){
+    if(!r.ok){toast('❌ '+(r.erro||'Erro'),true);return;}
+    toast('✅ Solicitação de cartela '+(cartelas.length+1)+' enviada!');
+  });
+};
+document.getElementById('btnVoltar').onclick=function(){tela(1);};
+document.getElementById('btnAudio').onclick=function(){
+  audioOn=!audioOn;this.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';
+  this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
+  this.style.color=audioOn?'var(--gold2)':'#e74c3c';
+};
   var codCart=document.getElementById('iCodCart').value.trim().toUpperCase();
   if(!codCart){toast('❌ Digite o código da cartela!',true);return;}
   toast('⏳ Buscando cartela...');
