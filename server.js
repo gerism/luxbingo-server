@@ -610,6 +610,16 @@ function mostrarTelaSalvar(novas, onJogar){
   document.body.appendChild(overlay);
 }
  
+var _pixVencedor='';
+function copiarPixVencedor(){
+  if(!_pixVencedor)return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(_pixVencedor).then(function(){toast('📋 Chave Pix copiada!');});
+  } else {
+    var t=document.createElement('textarea');t.value=_pixVencedor;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
+    toast('📋 Chave Pix copiada!');
+  }
+}
 function registrarEventos(nome){
   sock.off('cartela_aprovada');
   sock.off('cartela_rejeitada');
@@ -664,16 +674,6 @@ function registrarEventos(nome){
     salvarLocal(localStorage.getItem('luxbingo_nome_'+COD)||'Jogador');
     renderCartelas();renderGrid();verBingo();falarNumero(d.numero);
   });
- var _pixVencedor='';
-function copiarPixVencedor(){
-  if(!_pixVencedor)return;
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(_pixVencedor).then(function(){toast('📋 Chave Pix copiada!');});
-  } else {
-    var t=document.createElement('textarea');t.value=_pixVencedor;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
-    toast('📋 Chave Pix copiada!');
-  }
-}
 sock.on('bingo_confirmado',function(d){
     var b=document.createElement('div');b.className='bingo-banner';
     _pixVencedor=d.vencedor.chavePix||'';
