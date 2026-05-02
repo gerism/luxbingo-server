@@ -61,8 +61,10 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .inp{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.3);border-radius:10px;padding:11px;color:var(--gold2);font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
 .inp::placeholder{color:var(--textl)}
 .inp:focus{border-color:var(--gold2)}
-.btn-g{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;font-size:14px;font-weight:900;color:var(--navy);letter-spacing:2px;cursor:pointer;margin-bottom:8px}
-.btn-b{width:100%;padding:11px;background:transparent;border:2px solid rgba(201,162,39,.4);border-radius:12px;font-size:13px;font-weight:900;color:var(--gold2);cursor:pointer;margin-bottom:8px}
+.btn-g{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;font-size:14px;font-weight:900;color:var(--navy);letter-spacing:2px;cursor:pointer;margin-bottom:8px;transition:transform .1s,opacity .1s,box-shadow .1s;box-shadow:0 4px 15px rgba(201,162,39,.4);active-scale:.96}
+.btn-g:active{transform:scale(.96);opacity:.85;box-shadow:0 2px 6px rgba(201,162,39,.2)}
+.btn-b{width:100%;padding:11px;background:transparent;border:2px solid rgba(201,162,39,.4);border-radius:12px;font-size:13px;font-weight:900;color:var(--gold2);cursor:pointer;margin-bottom:8px;transition:transform .1s,opacity .1s,background .1s}
+.btn-b:active{transform:scale(.96);opacity:.8;background:rgba(201,162,39,.1)}
 .info-box{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:10px;padding:8px 14px;margin-bottom:12px;text-align:center;width:100%;max-width:400px}
 .info-cod{font-size:11px;color:var(--textl);letter-spacing:2px}
 .aguard{text-align:center;padding:20px 16px;background:rgba(201,162,39,.08);border:2px solid rgba(201,162,39,.3);border-radius:14px;margin-bottom:10px;width:100%;max-width:400px}
@@ -109,15 +111,18 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .bb-title{font-size:15px;font-weight:900;color:var(--navy);letter-spacing:2px}
 .bb-sub{font-size:10px;color:rgba(13,27,46,.7);margin-top:2px}
 .bottom-bar{display:flex;gap:6px;padding:6px 10px 10px;flex-shrink:0;border-top:1px solid rgba(201,162,39,.15);padding-bottom:max(10px,env(safe-area-inset-bottom))}
-.btn-audio{flex:1;padding:9px;background:transparent;border:1.5px solid rgba(201,162,39,.4);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit}
-.btn-mais{flex:1;padding:9px;background:rgba(201,162,39,.1);border:1.5px solid rgba(201,162,39,.3);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit}
+.btn-audio{flex:1;padding:9px;background:transparent;border:1.5px solid rgba(201,162,39,.4);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit;transition:transform .1s,opacity .1s}
+.btn-audio:active{transform:scale(.94);opacity:.8}
+.btn-mais{flex:1;padding:9px;background:rgba(201,162,39,.1);border:1.5px solid rgba(201,162,39,.3);border-radius:10px;font-size:11px;font-weight:900;color:var(--gold2);cursor:pointer;font-family:inherit;transition:transform .1s,opacity .1s}
+.btn-mais:active{transform:scale(.94);opacity:.8}
 .toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);padding:8px 18px;border-radius:50px;font-weight:900;font-size:11px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
 .toast.err{background:#e74c3c;color:#fff}
 .divider{display:flex;align-items:center;gap:8px;margin:4px 0 10px;width:100%;max-width:400px}
 .divider-line{flex:1;height:1px;background:rgba(201,162,39,.2)}
 .divider-txt{font-size:10px;color:var(--textl);font-weight:700;letter-spacing:1px}
-.qt-btn{flex:1;padding:10px 4px;border:1.5px solid rgba(201,162,39,.3);border-radius:9px;font-size:13px;font-weight:900;color:var(--textl);background:transparent;cursor:pointer;font-family:inherit}
+.qt-btn{flex:1;padding:10px 4px;border:1.5px solid rgba(201,162,39,.3);border-radius:9px;font-size:13px;font-weight:900;color:var(--textl);background:transparent;cursor:pointer;font-family:inherit;transition:transform .1s,opacity .1s}
+.qt-btn:active{transform:scale(.94);opacity:.8}
 .qt-btn.ok{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:transparent;color:var(--navy)}
 </style>
 </head>
