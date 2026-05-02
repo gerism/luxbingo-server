@@ -700,9 +700,16 @@ sock.on('alerta_jogador',function(d){
     } else {
      } else {
       div.innerHTML+='<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">Aguarde o sorteador...</div>'
-        +'<button onclick="(function(){var el=document.getElementById(\'alertaJogador\');if(el&&document.body.contains(el))document.body.removeChild(el);})()" style="margin-top:12px;padding:8px 24px;background:rgba(255,255,255,.2);border:none;border-radius:10px;font-size:12px;font-weight:900;color:#fff;cursor:pointer">✕ Fechar</button>';
+        +'<button id="btnFecharAlerta" style="margin-top:12px;padding:8px 24px;background:rgba(255,255,255,.2);border:none;border-radius:10px;font-size:12px;font-weight:900;color:#fff;cursor:pointer">✕ Fechar</button>';
     }
     document.body.appendChild(div);
+    setTimeout(function(){
+      var btnF=document.getElementById('btnFecharAlerta');
+      if(btnF)btnF.onclick=function(){
+        var el=document.getElementById('alertaJogador');
+        if(el&&document.body.contains(el))document.body.removeChild(el);
+      };
+    },100);
   });
  sock.on('fechar_alerta',function(){
     var div=document.getElementById('alertaJogador');
