@@ -698,7 +698,9 @@ sock.on('alerta_jogador',function(d){
       div.onclick=function(){if(document.body.contains(div))document.body.removeChild(div);};
       setTimeout(function(){if(document.body.contains(div))document.body.removeChild(div);},6000);
     } else {
-      div.innerHTML+='<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">Aguarde o sorteador...</div>';
+     } else {
+      div.innerHTML+='<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">Aguarde o sorteador...</div>'
+        +'<button onclick="(function(){var el=document.getElementById(\'alertaJogador\');if(el&&document.body.contains(el))document.body.removeChild(el);})()" style="margin-top:12px;padding:8px 24px;background:rgba(255,255,255,.2);border:none;border-radius:10px;font-size:12px;font-weight:900;color:#fff;cursor:pointer">✕ Fechar</button>';
     }
     document.body.appendChild(div);
   });
