@@ -246,19 +246,7 @@ function toast(m,e){
   var t=document.getElementById('toast');t.textContent=m;t.className='toast on'+(e?' err':'');
   setTimeout(function(){t.className='toast';},3000);
 }
-document.getElementById('iCpf').oninput=function(){
-  var v=this.value.replace(/\\D/g,'');
-  v=v.replace(/(\\d{3})(\\d)/,'$1.$2').replace(/(\\d{3})(\\d)/,'$1.$2').replace(/(\\d{3})(\\d{1,2})$/,'$1-$2');
-  this.value=v;
-};
-document.getElementById('iCel').oninput=function(){
-  var v=this.value.replace(/\\D/g,'');
-  v=v.replace(/^(\\d{2})(\\d)/,'($1) $2').replace(/(\\d{5})(\\d{1,4})$/,'$1-$2');
-  this.value=v;
-};
-document.getElementById('iCodCart').oninput=function(){
-  this.value=this.value.toUpperCase();
-};
+
 document.getElementById('btnRecuperar').onclick=function(){
   var codCart=document.getElementById('iCodCart').value.trim().toUpperCase();
   if(!codCart){toast('❌ Digite o código da cartela!',true);return;}
@@ -324,27 +312,8 @@ document.getElementById('btnConectar').onclick=function(){
   }
   if(sock){sock.off('connect_error');sock.disconnect();}
   sock=io(SERVER,{transports:['websocket']});
-sock.on('cartela_aprovada',function(d){
-    var novas=d.cartelas||[d.cartela];
-    novas.forEach(function(cart){
-      cartelas.push(cart);
-      if(!marc[cart.id])marc[cart.id]=[];
-      nums=d.sorteados||nums;
-      nums.forEach(function(n){if(marc[cart.id].indexOf(n)===-1)marc[cart.id].push(n);});
-    });
-    if(d.youtubeLink)setYoutube(d.youtubeLink);
-    salvarLocal(nome);
-    mostrarTelaSalvar(novas, function(){
-      mostrarYoutube();
-      tela(3);
-      document.getElementById('semCartela').style.display='none';
-      renderCartelas();renderGrid();mostrarCodigosBar();
-      if(cartelas.length<5)document.getElementById('btnMais').style.display='block';
-      else document.getElementById('btnMais').style.display='none';
-      toast('🎉 Cartela '+cartelas.length+' liberada! Boa sorte!');
-    });
-  });
-sock.on('connect',function(){
+   
+   sock.on('connect',function(){
     localStorage.setItem('luxbingo_nome_'+COD,nome);
     registrarEventos(nome);
     sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:nome},function(r){
@@ -637,6 +606,16 @@ function mostrarTelaSalvar(novas, onJogar){
 }
  
 function registrarEventos(nome){
+  sock.off('cartela_aprovada');
+  sock.off('cartela_rejeitada');
+  sock.off('numero_sorteado');
+  sock.off('bingo_confirmado');
+  sock.off('alerta_jogador');
+  sock.off('fechar_alerta');
+  sock.off('alerta_geral');
+  sock.off('adm_desconectado');
+  sock.off('sorteio_zerado');
+  sock.off('cartelas_limpas');
   sock.on('connect',function(){
     if(cartelas.length>0){
       sock.emit('entrar_sala',{codigo:COD,idUnico:meuIdUnico,nomeJogador:localStorage.getItem('luxbingo_nome_'+COD)||nome},function(){});
@@ -1030,6 +1009,20 @@ function iniciarTimerPix(segundos){
   pixTimerInterval=setInterval(atualizar,1000);
 }
 window.onload=function(){
+  var elCpf=document.getElementById('iCpf');
+  var elCel=document.getElementById('iCel');
+  var elCod=document.getElementById('iCodCart');
+  if(elCpf)elCpf.oninput=function(){
+    var v=this.value.replace(/\D/g,'');
+    v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+    this.value=v;
+  };
+  if(elCel)elCel.oninput=function(){
+    var v=this.value.replace(/\D/g,'');
+    v=v.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{1,4})$/,'$1-$2');
+    this.value=v;
+  };
+  if(elCod)elCod.oninput=function(){this.value=this.value.toUpperCase();};
   renderGrid();
   var params=new URLSearchParams(window.location.search);
   var autoRec=params.get('recuperar');
