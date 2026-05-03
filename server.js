@@ -1599,6 +1599,20 @@ io.on('connection', (socket) => {
       delete s.pendingCartelas[idUnico];
       setTimeout(() => socket.emit('cartela_aprovada', payload), 500);
       console.log('[ENTRAR] entregando pendente para idUnico:',idUnico);
+      // Não retorna cartelasExistentes pois cartela_aprovada já vai entregar
+      const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
+      const premioEstimado = totalCartelas * s.valorCartela;
+      return cb({
+        ok: true,
+        sorteados: s.sorteados,
+        ativa: s.ativa,
+        valorCartela: s.valorCartela,
+        chavePix: s.chavePix,
+        horario: s.horario,
+        youtubeLink: s.youtubeLink,
+        cartelasExistentes: [],
+        premioEstimado: s.ativa ? premioEstimado : null
+      });
     }
     
     const cartelasExistentes = s.cartelasVendidasPorIdUnico[idUnico] || [];
