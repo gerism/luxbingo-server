@@ -899,7 +899,7 @@ function renderCartelas(){
   div.appendChild(btnB);
   scroll.appendChild(div);
   verBingoCartela(c,m,btnB);
-  document.getElementById('semCartela').style.display='none';
+  var sc=document.getElementById('semCartela');if(sc)sc.style.display='none';
 }
 function verBingoCartela(c,m,btn){
   var ok=true;
@@ -1811,6 +1811,20 @@ Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
 
   socket.on('fechar_alerta_jogadores', ({ codigo }, cb) => {
     io.to(codigo).emit('fechar_alerta');
+    cb && cb({ ok: true });
+  });
+
+  socket.on('deletar_sala', ({ codigo }, cb) => {
+    const s = salas[codigo];
+    if (!s) return cb && cb({ ok: false });
+    delete salas[codigo];
+    if (UPSTASH_URL && UPSTASH_TOKEN) {
+      fetch(`${UPSTASH_URL}/del/luxbingo_vendidas_${codigo}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+      }).catch(()=>{});
+    }
+    salvarSalas();
     cb && cb({ ok: true });
   });
 
