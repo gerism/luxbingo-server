@@ -1139,6 +1139,14 @@ async function carregarSalas() {
     const d = await r.json();
     if (d.result) {
       const salvas = JSON.parse(d.result);
+      for (const cod of Object.keys(salvas)) {
+        if (salvas[cod]?.adm) salvas[cod].adm.socketId = null;
+        if (salvas[cod]?.jogadoresPorIdUnico) {
+          for (const id of Object.keys(salvas[cod].jogadoresPorIdUnico)) {
+            if (salvas[cod].jogadoresPorIdUnico[id]) salvas[cod].jogadoresPorIdUnico[id].socketId = null;
+          }
+        }
+      }
       Object.assign(salas, salvas);
       // Restaura cartelas vendidas
       for (const cod of Object.keys(salas)) {
