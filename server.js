@@ -223,7 +223,11 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
     </div>
   </div>
   <div class="bottom-bar">
-    <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
+    document.getElementById('btnAudio').onclick=function(){
+  audioOn=!audioOn;this.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';
+  this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
+  this.style.color=audioOn?'var(--gold2)':'#e74c3c';
+};
     <button id="btnCopiarCod" style="display:none;flex:1;padding:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;font-size:11px;font-weight:900;color:var(--navy);cursor:pointer;font-family:inherit">📋 Copiar Código</button>
     <button class="btn-mais" id="btnMais" style="display:none"></button>
   </div>
