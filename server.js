@@ -224,7 +224,6 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
   <div class="bottom-bar">
     <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
-    <button id="btnCopiarCod" style="display:none;flex:1;padding:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;font-size:11px;font-weight:900;color:var(--navy);cursor:pointer;font-family:inherit">📋 Copiar Código</button>
     <button class="btn-mais" id="btnMais" style="display:none"></button>
   </div>
 </div>
@@ -867,7 +866,7 @@ function renderCartelas(){
   var c=cartelas[tabAtiva];
   var m=marc[c.id]||[];
   var div=document.createElement('div');div.className='cartela-card';
-  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button onclick="printCartela('+tabAtiva+')" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:var(--navy);cursor:pointer;margin-left:6px">📸 Print</button></div>';
+  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button id="btnAudioCart" onclick="(function(){audioOn=!audioOn;var b=document.getElementById(\'btnAudioCart\');b.textContent=audioOn?\'🔊\':\'🔇\';b.style.background=audioOn?\'linear-gradient(135deg,var(--gold),var(--gold2))\':\'rgba(231,76,60,.2)\';b.style.color=audioOn?\'var(--navy)\':\'#e74c3c\';})()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:var(--navy);cursor:pointer;margin-left:6px">🔊</button></div>';
   var letRow=document.createElement('div');letRow.className='letras-row';
   ['B','I','N','G','O'].forEach(function(l){var s=document.createElement('div');s.className='letra';s.textContent=l;letRow.appendChild(s);});
   div.appendChild(letRow);
