@@ -748,6 +748,9 @@ sock.on('alerta_jogador',function(d){
     document.getElementById('semCartela').style.display='block';
     document.getElementById('cartTabs').innerHTML='';
     document.getElementById('cartScroll').innerHTML='<div style="text-align:center;padding:30px 16px;color:var(--textl);font-size:12px" id="semCartela">⏳ Aguardando cartela ser liberada...</div>';
+    document.getElementById('bingoBox').innerHTML='';
+    var alerta=document.getElementById('alertaJogador');
+    if(alerta&&document.body.contains(alerta))document.body.removeChild(alerta);
     tela(1);toast('⚠️ Cartelas resetadas pelo ADM!');
   });
 }
@@ -1136,6 +1139,14 @@ async function carregarSalas() {
     const d = await r.json();
     if (d.result) {
       const salvas = JSON.parse(d.result);
+      for (const cod of Object.keys(salvas)) {
+        if (salvas[cod]?.adm) salvas[cod].adm.socketId = null;
+        if (salvas[cod]?.jogadoresPorIdUnico) {
+          for (const id of Object.keys(salvas[cod].jogadoresPorIdUnico)) {
+            if (salvas[cod].jogadoresPorIdUnico[id]) salvas[cod].jogadoresPorIdUnico[id].socketId = null;
+          }
+        }
+      }
       Object.assign(salas, salvas);
       // Restaura cartelas vendidas
       for (const cod of Object.keys(salas)) {
@@ -1588,6 +1599,20 @@ io.on('connection', (socket) => {
       delete s.pendingCartelas[idUnico];
       setTimeout(() => socket.emit('cartela_aprovada', payload), 500);
       console.log('[ENTRAR] entregando pendente para idUnico:',idUnico);
+      // Não retorna cartelasExistentes pois cartela_aprovada já vai entregar
+      const totalCartelas = Object.values(s.cartelasVendidasPorIdUnico).reduce((t, c) => t + c.length, 0);
+      const premioEstimado = totalCartelas * s.valorCartela;
+      return cb({
+        ok: true,
+        sorteados: s.sorteados,
+        ativa: s.ativa,
+        valorCartela: s.valorCartela,
+        chavePix: s.chavePix,
+        horario: s.horario,
+        youtubeLink: s.youtubeLink,
+        cartelasExistentes: [],
+        premioEstimado: s.ativa ? premioEstimado : null
+      });
     }
     
     const cartelasExistentes = s.cartelasVendidasPorIdUnico[idUnico] || [];
