@@ -29,7 +29,7 @@ app.get('/sala-adm/:admId', (req, res) => {
   });
 });
 
-const LOGO = 'https://i.ibb.co/SEU-LINK-AQUI/logo.png';
+const LOGO = 'https://luxbingo-server-production.up.railway.app/logo.png';
 
 app.get('/jogo/:codigo', (req, res) => {
   const codigo = req.params.codigo.toUpperCase();

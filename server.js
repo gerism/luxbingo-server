@@ -727,10 +727,13 @@ sock.on('alerta_jogador',function(d){
     if(d.tipo!=='bingo')setTimeout(function(){if(item.parentElement)item.remove();},8000);
   });
   sock.on('adm_desconectado',function(){toast('⚠️ Sorteador desconectou!');});
-  sock.on('sorteio_zerado',function(){
+ sock.on('sorteio_zerado',function(){
     nums=[];marc={};
     cartelas.forEach(function(c){marc[c.id]=[];});
     document.getElementById('nAtual').textContent='--';
+    document.getElementById('bingoBox').innerHTML='';
+    var alerta=document.getElementById('alertaJogador');
+    if(alerta&&document.body.contains(alerta))document.body.removeChild(alerta);
     var nome=localStorage.getItem('luxbingo_nome_'+COD)||'Jogador';
     salvarLocal(nome);
     renderCartelas();renderGrid();
