@@ -1351,6 +1351,7 @@ app.post('/webhook-mp', async (req, res) => {
       const cartelas = disp.slice(0, qtd || 1);
       sala.cartelasVendidasPorIdUnico[idUnico] = [...(sala.cartelasVendidasPorIdUnico[idUnico] || []), ...cartelas];
       sala.solicitacoes[idUnico].status = 'aprovado';
+      sala.solicitacoes[idUnico].pagoViaMp = true;
 
       // 🔴🔴🔴 CRUCIAL: Registra o jogador mesmo offline 🔴🔴🔴
       if (!sala.jogadoresPorIdUnico[idUnico]) {
@@ -1643,7 +1644,8 @@ io.on('connection', (socket) => {
     if (cj.length >= 5) return cb({ ok: false, erro: 'Máximo de 5 cartelas!' });
     
     const sol = s.solicitacoes[idUnico];
-    if (sol && sol.status === 'pendente' && !sol.pagoViaMp) return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
+    if (sol && sol.status === 'pendente') return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
+    if (sol && sol.status === 'aprovado') return cb({ ok: false, erro: 'Sua cartela já foi liberada!' });
     
     s.solicitacoes[idUnico] = {
       idUnico: idUnico,
