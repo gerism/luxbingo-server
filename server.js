@@ -1660,17 +1660,20 @@ io.on('connection', (socket) => {
       qtdSolicitada: qtd || dados.qtd || 1
     };
     
-    io.to(s.adm.socketId).emit('nova_solicitacao', {
-      idUnico: idUnico,
-      nome: s.solicitacoes[idUnico].nome,
-      cpf: dados.cpf || '',
-      celular: dados.celular || '',
-      chavePix: dados.chavePix || '',
-      email: dados.email || '',
-      cartelasJaTem: cj.length,
-      qtdSolicitada: s.solicitacoes[idUnico].qtdSolicitada || 1,
-      timestamp: Date.now()
-    });
+    // Só notifica ADM se não tiver token MP (pagamento manual)
+    if (!s.mpToken) {
+      io.to(s.adm.socketId).emit('nova_solicitacao', {
+        idUnico: idUnico,
+        nome: s.solicitacoes[idUnico].nome,
+        cpf: dados.cpf || '',
+        celular: dados.celular || '',
+        chavePix: dados.chavePix || '',
+        email: dados.email || '',
+        cartelasJaTem: cj.length,
+        qtdSolicitada: s.solicitacoes[idUnico].qtdSolicitada || 1,
+        timestamp: Date.now()
+      });
+    }
     
     cb({ ok: true, mensagem: 'Solicitação enviada!' });
   });
