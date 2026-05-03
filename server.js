@@ -748,6 +748,9 @@ sock.on('alerta_jogador',function(d){
     document.getElementById('semCartela').style.display='block';
     document.getElementById('cartTabs').innerHTML='';
     document.getElementById('cartScroll').innerHTML='<div style="text-align:center;padding:30px 16px;color:var(--textl);font-size:12px" id="semCartela">⏳ Aguardando cartela ser liberada...</div>';
+    document.getElementById('bingoBox').innerHTML='';
+    var alerta=document.getElementById('alertaJogador');
+    if(alerta&&document.body.contains(alerta))document.body.removeChild(alerta);
     tela(1);toast('⚠️ Cartelas resetadas pelo ADM!');
   });
 }
