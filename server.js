@@ -831,6 +831,8 @@ document.getElementById('btnAudio').onclick=function(){
 };
 function toggleAudioCart(){
   audioOn=!audioOn;
+  var bMain=document.getElementById('btnAudio');
+  if(bMain){bMain.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';bMain.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';bMain.style.color=audioOn?'var(--gold2)':'#e74c3c';}
   var b=document.getElementById('btnAudioCart');
   if(!b)return;
   b.textContent=audioOn?'🔊':'🔇';
@@ -876,7 +878,10 @@ function renderCartelas(){
   var c=cartelas[tabAtiva];
   var m=marc[c.id]||[];
   var div=document.createElement('div');div.className='cartela-card';
-  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button id="btnAudioCart" onclick="toggleAudioCart()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:var(--navy);cursor:pointer;margin-left:6px">🔊</button></div>';
+  var audioBg=audioOn?'linear-gradient(135deg,var(--gold),var(--gold2))':'rgba(231,76,60,.2)';
+  var audioClr=audioOn?'var(--navy)':'#e74c3c';
+  var audioTxt=audioOn?'🔊':'🔇';
+  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button id="btnAudioCart" onclick="toggleAudioCart()" style="background:'+audioBg+';border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:'+audioClr+';cursor:pointer;margin-left:6px">'+audioTxt+'</button></div>';
   var letRow=document.createElement('div');letRow.className='letras-row';
   ['B','I','N','G','O'].forEach(function(l){var s=document.createElement('div');s.className='letra';s.textContent=l;letRow.appendChild(s);});
   div.appendChild(letRow);
