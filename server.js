@@ -829,6 +829,16 @@ document.getElementById('btnAudio').onclick=function(){
   this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
   this.style.color=audioOn?'var(--gold2)':'#e74c3c';
 };
+function toggleAudioCart(){
+  audioOn=!audioOn;
+  var b=document.getElementById('btnAudioCart');
+  if(!b)return;
+  b.textContent=audioOn?'🔊':'🔇';
+  b.style.background=audioOn?'linear-gradient(135deg,var(--gold),var(--gold2))':'rgba(231,76,60,.2)';
+  b.style.color=audioOn?'var(--navy)':'#e74c3c';
+  var bMain=document.getElementById('btnAudio');
+  if(bMain){bMain.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';bMain.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';bMain.style.color=audioOn?'var(--gold2)':'#e74c3c';}
+}
 var ytVid='';
 function setYoutube(link){
   if(!link)return;
@@ -866,7 +876,7 @@ function renderCartelas(){
   var c=cartelas[tabAtiva];
   var m=marc[c.id]||[];
   var div=document.createElement('div');div.className='cartela-card';
-  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button id="btnAudioCart" onclick="(function(){audioOn=!audioOn;var b=document.getElementById(\'btnAudioCart\');b.textContent=audioOn?\'🔊\':\'🔇\';b.style.background=audioOn?\'linear-gradient(135deg,var(--gold),var(--gold2))\':\'rgba(231,76,60,.2)\';b.style.color=audioOn?\'var(--navy)\':\'#e74c3c\';})()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:var(--navy);cursor:pointer;margin-left:6px">🔊</button></div>';
+  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button id="btnAudioCart" onclick="toggleAudioCart()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:var(--navy);cursor:pointer;margin-left:6px">🔊</button></div>';
   var letRow=document.createElement('div');letRow.className='letras-row';
   ['B','I','N','G','O'].forEach(function(l){var s=document.createElement('div');s.className='letra';s.textContent=l;letRow.appendChild(s);});
   div.appendChild(letRow);
