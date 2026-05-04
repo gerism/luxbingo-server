@@ -892,12 +892,6 @@ function renderCartelas(){
     else{
       el.className='cel'+(m.indexOf(v)!==-1?' marc':'');
       el.textContent=v;
-      (function(val,cid,e){e.onclick=function(){
-        var arr=marc[cid]||[];var i=arr.indexOf(val);
-        if(i===-1)arr.push(val);else arr.splice(i,1);
-        marc[cid]=arr;renderCartelas();verBingo();
-        salvarLocal(localStorage.getItem('luxbingo_nome_'+COD)||'Jogador');
-      };})(v,c.id,el);
     }
     grid.appendChild(el);
   }

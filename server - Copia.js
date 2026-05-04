@@ -224,7 +224,6 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
   </div>
   <div class="bottom-bar">
     <button class="btn-audio" id="btnAudio">🔊 Áudio ON</button>
-    <button id="btnCopiarCod" style="display:none;flex:1;padding:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;font-size:11px;font-weight:900;color:var(--navy);cursor:pointer;font-family:inherit">📋 Copiar Código</button>
     <button class="btn-mais" id="btnMais" style="display:none"></button>
   </div>
 </div>
@@ -830,6 +829,18 @@ document.getElementById('btnAudio').onclick=function(){
   this.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';
   this.style.color=audioOn?'var(--gold2)':'#e74c3c';
 };
+function toggleAudioCart(){
+  audioOn=!audioOn;
+  var bMain=document.getElementById('btnAudio');
+  if(bMain){bMain.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';bMain.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';bMain.style.color=audioOn?'var(--gold2)':'#e74c3c';}
+  var b=document.getElementById('btnAudioCart');
+  if(!b)return;
+  b.textContent=audioOn?'🔊':'🔇';
+  b.style.background=audioOn?'linear-gradient(135deg,var(--gold),var(--gold2))':'rgba(231,76,60,.2)';
+  b.style.color=audioOn?'var(--navy)':'#e74c3c';
+  var bMain=document.getElementById('btnAudio');
+  if(bMain){bMain.textContent=audioOn?'🔊 Áudio ON':'🔇 Áudio OFF';bMain.style.borderColor=audioOn?'rgba(201,162,39,.4)':'rgba(231,76,60,.5)';bMain.style.color=audioOn?'var(--gold2)':'#e74c3c';}
+}
 var ytVid='';
 function setYoutube(link){
   if(!link)return;
@@ -867,7 +878,10 @@ function renderCartelas(){
   var c=cartelas[tabAtiva];
   var m=marc[c.id]||[];
   var div=document.createElement('div');div.className='cartela-card';
-  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button onclick="printCartela('+tabAtiva+')" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:var(--navy);cursor:pointer;margin-left:6px">📸 Print</button></div>';
+  var audioBg=audioOn?'linear-gradient(135deg,var(--gold),var(--gold2))':'rgba(231,76,60,.2)';
+  var audioClr=audioOn?'var(--navy)':'#e74c3c';
+  var audioTxt=audioOn?'🔊':'🔇';
+  div.innerHTML='<div class="cartela-header"><div class="cartela-titulo">🎟️ CARTELA '+(tabAtiva+1)+'</div><div class="cartela-num">'+c.id+'</div><button id="btnAudioCart" onclick="toggleAudioCart()" style="background:'+audioBg+';border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:900;color:'+audioClr+';cursor:pointer;margin-left:6px">'+audioTxt+'</button></div>';
   var letRow=document.createElement('div');letRow.className='letras-row';
   ['B','I','N','G','O'].forEach(function(l){var s=document.createElement('div');s.className='letra';s.textContent=l;letRow.appendChild(s);});
   div.appendChild(letRow);
@@ -899,7 +913,7 @@ function renderCartelas(){
   div.appendChild(btnB);
   scroll.appendChild(div);
   verBingoCartela(c,m,btnB);
-  document.getElementById('semCartela').style.display='none';
+  var sc=document.getElementById('semCartela');if(sc)sc.style.display='none';
 }
 function verBingoCartela(c,m,btn){
   var ok=true;
@@ -1351,6 +1365,7 @@ app.post('/webhook-mp', async (req, res) => {
       const cartelas = disp.slice(0, qtd || 1);
       sala.cartelasVendidasPorIdUnico[idUnico] = [...(sala.cartelasVendidasPorIdUnico[idUnico] || []), ...cartelas];
       sala.solicitacoes[idUnico].status = 'aprovado';
+      sala.solicitacoes[idUnico].pagoViaMp = true;
 
       // 🔴🔴🔴 CRUCIAL: Registra o jogador mesmo offline 🔴🔴🔴
       if (!sala.jogadoresPorIdUnico[idUnico]) {
@@ -1643,7 +1658,8 @@ io.on('connection', (socket) => {
     if (cj.length >= 5) return cb({ ok: false, erro: 'Máximo de 5 cartelas!' });
     
     const sol = s.solicitacoes[idUnico];
-    if (sol && sol.status === 'pendente' && !sol.pagoViaMp) return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
+    if (sol && sol.status === 'pendente') return cb({ ok: false, erro: 'Você já tem uma solicitação pendente.' });
+    if (sol && sol.status === 'aprovado') return cb({ ok: false, erro: 'Sua cartela já foi liberada!' });
     
     s.solicitacoes[idUnico] = {
       idUnico: idUnico,
@@ -1658,17 +1674,20 @@ io.on('connection', (socket) => {
       qtdSolicitada: qtd || dados.qtd || 1
     };
     
-    io.to(s.adm.socketId).emit('nova_solicitacao', {
-      idUnico: idUnico,
-      nome: s.solicitacoes[idUnico].nome,
-      cpf: dados.cpf || '',
-      celular: dados.celular || '',
-      chavePix: dados.chavePix || '',
-      email: dados.email || '',
-      cartelasJaTem: cj.length,
-      qtdSolicitada: s.solicitacoes[idUnico].qtdSolicitada || 1,
-      timestamp: Date.now()
-    });
+    // Só notifica ADM se não tiver token MP (pagamento manual)
+    if (!s.mpToken) {
+      io.to(s.adm.socketId).emit('nova_solicitacao', {
+        idUnico: idUnico,
+        nome: s.solicitacoes[idUnico].nome,
+        cpf: dados.cpf || '',
+        celular: dados.celular || '',
+        chavePix: dados.chavePix || '',
+        email: dados.email || '',
+        cartelasJaTem: cj.length,
+        qtdSolicitada: s.solicitacoes[idUnico].qtdSolicitada || 1,
+        timestamp: Date.now()
+      });
+    }
     
     cb({ ok: true, mensagem: 'Solicitação enviada!' });
   });
@@ -1811,6 +1830,20 @@ Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
 
   socket.on('fechar_alerta_jogadores', ({ codigo }, cb) => {
     io.to(codigo).emit('fechar_alerta');
+    cb && cb({ ok: true });
+  });
+
+  socket.on('deletar_sala', ({ codigo }, cb) => {
+    const s = salas[codigo];
+    if (!s) return cb && cb({ ok: false });
+    delete salas[codigo];
+    if (UPSTASH_URL && UPSTASH_TOKEN) {
+      fetch(`${UPSTASH_URL}/del/luxbingo_vendidas_${codigo}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+      }).catch(()=>{});
+    }
+    salvarSalas();
     cb && cb({ ok: true });
   });
 
