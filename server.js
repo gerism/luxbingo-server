@@ -896,17 +896,7 @@ function renderCartelas(){
     grid.appendChild(el);
   }
   div.appendChild(grid);
-  var btnB=document.createElement('button');btnB.className='bingo-btn';btnB.textContent='🎉 GRITAR BINGO!';
-  btnB.id='bBtn_'+tabAtiva;
-  (function(cid){btnB.onclick=function(){
-    if(!sock)return;
-    sock.emit('gritar_bingo',{codigo:COD,cartelaId:cid},function(r){
-      if(r.ok)toast('🎉 BINGO confirmado!');else toast('❌ '+r.erro,true);
-    });
-  };})(c.id);
-  div.appendChild(btnB);
-  scroll.appendChild(div);
-  verBingoCartela(c,m,btnB);
+ scroll.appendChild(div);
   var sc=document.getElementById('semCartela');if(sc)sc.style.display='none';
 }
 function verBingoCartela(c,m,btn){
@@ -1780,10 +1770,14 @@ Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
         else if (marc === tot - 1) melhorQuase = true;
       });
 
-      if (melhorBingo) {
-        io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 '+nomeExib+' completou!' });
-        io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'bingo', texto: '🎉 BINGO!' });
-        if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'bingo', texto: '🎉 Você completou a cartela!' });
+      if (melhorBingo && !s.vencedor) {
+        s.vencedor = { idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome, cartelaId: (carts[0]?.id || '') };
+        s.ativa = false;
+        salvarSalas();
+        const chavePix = s.solicitacoes[idUnico]?.chavePix || '';
+        console.log('[AUTO-BINGO] chavePix:', chavePix, 'idUnico:', idUnico);
+        io.to(codigo).emit('bingo_confirmado', { vencedor: { ...s.vencedor, chavePix }, sorteados: s.sorteados });
+        io.to(s.adm.socketId).emit('parar_sorteio');
       } else if (melhorQuase) {
         io.to(s.adm.socketId).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 '+nomeExib+' — falta 1!' });
         io.to(codigo).emit('alerta_geral', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1!' });
