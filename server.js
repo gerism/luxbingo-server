@@ -1434,19 +1434,8 @@ app.get('/teste-mp/:codigo', (req, res) => {
   });
 });
 
-app.get('/teste-bingo/:codigo', (req, res) => {
-  const s = salas[req.params.codigo?.toUpperCase()];
-  if (!s) return res.json({ ok: false, erro: 'Sala não encontrada' });
-  const idUnico = Object.keys(s.cartelasVendidasPorIdUnico)[0];
-  if (!idUnico) return res.json({ ok: false, erro: 'Sem jogadores' });
-  const chavePix = s.solicitacoes[idUnico]?.chavePix || '';
-  const vencedor = { idUnico, nome: s.jogadoresPorIdUnico[idUnico]?.nome || 'Teste', cartelaId: 'TESTE', chavePix };
-  io.to(req.params.codigo.toUpperCase()).emit('bingo_confirmado', { vencedor, sorteados: s.sorteados });
-  io.to(s.adm.socketId).emit('parar_sorteio');
-  res.json({ ok: true, vencedor });
-});
-
 io.on('connection', (socket) => {
+  console.log(`[+] ${socket.id}`);
 
   socket.on('reconectar_adm', ({ codigo }, cb) => {
     const s = salas[codigo];
