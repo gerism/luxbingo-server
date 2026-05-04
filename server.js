@@ -1856,6 +1856,7 @@ Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
     s.ativa = false;
     salvarSalas();
     const chavePix = s.solicitacoes[s.vencedor.idUnico]?.chavePix || '';
+    console.log('[BINGO] chavePix:', chavePix, 'idUnico:', s.vencedor.idUnico, 'sol:', JSON.stringify(s.solicitacoes[s.vencedor.idUnico]));
 io.to(codigo).emit('bingo_confirmado', { vencedor: { ...s.vencedor, chavePix }, sorteados: s.sorteados });
     io.to(s.adm.socketId).emit('parar_sorteio');
     cb({ ok: true });
