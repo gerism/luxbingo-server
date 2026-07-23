@@ -4,7 +4,6 @@ const { Server } = require('socket.io');
 const path = require('path');
 
 const app = express();
-app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -30,8 +29,7 @@ app.get('/sala-adm/:admId', (req, res) => {
   });
 });
 
-const DOMINIO = process.env.RAILWAY_PUBLIC_DOMAIN || 'luxbingo-server-production.up.railway.app';
-const LOGO = `https://${DOMINIO}/logo.png`;
+const LOGO = 'https://luxbingo-server-production.up.railway.app/logo.png';
 
 app.get('/jogo/:codigo', (req, res) => {
   const codigo = req.params.codigo.toUpperCase();
@@ -47,7 +45,7 @@ app.get('/jogo/:codigo', (req, res) => {
 <link rel="icon" type="image/png" href="/icon.png">
 <meta property="og:title" content="Lux Bingo 🎰">
 <meta property="og:description" content="Você foi convidado para jogar Bingo ao vivo! Clique para participar.">
-<meta property="og:image" content="${LOGO}">
+<meta property="og:image" content="https://luxbingo-server-production.up.railway.app/logo.png">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#c9a227">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"><\/script>
@@ -1179,84 +1177,6 @@ const salas = {};
 
 const UPSTASH_URL = process.env.UPSTASH_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
-// ===== SISTEMA DE LICENÇA / ASSINATURA DO ADM =====
-const licencas = {};
-let configLicenca = {
-  chavePix: process.env.PIX_ASSINATURA_CHAVE || '',
-  valor: parseFloat(process.env.VALOR_ASSINATURA || '29.90'),
-  mpToken: process.env.MP_TOKEN_ASSINATURA || '',
-  trialMinutos: 10080,
-  assinaturaMinutos: 43200
-};
-
-async function salvarConfigLicenca() {
-  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
-  try {
-    await fetch(`${UPSTASH_URL}/set/luxbingo_config_licenca`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(["luxbingo_config_licenca", JSON.stringify(configLicenca)])
-    });
-  } catch(e) { console.log('[CONFIG LICENCA SAVE ERROR]', e.message); }
-}
-
-async function carregarConfigLicenca() {
-  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
-  try {
-    const r = await fetch(`${UPSTASH_URL}/get/luxbingo_config_licenca`, {
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-    });
-    const d = await r.json();
-    if (d.result) Object.assign(configLicenca, JSON.parse(d.result));
-    console.log('[CONFIG LICENCA RESTORE]', configLicenca.chavePix ? 'OK' : 'VAZIO');
-  } catch(e) { console.log('[CONFIG LICENCA LOAD ERROR]', e.message); }
-}
-
-async function salvarLicencas() {
-  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
-  try {
-    await fetch(`${UPSTASH_URL}/set/luxbingo_licencas`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(["luxbingo_licencas", JSON.stringify(licencas)])
-    });
-  } catch(e) { console.log('[LICENCAS SAVE ERROR]', e.message); }
-}
-
-async function carregarLicencas() {
-  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
-  try {
-    const r = await fetch(`${UPSTASH_URL}/get/luxbingo_licencas`, {
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-    });
-    const d = await r.json();
-    if (d.result) Object.assign(licencas, JSON.parse(d.result));
-    console.log('[LICENCAS RESTORE]', Object.keys(licencas).length);
-  } catch(e) { console.log('[LICENCAS LOAD ERROR]', e.message); }
-}
-
-function statusLicenca(installId) {
-  const agora = Date.now();
-  let lic = licencas[installId];
-  if (!lic) {
-    lic = { instalado: agora, pagoAte: null };
-    licencas[installId] = lic;
-    salvarLicencas();
-  }
-  const trialFim = lic.instalado + configLicenca.trialMinutos * 60 * 1000;
-  const emTrial = agora < trialFim;
-  const assinaturaAtiva = !!(lic.pagoAte && agora < lic.pagoAte);
-  const liberado = emTrial || assinaturaAtiva;
-  return {
-    liberado,
-    emTrial,
-    minutosTrialRestantes: emTrial ? Math.ceil((trialFim - agora) / (60*1000)) : 0,
-    assinaturaAtiva,
-    pagoAte: lic.pagoAte,
-    chavePixAssinatura: configLicenca.chavePix,
-    valorAssinatura: configLicenca.valor
-  };
-}
 
 async function salvarSalas() {
   if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
@@ -1441,107 +1361,6 @@ app.get('/admin/limpar-tudo', (req, res) => {
   salvarSalas();
   res.json({ ok: true, removidas: qtd });
 });
-
-app.get('/licenca/:installId', (req, res) => {
-  const status = statusLicenca(req.params.installId);
-  res.json({ ok: true, ...status });
-});
-
-
-app.post('/assinatura/pagar/:installId', async (req, res) => {
-  const { installId } = req.params;
-  if (!configLicenca.mpToken) return res.json({ ok: false, erro: 'Token de pagamento não configurado. Fale com o suporte.' });
-  const { nome, cpf, email } = req.body;
-  const cpfLimpo = (cpf||'').replace(/\D/g,'');
-  if (cpfLimpo.length < 11) return res.json({ ok: false, erro: 'CPF inválido. Digite os 11 dígitos.' });
-
-  try {
-    const r = await fetch('https://api.mercadopago.com/v1/payments', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${configLicenca.mpToken}`,
-        'Content-Type': 'application/json',
-        'X-Idempotency-Key': `assinatura-${installId}-${Date.now()}`
-      },
-      body: JSON.stringify({
-        transaction_amount: configLicenca.valor,
-        description: `Lux Bingo - Assinatura mensal`,
-        payment_method_id: 'pix',
-        payer: {
-          email: email || 'adm@luxbingo.com',
-          first_name: (nome||'Adm').split(' ')[0],
-          last_name: (nome||'').split(' ').slice(1).join(' ') || 'Lux Bingo',
-          identification: { type: 'CPF', number: cpfLimpo.slice(0, 11) }
-        },
-        notification_url: `https://${DOMINIO}/webhook-assinatura`,
-        metadata: { installId }
-      })
-    });
-    const d = await r.json();
-    if (!d.id) return res.json({ ok: false, erro: d.message || 'Erro ao gerar Pix' });
-    res.json({
-      ok: true,
-      qrCode: d.point_of_interaction?.transaction_data?.qr_code,
-      qrCodeBase64: d.point_of_interaction?.transaction_data?.qr_code_base64,
-      valor: configLicenca.valor,
-      expiracao: 600
-    });
-  } catch(e) {
-    res.json({ ok: false, erro: e.message });
-  }
-});
-
-app.post('/webhook-assinatura', async (req, res) => {
-  res.sendStatus(200);
-  console.log('[WEBHOOK ASSINATURA] recebido:', JSON.stringify(req.body));
-  const { type, action, data, topic, resource } = req.body;
-  const tipoEvento = type || (action && action.startsWith('payment') ? 'payment' : null) || (topic === 'payment' ? 'payment' : null);
-  if (tipoEvento !== 'payment') return;
-  const paymentId = data?.id || resource;
-  if (!paymentId || !configLicenca.mpToken) return;
-
-try {
-    const r = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-      headers: { 'Authorization': `Bearer ${configLicenca.mpToken}` }
-    });
-    const payment = await r.json();
-    console.log('[WEBHOOK ASSINATURA] status:', payment.status, 'erro:', payment.error, 'metadata:', JSON.stringify(payment.metadata));
-    if (payment.error || payment.status !== 'approved') {
-      console.log('[WEBHOOK ASSINATURA] ignorado - status não aprovado ou erro');
-      return;
-    }
-
-  const installId = payment.metadata?.install_id || payment.metadata?.installId;
-    if (!installId) {
-      console.log('[WEBHOOK ASSINATURA] ignorado - sem installId no metadata');
-      return;
-    }
-
- const agora = Date.now();
-    const lic = licencas[installId] || { instalado: agora, pagoAte: null };
-    lic.pagoAte = agora + configLicenca.assinaturaMinutos * 60 * 1000;
-    licencas[installId] = lic;
-    salvarLicencas();
-    console.log('[ASSINATURA] Liberado até', new Date(lic.pagoAte).toLocaleString('pt-BR'), 'para', installId);
-  } catch(e) {
-    console.log('[WEBHOOK ASSINATURA ERROR]', e.message);
-  }
-});
-app.get('/admin/config-licenca', (req, res) => {
-  res.json({ ok: true, ...configLicenca });
-});
-
-app.post('/admin/config-licenca', (req, res) => {
-  const { chavePix, valor, mpToken, trialMinutos, assinaturaMinutos } = req.body;
-  if (chavePix !== undefined) configLicenca.chavePix = chavePix;
-  if (valor !== undefined) configLicenca.valor = parseFloat(valor) || 0;
-  if (mpToken !== undefined) configLicenca.mpToken = mpToken;
-  if (trialMinutos !== undefined) configLicenca.trialMinutos = parseInt(trialMinutos) || 10080;
-  if (assinaturaMinutos !== undefined) configLicenca.assinaturaMinutos = parseInt(assinaturaMinutos) || 43200;
-  salvarConfigLicenca();
-  res.json({ ok: true, ...configLicenca });
-});
-
 app.get('/minhas-salas', (req, res) => {
   const lista = Object.values(salas).map((s) => ({
     codigo: s.codigo,
@@ -1573,7 +1392,7 @@ app.get('/cartela/:codigo/:cartelaId', (req, res) => {
   res.json({ ok: false, erro: 'Cartela não encontrada' });
 });
 
-
+app.use(express.json());
 
 app.post('/criar-pagamento/:codigo', async (req, res) => {
   const { codigo } = req.params;
@@ -1607,7 +1426,7 @@ app.post('/criar-pagamento/:codigo', async (req, res) => {
           last_name: nome.split(' ').slice(1).join(' ') || 'Jogador',
           identification: { type: 'CPF', number: cpfFinal }
         },
-        notification_url: `https://${DOMINIO}/webhook-mp`,
+        notification_url: `https://luxbingo-server-production.up.railway.app/webhook-mp`,
         metadata: { codigo, idUnico, qtd: qtd||1 }
       })
     });
@@ -1745,7 +1564,7 @@ app.post('/webhook-mp', async (req, res) => {
 
 app.get('/imprimir-qr/:codigo', (req, res) => {
   const codigo = req.params.codigo.toUpperCase();
-  const url = `https://${DOMINIO}/jogo/${codigo}`;
+  const url = `https://luxbingo-server-production.up.railway.app/jogo/${codigo}`;
 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(url)}`;
   res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>QR Code - Lux Bingo</title>
@@ -2220,7 +2039,6 @@ Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
       }
     });
     if (vencedores.length > 0 && !s.vencedor) {
-      console.log('[BINGO] vencedor:', JSON.stringify(vencedores[0]), 'sorteados:', s.sorteados.length);
       s.vencedor = vencedores[0];
       s.ativa = false;
       salvarSalas();
@@ -2367,7 +2185,7 @@ cb && cb({ ok: true });
 });
 
 const PORT = process.env.PORT || 3000;
-Promise.all([carregarSalas(), carregarLicencas(), carregarConfigLicenca()]).then(() => {
+carregarSalas().then(() => {
   server.listen(PORT, () => {
     console.log(`Lux Bingo Server rodando na porta ${PORT} 🎱`);
   });
