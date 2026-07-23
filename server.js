@@ -664,10 +664,9 @@ sock.on('connect',function(){
       }
     });
   });
-sock.on('cartela_aprovada',function(d){
+  sock.on('cartela_aprovada',function(d){
     var novas=d.cartelas||[d.cartela];
     novas.forEach(function(cart){
-      if(cartelas.some(function(c){return c.id===cart.id;}))return;
       cartelas.push(cart);
       if(!marc[cart.id])marc[cart.id]=[];
       nums=d.sorteados||nums;
@@ -999,7 +998,6 @@ function destravarAudio(){
   window.speechSynthesis.speak(m);
 }
 
-function falarNumero(num){
 function falarNumero(num){
   if(!audioOn||!window.speechSynthesis)return;
   window.speechSynthesis.cancel();
