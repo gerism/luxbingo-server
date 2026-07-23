@@ -608,10 +608,11 @@ var salvou=false;
       btnSalvar.style.border='2px solid #2ecc71';
       btnSalvar.style.color='#2ecc71';
       btnSalvar.disabled=true;
+      toast('📥 '+novas.length+' cartela'+(novas.length>1?'s':'')+' baixada'+(novas.length>1?'s':'')+' com sucesso!');
       setTimeout(function(){
         document.body.removeChild(overlay);
         onJogar();
-      }, 600);
+      }, 900);
     }, novas.length*300+200);
   };
  
