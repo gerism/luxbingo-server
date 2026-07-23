@@ -258,8 +258,8 @@ function toast(m,e){
   var t=document.getElementById('toast');t.textContent=m;t.className='toast on'+(e?' err':'');
   setTimeout(function(){t.className='toast';},3000);
 }
-
 document.getElementById('btnRecuperar').onclick=function(){
+  destravarAudio();
   var codCart=document.getElementById('iCodCart').value.trim().toUpperCase();
   if(!codCart){toast('❌ Digite o código da cartela!',true);return;}
   toast('⏳ Buscando cartela...');
@@ -301,6 +301,7 @@ document.getElementById('btnRecuperar').onclick=function(){
     .catch(function(){toast('❌ Erro de conexão!',true);});
 };
 document.getElementById('btnConectar').onclick=function(){
+  destravarAudio();
   var nome=document.getElementById('iNome').value.trim();
   var cpf=document.getElementById('iCpf').value.trim();
   var cel=document.getElementById('iCel').value.trim();
@@ -988,6 +989,16 @@ function verBingo(){
     if(btn)verBingoCartela(c,m,btn);
   });
 }
+var audioDestravado=false;
+function destravarAudio(){
+  if(audioDestravado||!window.speechSynthesis)return;
+  audioDestravado=true;
+  var m=new SpeechSynthesisUtterance(' ');
+  m.volume=0;
+  window.speechSynthesis.speak(m);
+}
+
+function falarNumero(num){
 function falarNumero(num){
   if(!audioOn||!window.speechSynthesis)return;
   window.speechSynthesis.cancel();
