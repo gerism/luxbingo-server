@@ -589,7 +589,7 @@ function mostrarTelaSalvar(novas, onJogar){
   btnJogar.textContent='▶ AGUARDANDO O SORTEIO';
   btnJogar.style.cssText='width:100%;max-width:340px;padding:15px;background:linear-gradient(135deg,#155c30,#25a05a);border:none;border-radius:13px;font-size:15px;font-weight:900;color:#fff;font-family:Georgia,serif;letter-spacing:2px;cursor:pointer;display:none';
  
-  var salvou=false;
+var salvou=false;
   btnSalvar.onclick=function(){
     // Baixa todas as cartelas
     novas.forEach(function(cart,idx){
@@ -601,15 +601,17 @@ function mostrarTelaSalvar(novas, onJogar){
         a.click();
       }, idx*300);
     });
-    // Atualiza visual do botão salvar
+    // Atualiza visual do botão salvar e já avança pro jogo
     setTimeout(function(){
       btnSalvar.textContent='✅ CARTELA SALVA!';
       btnSalvar.style.background='rgba(46,204,113,0.15)';
       btnSalvar.style.border='2px solid #2ecc71';
       btnSalvar.style.color='#2ecc71';
       btnSalvar.disabled=true;
-      // Libera botão jogar
-      btnJogar.style.display='block';
+      setTimeout(function(){
+        document.body.removeChild(overlay);
+        onJogar();
+      }, 600);
     }, novas.length*300+200);
   };
  
