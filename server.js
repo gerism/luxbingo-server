@@ -2190,12 +2190,14 @@ Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
       const nomeExib = nome + (celMask ? ' '+celMask : '');
       const socketJogador = s.jogadoresPorIdUnico[idUnico]?.socketId;
 
-      let melhorQuase = false;
+let melhorQuase = false;
       let melhorBingo = false;
+      let cartelaVencedora = null;
 
       carts.forEach(cartela => {
         if (validarBingo(cartela, s.sorteados)) {
           melhorBingo = true;
+          if (!cartelaVencedora) cartelaVencedora = cartela;
         } else {
           let faltando = 0;
           for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
@@ -2210,7 +2212,7 @@ Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
         vencedores.push({
           idUnico,
           nome: s.jogadoresPorIdUnico[idUnico]?.nome,
-          cartelaId: carts[0]?.id || '',
+          cartelaId: cartelaVencedora?.id || '',
           chavePix: s.solicitacoes[idUnico]?.chavePix || ''
         });
       }else if (melhorQuase) {
