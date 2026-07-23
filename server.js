@@ -62,7 +62,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .logo-sub{font-size:10px;color:var(--textl);letter-spacing:2px;margin-bottom:16px}
 .card{background:var(--card);border:1px solid rgba(201,162,39,.2);border-radius:14px;padding:16px;width:100%;max-width:400px;margin-bottom:10px}
 .ct{font-size:10px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
-.lbl{font-size:10px;color:var(--textl);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;display:block}
+.lbl{font-size:12px;color:#fff;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;display:block}
 .inp{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,162,39,.3);border-radius:10px;padding:11px;color:var(--gold2);font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
 .inp::placeholder{color:var(--textl)}
 .inp:focus{border-color:var(--gold2)}
@@ -87,7 +87,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .num-atual{font-size:32px;font-weight:900;color:var(--gold2);min-width:44px;text-align:center;line-height:1}
 .num-lbl{font-size:7px;color:var(--textl);text-transform:uppercase;letter-spacing:1px;display:block}
 .ng90{display:grid;grid-template-columns:repeat(15,1fr);flex:1;gap:1px}
-.nm90{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:2px;background:rgba(255,255,255,.04);font-size:6px;font-weight:700;color:rgba(232,213,163,.3)}
+.nm90{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:2px;background:rgba(255,255,255,.04);font-size:7px;font-weight:900;color:rgba(255,255,255,.85)}
 .nm90.s{background:rgba(201,162,39,.25);color:var(--gold)}
 .nm90.u{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy)}
 .cartelas-area{flex:1;overflow:hidden;display:flex;flex-direction:column;max-width:500px;margin:0 auto;width:100%}
@@ -98,7 +98,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--navy);color:var(--text);
 .cartela-card{background:var(--card);border:2px solid rgba(201,162,39,.3);border-radius:12px;overflow:hidden;margin-bottom:8px}
 .cartela-header{background:linear-gradient(135deg,#0a1628,var(--navy2));border-bottom:2px solid var(--gold);padding:6px 10px;display:flex;align-items:center;justify-content:space-between}
 .cartela-titulo{font-size:11px;font-weight:900;color:var(--gold2);letter-spacing:1px}
-.cartela-num{font-size:10px;color:var(--textl)}
+.cartela-num{font-size:12px;color:#fff;font-weight:800}
 .letras-row{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:4px 6px 0}
 .letra{text-align:center;font-size:14px;font-weight:900;color:var(--gold);padding:2px 0}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px 6px 6px;width:100%}
@@ -2219,7 +2219,7 @@ Object.entries(s.cartelasVendidasPorIdUnico).forEach(([idUnico, carts]) => {
         if (socketJogador) io.to(socketJogador).emit('alerta_jogador', { nome: nomeExib, tipo: 'quase', texto: '🔥 Falta 1 número!' });
       }
     });
-    if (vencedores.length > 0 && !s.vencedor) {
+ if (vencedores.length > 0 && !s.vencedor) {
       console.log('[BINGO] vencedor:', JSON.stringify(vencedores[0]), 'sorteados:', s.sorteados.length);
       s.vencedor = vencedores[0];
       s.ativa = false;
